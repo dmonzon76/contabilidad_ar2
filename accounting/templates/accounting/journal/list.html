@@ -1,0 +1,30 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Journal Entries — {{ company.name }}</h2>
+
+<a href="{% url 'journal_create' %}" class="btn btn-primary mb-3">+ New Entry</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Period</th>
+            <th>Description</th>
+            <th>Total Debit</th>
+            <th>Total Credit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.date }}</td>
+            <td>{{ entry.period.name }}</td>
+            <td>{{ entry.description }}</td>
+            <td>{{ entry.total_debit }}</td>
+            <td>{{ entry.total_credit }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

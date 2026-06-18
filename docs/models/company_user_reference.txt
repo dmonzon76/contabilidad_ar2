@@ -1,0 +1,23 @@
+COMPANY USER MODEL
+==================
+
+Model: CompanyUser
+------------------
+
+Fields:
+- user: ForeignKey(User)
+- company: ForeignKey(Company, related_name="company_users")
+- role: CharField(choices=ROLE_CHOICES)
+- can_view_accounting: BooleanField(default=True)
+- can_edit_accounting: BooleanField(default=False)
+- can_view_fiscal: BooleanField(default=True)
+- can_edit_fiscal: BooleanField(default=False)
+- can_view_documents: BooleanField(default=True)
+- can_edit_documents: BooleanField(default=False)
+- is_active: BooleanField(default=True)
+
+Meta:
+- unique_together = ("user", "company")
+
+String representation:
+- __str__ = "{user.username} @ {company.name} ({role})"

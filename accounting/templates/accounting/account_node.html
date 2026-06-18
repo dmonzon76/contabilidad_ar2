@@ -1,0 +1,49 @@
+{% with level=account.code|cut:"."|length %}
+<li>
+
+    <div class="account-node {% if account.children.count == 0 %}leaf{% endif %}" style="--level: {{ level }};">
+        <div class="account-indent"></div>
+
+        <div class="account-toggle">
+            {% if account.children.count > 0 %}
+                ▶
+            {% endif %}
+        </div>
+
+        <div>
+            <strong>{{ account.code }}</strong> — {{ account.name }}
+        </div>
+    </div>
+
+    {% if account.children.count > 0 %}
+        <ul class="account-children list-unstyled" style="display:none;">
+            {% for child in account.children.all %}
+                {% include "accounting/account_node.html" with account=child %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</li>
+{% endwith %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+COMPANY PROFILE MODEL
+=====================
+
+Model: CompanyProfile
+---------------------
+
+Fields:
+- company: OneToOneField(Company, related_name="tax_profile")
+- vat_21: BooleanField(default=True)
+- vat_105: BooleanField(default=False)
+- vat_27: BooleanField(default=False)
+- vat_exempt: BooleanField(default=False)
+- vat_non_taxed: BooleanField(default=False)
+- iibb_registered: BooleanField(default=False)
+- ganancias_agent: BooleanField(default=False)
+- uses_perceptions: BooleanField(default=False)
+- uses_retentions: BooleanField(default=False)
+
+String representation:
+- __str__ = "Tax profile for {company.name}"

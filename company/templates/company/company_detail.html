@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">Company — {{ company.name }}</h2>
+
+<div class="erp-card p-4">
+
+    <div class="row g-3">
+
+        <div class="col-md-6">
+            <label class="text-muted">Name</label>
+            <p>{{ company.name }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <label class="text-muted">CUIT</label>
+            <p>{{ company.tax_id }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <label class="text-muted">AFIP Category</label>
+            <p>{{ company.get_afip_category_display }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <label class="text-muted">Address</label>
+            <p>{{ company.address }}</p>
+        </div>
+
+        <div class="col-md-4">
+            <label class="text-muted">City</label>
+            <p>{{ company.city }}</p>
+        </div>
+
+        <div class="col-md-4">
+            <label class="text-muted">Province</label>
+            <p>{{ company.province }}</p>
+        </div>
+
+        <div class="col-md-4">
+            <label class="text-muted">Active</label>
+            <p>
+                {% if company.is_active %}
+                    <span class="badge bg-success">Yes</span>
+                {% else %}
+                    <span class="badge bg-secondary">No</span>
+                {% endif %}
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mt-4 d-flex justify-content-between">
+        <a href="{% url 'company_list' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'company_edit' company.id %}" class="btn btn-primary">Edit</a>
+    </div>
+
+</div>
+
+{% endblock %}

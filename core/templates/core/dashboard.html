@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">Dashboard{% if active_company %} — {{ active_company.name }}{% endif %}</h2>
+
+<div class="row g-3 mt-3">
+
+    <!-- Companies -->
+    <div class="col-md-3">
+        <a href="{% if active_company %}{% url 'company_detail' active_company.id %}{% else %}#{% endif %}" class="erp-card text-center p-4 d-block">
+            <h4>Company</h4>
+            <p class="text-muted">General information</p>
+        </a>
+    </div>
+
+    <!-- Activities -->
+    <div class="col-md-3">
+        <a href="{% if active_company %}{% url 'company_activity_list' active_company.id %}{% else %}#{% endif %}" class="erp-card text-center p-4 d-block">
+            <h4>Activities</h4>
+            <p class="text-muted">AFIP / Jurisdictions</p>
+        </a>
+    </div>
+
+    <!-- Users -->
+    <div class="col-md-3">
+        <a href="{% if active_company %}{% url 'company_user_list' active_company.id %}{% else %}#{% endif %}" class="erp-card text-center p-4 d-block">
+            <h4>Users</h4>
+            <p class="text-muted">Roles & permissions</p>
+        </a>
+    </div>
+
+    <!-- Tax Profile -->
+    <div class="col-md-3">
+        <a href="{% if active_company %}{% url 'company_profile' active_company.id %}{% else %}#{% endif %}" class="erp-card text-center p-4 d-block">
+            <h4>Tax Profile</h4>
+            <p class="text-muted">IVA / IIBB / CUIT</p>
+        </a>
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+<div class="row g-3">
+
+    <!-- Accounting -->
+    <div class="col-md-3">
+        <a href="#" class="erp-card text-center p-4 d-block">
+            <h4>Accounting</h4>
+            <p class="text-muted">Journal, Ledger, Balances</p>
+        </a>
+    </div>
+
+    <!-- Sales -->
+    <div class="col-md-3">
+        <a href="#" class="erp-card text-center p-4 d-block">
+            <h4>Sales</h4>
+            <p class="text-muted">Invoices & Customers</p>
+        </a>
+    </div>
+
+    <!-- Purchases -->
+    <div class="col-md-3">
+        <a href="#" class="erp-card text-center p-4 d-block">
+            <h4>Purchases</h4>
+            <p class="text-muted">Suppliers & Expenses</p>
+        </a>
+    </div>
+
+    <!-- Inventory -->
+    <div class="col-md-3">
+        <a href="#" class="erp-card text-center p-4 d-block">
+            <h4>Inventory</h4>
+            <p class="text-muted">Stock & Products</p>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

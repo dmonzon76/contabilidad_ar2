@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">New Account</h2>
+
+<div class="erp-card p-4">
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <label class="form-label">Code</label>
+                {{ form.code }}
+            </div>
+
+            <div class="col-md-8">
+                <label class="form-label">Name</label>
+                {{ form.name }}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Account Type</label>
+                {{ form.account_type }}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Parent Account</label>
+                {{ form.parent }}
+            </div>
+
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'account_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success">Create</button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

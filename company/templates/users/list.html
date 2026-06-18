@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Users — {{ company.name }}</h2>
+
+<a href="{% url 'company_user_create' company.id %}" class="btn btn-primary mb-3">
+    + Add User
+</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cu in users %}
+        <tr>
+            <td>{{ cu.user.username }}</td>
+            <td>{{ cu.get_role_display }}</td>
+            <td>{{ cu.is_active }}</td>
+            <td>
+                <a href="{% url 'company_user_edit' company.id cu.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                <a href="{% url 'company_user_delete' company.id cu.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+ERP DIRECTORY STRUCTURE
+=======================
+
+/config/
+    settings.py
+    urls.py
+    wsgi.py
+    asgi.py
+
+/company/
+    models/
+        models.py
+        activity.py
+    admin.py
+    forms/
+    views/
+    urls.py
+    templates/company/
+
+/sales/
+    models.py
+    admin.py
+    forms/
+    views/
+    urls.py
+    templates/sales/
+
+/purchases/
+    models.py
+    admin.py
+    forms/
+    views/
+    urls.py
+    templates/purchases/
+
+/fiscal/
+    models.py
+    admin.py
+    forms/
+    views/
+    urls.py
+    templates/fiscal/
+
+/accounting/
+    models.py
+    admin.py
+    forms/
+    views/
+    urls.py
+    templates/accounting/
+
+/static/
+    css/
+    js/
+    img/
+
+/templates/
+    base.html
+    layout/
+    components/
+
+/docs/
+    models/
+        company_model_reference.txt
+        purchases_model_reference.txt
+        sales_model_reference.txt
+        fiscal_model_reference.txt
+    architecture/
+        erp_migrations_best_practices.txt
+        erp_directory_structure.txt
+        erp_naming_conventions.txt

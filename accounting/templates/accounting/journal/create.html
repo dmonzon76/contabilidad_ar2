@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">New Journal Entry — {{ company.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="erp-card p-3 mb-3">
+        <div class="mb-3">
+            {{ form.date.label_tag }}
+            {{ form.date }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+    </div>
+
+    <div class="erp-card p-3">
+        <h5>Lines</h5>
+        {{ formset.management_form }}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Description</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line_form in formset %}
+                <tr>
+                    <td>{{ line_form.account }}</td>
+                    <td>{{ line_form.description }}</td>
+                    <td>{{ line_form.debit }}</td>
+                    <td>{{ line_form.credit }}</td>
+                    <td>{{ line_form.DELETE }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Save Entry</button>
+</form>
+{% endblock %}

@@ -1,0 +1,167 @@
+<aside class="erp-sidebar bg-light border-end">
+
+    <div class="p-3">
+        <h5 class="text-muted">Modules</h5>
+    </div>
+
+    <ul class="nav flex-column">
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+        </li>
+
+        {% if request.session.active_company_id %}
+
+        <!-- Company Section -->
+        <li class="nav-item mt-3 px-3 text-muted small">
+            Company
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'company_detail' request.session.active_company_id %}">
+                <i class="bi bi-building"></i> Company Info
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'company_activity_list' request.session.active_company_id %}">
+                <i class="bi bi-list-task"></i> Activities
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'company_profile' request.session.active_company_id %}">
+                <i class="bi bi-gear"></i> Tax Profile
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'company_user_list' request.session.active_company_id %}">
+                <i class="bi bi-people"></i> Users & Roles
+            </a>
+        </li>
+
+        <!-- Accounting Section -->
+        <li class="nav-item mt-3 px-3 text-muted small">
+            Accounting
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'account_list' %}">
+                <i class="bi bi-journal-text"></i> Chart of Accounts
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'journal_list' %}">
+                <i class="bi bi-book"></i> Journal
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'period_list' %}">
+                <i class="bi bi-calendar3"></i> Fiscal Periods
+            </a>
+        </li>
+
+        {% endif %}
+
+        <!-- System Section -->
+        <li class="nav-item mt-3 px-3 text-muted small">
+            System
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'company_select' %}">
+                <i class="bi bi-arrow-left-right"></i> Change Company
+            </a>
+        </li>
+
+    </ul>
+
+</aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+PURCHASES – SUPPLIER MODEL
+==========================
+
+Model: Supplier
+---------------
+
+Fields:
+- company: ForeignKey(Company)
+- tax_profile: OneToOneField(ThirdPartyTaxProfile, null=True, blank=True)
+- name: CharField(255)
+- tax_id: CharField(20, blank=True, null=True)
+- email: EmailField(blank=True, null=True)
+- phone: CharField(50, blank=True, null=True)
+- address: CharField(255, blank=True, null=True)
+- is_active: BooleanField(default=True)
+- created_at: DateTimeField(auto_now_add=True, null=True)
+
+Meta:
+- unique_together = ("company", "name")
+- ordering = ["name"]
+
+String representation:
+- __str__ = "{name} ({company.legal_name})"

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">New Company</h2>
+
+<div class="erp-card p-4">
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">CUIT</label>
+                <input type="text" name="tax_id" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">AFIP Category</label>
+                <select name="afip_category" class="form-select">
+                    <option value="RI">Responsable Inscripto</option>
+                    <option value="MONO">Monotributo</option>
+                    <option value="EX">Exento</option>
+                    <option value="PYME">PyME</option>
+                    <option value="GC">Gran Contribuyente</option>
+                    <option value="PH">Persona Humana</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <input type="text" name="address" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">City</label>
+                <input type="text" name="city" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Province</label>
+                <input type="text" name="province" class="form-control">
+            </div>
+
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'company_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success">Create</button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

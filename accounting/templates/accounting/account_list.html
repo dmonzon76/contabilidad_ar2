@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">Chart of Accounts</h2>
+
+<div class="erp-card p-3">
+
+    <ul class="account-tree list-unstyled">
+        {% for account in accounts %}
+            {% include "accounting/account_node.html" with account=account %}
+        {% endfor %}
+    </ul>
+
+</div>
+
+<style>
+    .account-node {
+        cursor: pointer;
+        padding: 4px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .account-indent {
+        width: calc(var(--level) * 20px);
+        flex-shrink: 0;
+    }
+
+    .account-toggle {
+        width: 18px;
+        text-align: center;
+        margin-right: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .account-children {
+        margin-left: 20px;
+        display: none;
+    }
+
+    .account-node.leaf .account-toggle {
+        visibility: hidden;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".account-toggle").forEach(function (toggle) {
+            toggle.addEventListener("click", function (e) {
+                e.stopPropagation();
+
+                const children = this.parentElement.parentElement.querySelector(".account-children");
+
+                if (children) {
+                    const isHidden = children.style.display === "none" || children.style.display === "";
+                    children.style.display = isHidden ? "block" : "none";
+                    this.textContent = isHidden ? "▼" : "▶";
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

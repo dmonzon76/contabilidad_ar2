@@ -1,0 +1,52 @@
+.erp-sidebar {
+    width: 240px;
+    min-height: 100vh;
+}
+
+.erp-sidebar .nav-link {
+    color: #333;
+    padding: 10px 20px;
+}
+
+.erp-sidebar .nav-link:hover {
+    background: #e9ecef;
+    color: #000;
+}
+
+.erp-card {
+    border-radius: 8px;
+}
+.erp-card ul {
+    margin: 0;
+    padding-left: 0;
+}
+
+.erp-card li {
+    list-style: none;
+}
+
+.erp-card ul ul {
+    border-left: 1px solid #ddd;
+    margin-left: 12px;
+    padding-left: 12px;
+}
+.erp-tree-row {
+    padding: 4px 0;
+}
+
+.erp-tree-toggle {
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+}
+
+.erp-tree-empty {
+    display: inline-block;
+    width: 12px;
+}
+
+.erp-tree-children {
+    border-left: 1px solid #ddd;
+    margin-left: 12px;
+    padding-left: 12px;
+}

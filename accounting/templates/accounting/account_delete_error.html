@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page text-danger">Cannot Delete Account</h2>
+
+<div class="erp-card p-4">
+
+    <p class="mb-3">
+        The account <strong>{{ account.code }} — {{ account.name }}</strong> cannot be deleted because it has child accounts.
+    </p>
+
+    <p class="text-muted">
+        To delete this account, first remove or reassign its child accounts.
+    </p>
+
+    <div class="mt-4">
+        <a href="{% url 'account_list' %}" class="btn btn-primary">Back to Chart of Accounts</a>
+    </div>
+
+</div>
+
+{% endblock %}

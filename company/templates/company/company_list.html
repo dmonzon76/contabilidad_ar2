@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">Companies</h2>
+
+<div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'company_create' %}" class="btn btn-success">
+        + New Company
+    </a>
+</div>
+
+<div class="erp-card p-3">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>CUIT</th>
+                <th>AFIP Category</th>
+                <th>City</th>
+                <th>Active</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for company in companies %}
+            <tr>
+                <td>{{ company.name }}</td>
+                <td>{{ company.tax_id }}</td>
+                <td>{{ company.get_afip_category_display }}</td>
+                <td>{{ company.city }}</td>
+                <td>
+                    {% if company.is_active %}
+                        <span class="badge bg-success">Yes</span>
+                    {% else %}
+                        <span class="badge bg-secondary">No</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'company_detail' company.id %}" class="btn btn-primary btn-sm">
+                        View
+                    </a>
+                    <a href="{% url 'company_edit' company.id %}" class="btn btn-secondary btn-sm">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">No companies found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

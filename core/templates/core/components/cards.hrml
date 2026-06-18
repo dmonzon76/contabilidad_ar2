@@ -1,0 +1,22 @@
+{% comment %}
+Reusable ERP Cards
+Usage:
+{% include "core/components/cards.html" with title="Total Sales" value=1234 icon="bi-cash" %}
+{% endcomment %}
+
+<div class="erp-card card shadow-sm mb-3">
+    <div class="card-body d-flex align-items-center">
+
+        {% if icon %}
+        <div class="me-3">
+            <i class="bi {{ icon }} fs-2 text-primary"></i>
+        </div>
+        {% endif %}
+
+        <div>
+            <h6 class="text-muted mb-1">{{ title }}</h6>
+            <h4 class="fw-bold">{{ value }}</h4>
+        </div>
+
+    </div>
+</div>
