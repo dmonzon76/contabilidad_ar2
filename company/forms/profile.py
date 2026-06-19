@@ -11,8 +11,8 @@ class CompanyProfileForm(forms.ModelForm):
             "vat_27",
             "vat_exempt",
             "vat_non_taxed",
-            "iibb_registered",
-            "ganancias_agent",
+            "ganancias_status",
+            "iibb_status",
             "uses_perceptions",
             "uses_retentions",
         ]

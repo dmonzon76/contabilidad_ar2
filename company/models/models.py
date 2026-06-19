@@ -30,6 +30,7 @@ class Company(models.Model):
     zip_code = models.CharField(max_length=20, blank=True, null=True)
 
 
+
     start_date = models.DateField(null=True, blank=True)
     accounting_start_date = models.DateField(
         null=True,
@@ -44,6 +45,18 @@ class Company(models.Model):
 
 
 class CompanyProfile(models.Model):
+    GANANCIAS_STATUS_CHOICES = [
+        ("INSCRIPTO", "Inscripto"),
+        ("EXENTO", "Exento"),
+        ("NO_CORRESPONDE", "No corresponde (Monotributista)"),
+    ]
+
+    IIBB_STATUS_CHOICES = [
+        ("INSCRIPTO", "Inscripto"),
+        ("EXENTO", "Exento"),
+        ("NO_CORRESPONDE", "No corresponde"),
+    ]
+
     company = models.OneToOneField(
         Company,
         on_delete=models.CASCADE,
@@ -58,10 +71,18 @@ class CompanyProfile(models.Model):
     vat_non_taxed = models.BooleanField(default=False)
 
     # IIBB
-    iibb_registered = models.BooleanField(default=False)
+    iibb_status = models.CharField(
+        max_length=20,
+        choices=IIBB_STATUS_CHOICES,
+        default="NO_CORRESPONDE",
+    )
 
     # Ganancias
-    ganancias_agent = models.BooleanField(default=False)
+    ganancias_status = models.CharField(
+        max_length=20,
+        choices=GANANCIAS_STATUS_CHOICES,
+        default="NO_CORRESPONDE",
+    )
 
     # Other flags
     uses_perceptions = models.BooleanField(default=False)
@@ -69,7 +90,6 @@ class CompanyProfile(models.Model):
 
     def __str__(self):
         return f"Tax profile for {self.company.name}"
-
 
 class CompanyUser(models.Model):
     ROLE_CHOICES = [

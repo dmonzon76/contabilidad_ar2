@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Add User — {{ company.name }}</h2>
+
+<form method="post" class="erp-card p-3">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button class="btn btn-success">Save</button>
+    <a href="{% url 'company_user_list' company.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

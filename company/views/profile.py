@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
-from company.models import Company, CompanyProfile
 from company.forms import CompanyProfileForm
+from company.models.models import Company, CompanyProfile
 
 
 @login_required
@@ -24,7 +24,7 @@ def profile_edit(request, company_id):
         form = CompanyProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect("company_profile", company_id=company.id)
+            return redirect("company_profile", company_id=company.id)  # ← CORREGIDO
     else:
         form = CompanyProfileForm(instance=profile)
 
