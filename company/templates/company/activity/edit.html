@@ -1,14 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="erp-title-page">Add AFIP Activity — {{ company.name }}</h2>
+<h2 class="erp-title-page">Edit AFIP Activity — {{ company.name }}</h2>
 
 <form method="post" class="erp-card p-4">
     {% csrf_token %}
 
     <div class="mb-3">
         <label class="form-label">AFIP Activity</label>
-        {{ form.activity }}
+
+        <select name="activity" class="form-select select2-afip" style="width:100%;">
+            {% if form.instance.activity %}
+                <option value="{{ form.instance.activity.id }}" selected>
+                    {{ form.instance.activity.code }} – {{ form.instance.activity.description }}
+                </option>
+            {% endif %}
+        </select>
     </div>
 
     <div class="mb-3">
@@ -21,14 +28,11 @@
         {{ form.is_primary }}
     </div>
 
-    <button class="btn btn-success">Save</button>
+    <button class="btn btn-primary">Update</button>
     <a href="{% url 'company_activity_list' company.id %}" class="btn btn-secondary ms-2">Cancel</a>
 </form>
 
-<!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 
 <script>

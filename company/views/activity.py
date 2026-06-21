@@ -1,9 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from company.models import Company, CompanyActivity
-from company.forms import CompanyActivityForm
+from company.forms.activity import CompanyActivityForm
+import json
+from django.conf import settings
 
 
+# ----------------------------------------
+# Cargar tabla oficial AFIP desde JSON
+# ----------------------------------------
+def load_afip_codes():
+    path = settings.BASE_DIR / "fiscal/data/afip_activities.json"
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+# ----------------------------------------
+# LIST
+# ----------------------------------------
 @login_required
 def activity_list(request, company_id):
     company = get_object_or_404(Company, id=company_id)
@@ -15,16 +29,18 @@ def activity_list(request, company_id):
     })
 
 
+# ----------------------------------------
+# CREATE
+# ----------------------------------------
 @login_required
 def activity_create(request, company_id):
     company = get_object_or_404(Company, id=company_id)
 
     if request.method == "POST":
         form = CompanyActivityForm(request.POST)
+        form.instance.company = company
         if form.is_valid():
-            activity = form.save(commit=False)
-            activity.company = company
-            activity.save()
+            form.save()
             return redirect("company_activity_list", company_id=company.id)
     else:
         form = CompanyActivityForm()
@@ -32,8 +48,13 @@ def activity_create(request, company_id):
     return render(request, "company/activity/create.html", {
         "company": company,
         "form": form,
+        "afip_codes": load_afip_codes(),   # ← AUTOCOMPLETADO
     })
 
+
+# ----------------------------------------
+# EDIT
+# ----------------------------------------
 @login_required
 def activity_edit(request, company_id, activity_id):
     company = get_object_or_404(Company, id=company_id)
@@ -51,9 +72,13 @@ def activity_edit(request, company_id, activity_id):
         "company": company,
         "activity": activity,
         "form": form,
+        "afip_codes": load_afip_codes(),   # ← AUTOCOMPLETADO
     })
 
 
+# ----------------------------------------
+# DELETE
+# ----------------------------------------
 @login_required
 def activity_delete(request, company_id, activity_id):
     company = get_object_or_404(Company, id=company_id)

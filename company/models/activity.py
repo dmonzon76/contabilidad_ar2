@@ -1,5 +1,7 @@
 from django.db import models
 from company.models import Company
+from fiscal.models import AFIPActivity
+
 
 class CompanyActivity(models.Model):
     company = models.ForeignKey(
@@ -8,8 +10,15 @@ class CompanyActivity(models.Model):
         related_name="activities"
     )
 
-    code = models.CharField(max_length=20)  # Código AFIP
-    description = models.CharField(max_length=200, blank=True)
+    activity = models.ForeignKey(
+        AFIPActivity,
+        on_delete=models.PROTECT,
+        null=True,      # ← agregar
+        blank=True,     # ← agregar
+
+
+        related_name="company_activities"
+    )
 
     is_primary = models.BooleanField(default=False)
 
@@ -20,4 +29,20 @@ class CompanyActivity(models.Model):
     )
 
     def __str__(self):
-        return f"{self.code} - {self.company.name}"
+        return f"{self.activity.code} - {self.company.name}"
+
+    def save(self, *args, **kwargs):
+
+        # 1) Primera actividad → primaria automática
+        if not self.pk:
+            if not CompanyActivity.objects.filter(company=self.company).exists():
+                self.is_primary = True
+
+        # 2) Si se marca como primaria → desmarcar otras
+        if self.is_primary:
+            CompanyActivity.objects.filter(
+                company=self.company,
+                is_primary=True
+            ).exclude(id=self.id).update(is_primary=False)
+
+        super().save(*args, **kwargs)
