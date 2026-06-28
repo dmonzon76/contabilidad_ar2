@@ -46,7 +46,7 @@
 
     <!-- Accounting -->
     <div class="col-md-3">
-        <a href="#" class="erp-card text-center p-4 d-block">
+        <a href="{% url 'accounting:journal_list' %}" class="erp-card text-center p-4 d-block">
             <h4>Accounting</h4>
             <p class="text-muted">Journal, Ledger, Balances</p>
         </a>
@@ -54,23 +54,51 @@
 
     <!-- Sales -->
     <div class="col-md-3">
-        <a href="#" class="erp-card text-center p-4 d-block">
+        <a href="{% url 'sales:sale_list' %}" class="erp-card text-center p-4 d-block">
             <h4>Sales</h4>
             <p class="text-muted">Invoices & Customers</p>
         </a>
+
+        {% if active_company %}
+        <div class="erp-card p-3 mt-2">
+            <h5>Sales Summary</h5>
+            <p><strong>Net:</strong> {{ active_company.sales_totals.net }}</p>
+            <p><strong>IVA:</strong> {{ active_company.sales_totals.iva }}</p>
+            <p><strong>Total:</strong> {{ active_company.sales_totals.total }}</p>
+
+            {% if active_company.last_sale %}
+            <hr>
+            <p><strong>Last Sale:</strong> {{ active_company.last_sale.total_amount }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
     <!-- Purchases -->
     <div class="col-md-3">
-        <a href="#" class="erp-card text-center p-4 d-block">
+        <a href="{% url 'purchases:purchase_list' %}" class="erp-card text-center p-4 d-block">
             <h4>Purchases</h4>
             <p class="text-muted">Suppliers & Expenses</p>
         </a>
+
+        {% if active_company %}
+        <div class="erp-card p-3 mt-2">
+            <h5>Purchases Summary</h5>
+            <p><strong>Net:</strong> {{ active_company.purchases_totals.net }}</p>
+            <p><strong>IVA:</strong> {{ active_company.purchases_totals.iva }}</p>
+            <p><strong>Total:</strong> {{ active_company.purchases_totals.total }}</p>
+
+            {% if active_company.last_purchase %}
+            <hr>
+            <p><strong>Last Purchase:</strong> {{ active_company.last_purchase.total_amount }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
     <!-- Inventory -->
     <div class="col-md-3">
-        <a href="#" class="erp-card text-center p-4 d-block">
+        <a href="{% url 'inventory:product_list' %}" class="erp-card text-center p-4 d-block">
             <h4>Inventory</h4>
             <p class="text-muted">Stock & Products</p>
         </a>
@@ -79,328 +107,3 @@
 </div>
 
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

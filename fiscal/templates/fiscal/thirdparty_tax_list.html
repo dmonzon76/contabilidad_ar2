@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Third Party Tax Profiles</h2>
+
+<div class="erp-card p-3">
+    <a href="{% url 'thirdparty_tax_create' %}" class="btn btn-primary mb-3">New Profile</a>
+
+    <table class="table table-sm">
+        <tr>
+            <th>Company</th>
+            <th>AFIP Category</th>
+            <th>Ganancias</th>
+            <th>IIBB</th>
+            <th></th>
+        </tr>
+
+        {% for p in profiles %}
+        <tr>
+            <td>{{ p.company.name }}</td>
+            <td>{{ p.afip_category }}</td>
+            <td>{{ p.ganancias_status }}</td>
+            <td>{{ p.iibb_status }}</td>
+            <td>
+                <a href="{% url 'thirdparty_tax_edit' p.id %}">Edit</a> |
+                <a href="{% url 'thirdparty_tax_delete' p.id %}" class="text-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

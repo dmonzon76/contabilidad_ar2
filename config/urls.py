@@ -27,8 +27,12 @@ urlpatterns = [
     path("accounting/", include("accounting.urls")),
     path("", include("core.urls")),
     path("api/", include("fiscal.urls")),  # ← ESTA ES LA CLAVE
-    # path("sales/", include("sales.urls")),
-    # path("purchases/", include("purchases.urls")),
-    # path("inventory/", include("inventory.urls")),
-    # path("reports/", include("reports.urls")),
+    path("sales/", include("sales.urls")),
+    path("purchases/", include("purchases.urls")),
+    path("inventory/", include("inventory.urls")),
+    path("reports/", include("reports.urls")),
 ]
+
+
+
+

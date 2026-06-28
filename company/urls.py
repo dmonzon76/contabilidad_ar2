@@ -28,6 +28,8 @@ from company.views.users import (
     company_user_delete,
 )
 
+app_name = "company"
+
 urlpatterns = [
     # ============================================================
     # COMPANY SELECTOR

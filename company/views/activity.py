@@ -4,6 +4,7 @@ from company.models import Company, CompanyActivity
 from company.forms.activity import CompanyActivityForm
 import json
 from django.conf import settings
+from core.utils.company_access import user_has_access   # ← NUEVO
 
 
 # ----------------------------------------
@@ -20,8 +21,16 @@ def load_afip_codes():
 # ----------------------------------------
 @login_required
 def activity_list(request, company_id):
+
+    # Empresa solicitada
     company = get_object_or_404(Company, id=company_id)
-    activities = company.activities.all()
+
+    # Seguridad multi-company
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    # Filtrado por empresa activa
+    activities = CompanyActivity.objects.filter(company=company)
 
     return render(request, "company/activity/list.html", {
         "company": company,
@@ -34,7 +43,11 @@ def activity_list(request, company_id):
 # ----------------------------------------
 @login_required
 def activity_create(request, company_id):
+
     company = get_object_or_404(Company, id=company_id)
+
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     if request.method == "POST":
         form = CompanyActivityForm(request.POST)
@@ -48,7 +61,7 @@ def activity_create(request, company_id):
     return render(request, "company/activity/create.html", {
         "company": company,
         "form": form,
-        "afip_codes": load_afip_codes(),   # ← AUTOCOMPLETADO
+        "afip_codes": load_afip_codes(),
     })
 
 
@@ -57,7 +70,12 @@ def activity_create(request, company_id):
 # ----------------------------------------
 @login_required
 def activity_edit(request, company_id, activity_id):
+
     company = get_object_or_404(Company, id=company_id)
+
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
     activity = get_object_or_404(CompanyActivity, id=activity_id, company=company)
 
     if request.method == "POST":
@@ -72,7 +90,7 @@ def activity_edit(request, company_id, activity_id):
         "company": company,
         "activity": activity,
         "form": form,
-        "afip_codes": load_afip_codes(),   # ← AUTOCOMPLETADO
+        "afip_codes": load_afip_codes(),
     })
 
 
@@ -81,7 +99,12 @@ def activity_edit(request, company_id, activity_id):
 # ----------------------------------------
 @login_required
 def activity_delete(request, company_id, activity_id):
+
     company = get_object_or_404(Company, id=company_id)
+
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
     activity = get_object_or_404(CompanyActivity, id=activity_id, company=company)
 
     if request.method == "POST":

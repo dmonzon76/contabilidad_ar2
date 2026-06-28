@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Company Tax Profile</h2>
+
+<div class="erp-card p-3">
+    <p><strong>Company:</strong> {{ company.name }}</p>
+
+    <a href="{% url 'company_tax_profile_edit' %}" class="btn btn-primary">Edit</a>
+
+    <hr>
+
+    <p><strong>VAT:</strong></p>
+    <ul>
+        <li>21%: {{ profile.vat_21 }}</li>
+        <li>10.5%: {{ profile.vat_105 }}</li>
+        <li>27%: {{ profile.vat_27 }}</li>
+        <li>Exempt: {{ profile.vat_exempt }}</li>
+        <li>Non-taxed: {{ profile.vat_non_taxed }}</li>
+    </ul>
+
+    <p><strong>IIBB:</strong> {{ profile.iibb_status }}</p>
+    <p><strong>Ganancias:</strong> {{ profile.ganancias_status }}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+.level-0 .account-node { color: #000; font-weight: 600; }
+.level-1 .account-node { color: #333; }
+.level-2 .account-node { color: #555; }
+.level-3 .account-node { color: #777; }
+.level-4 .account-node { color: #999; }
+
+.account-node {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.account-indent {
+    width: calc(var(--level) * 16px);
+}
+
+.account-toggle {
+    width: 16px;
+    cursor: pointer;
+    user-select: none;
+}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">AFIP Activities</h2>
+
+<div class="erp-card p-3">
+    <a href="{% url 'afip_activity_create' %}" class="btn btn-primary mb-3">New Activity</a>
+
+    <table class="table table-sm">
+        <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th></th>
+        </tr>
+
+        {% for a in activities %}
+        <tr>
+            <td>{{ a.code }}</td>
+            <td>{{ a.description }}</td>
+            <td>
+                <a href="{% url 'afip_activity_edit' a.id %}">Edit</a> |
+                <a href="{% url 'afip_activity_delete' a.id %}" class="text-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

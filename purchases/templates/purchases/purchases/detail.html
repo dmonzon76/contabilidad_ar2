@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Purchase Detail</h2>
+
+<div class="erp-card p-3">
+
+    <h4>Header</h4>
+    <p><strong>Supplier:</strong> {{ object.supplier.name }}</p>
+    <p><strong>Date:</strong> {{ object.date }}</p>
+    <p><strong>Invoice:</strong> {{ object.invoice_number }}</p>
+
+    <hr>
+
+    <h4>Lines</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Account</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in object.lines.all %}
+            <tr>
+                <td>{{ line.description }}</td>
+                <td>{{ line.quantity }}</td>
+                <td>{{ line.unit_price }}</td>
+                <td>{{ line.expense_account.code }} - {{ line.expense_account.name }}</td>
+                <td>{{ line.subtotal }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h4>Taxes</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Base</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in object.taxes.all %}
+            <tr>
+                <td>{{ t.vat_type }}</td>
+                <td>{{ t.base_amount }}</td>
+                <td>{{ t.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h4>Perceptions</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in object.perceptions.all %}
+            <tr>
+                <td>{{ p.perception_type }}</td>
+                <td>{{ p.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h4>Retentions</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in object.retentions.all %}
+            <tr>
+                <td>{{ r.retention_type }}</td>
+                <td>{{ r.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h4>Totals</h4>
+    <p><strong>Net:</strong> {{ object.net_amount }}</p>
+    <p><strong>Taxes:</strong> {{ object.tax_amount }}</p>
+    <p><strong>Perceptions:</strong> {{ object.perception_amount }}</p>
+    <p><strong>Retentions:</strong> {{ object.retention_amount }}</p>
+    <p><strong>Total:</strong> {{ object.total_amount }}</p>
+
+    <hr>
+
+    <a href="{% url 'purchases:purchase_edit' object.id %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'purchases:purchase_list' %}" class="btn btn-secondary">Back</a>
+
+</div>
+{% endblock %}

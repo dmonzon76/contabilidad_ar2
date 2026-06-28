@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 
 class Company(models.Model):
     AFIP_CATEGORY_CHOICES = [
@@ -29,8 +27,6 @@ class Company(models.Model):
     country = models.CharField(max_length=100, default="Argentina")
     zip_code = models.CharField(max_length=20, blank=True, null=True)
 
-
-
     start_date = models.DateField(null=True, blank=True)
     accounting_start_date = models.DateField(
         null=True,
@@ -42,6 +38,51 @@ class Company(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.tax_id})"
+
+    # ============================================================
+    # PURCHASES SUMMARY (Dashboard)
+    # ============================================================
+
+    @property
+    def purchases_totals(self):
+        from purchases.models.purchase import Purchase
+        purchases = Purchase.objects.filter(company=self)
+
+        return {
+            "net": sum(p.net_amount for p in purchases),
+            "iva": sum(p.tax_amount for p in purchases),
+            "total": sum(p.total_amount for p in purchases),
+        }
+
+    @property
+    def last_purchase(self):
+        from purchases.models.purchase import Purchase
+        return Purchase.objects.filter(company=self).order_by("-date", "-id").first()
+
+    # ============================================================
+    # SALES SUMMARY (Dashboard)
+    # ============================================================
+
+    @property
+    def sales_totals(self):
+        try:
+            from sales.models.sale import Sale
+            sales = Sale.objects.filter(company=self)
+            return {
+                "net": sum(s.net_amount for s in sales),
+                "iva": sum(s.tax_amount for s in sales),
+                "total": sum(s.total_amount for s in sales),
+            }
+        except:
+            return {"net": 0, "iva": 0, "total": 0}
+
+    @property
+    def last_sale(self):
+        try:
+            from sales.models.sale import Sale
+            return Sale.objects.filter(company=self).order_by("-date", "-id").first()
+        except:
+            return None
 
 
 class CompanyProfile(models.Model):
@@ -63,33 +104,30 @@ class CompanyProfile(models.Model):
         related_name="tax_profile",
     )
 
-    # VAT capabilities
     vat_21 = models.BooleanField(default=True)
     vat_105 = models.BooleanField(default=False)
     vat_27 = models.BooleanField(default=False)
     vat_exempt = models.BooleanField(default=False)
     vat_non_taxed = models.BooleanField(default=False)
 
-    # IIBB
     iibb_status = models.CharField(
         max_length=20,
         choices=IIBB_STATUS_CHOICES,
         default="NO_CORRESPONDE",
     )
 
-    # Ganancias
     ganancias_status = models.CharField(
         max_length=20,
         choices=GANANCIAS_STATUS_CHOICES,
         default="NO_CORRESPONDE",
     )
 
-    # Other flags
     uses_perceptions = models.BooleanField(default=False)
     uses_retentions = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Tax profile for {self.company.name}"
+
 
 class CompanyUser(models.Model):
     ROLE_CHOICES = [

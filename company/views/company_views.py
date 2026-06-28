@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from company.models import Company, CompanyProfile
+from company.models import Company
+from core.utils.company_access import user_has_access
+
 
 
 @login_required
@@ -34,10 +37,37 @@ def company_create(request):
 
     return render(request, "company/company_create.html")
 
+
 @login_required
 def company_detail(request, company_id):
     company = get_object_or_404(Company, id=company_id)
-    return render(request, "company/company_detail.html", {"company": company})
+
+    # Seguridad multi-company
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    return render(request, "company/detail.html", {
+        "company": company,
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @login_required
 def company_edit(request, company_id):

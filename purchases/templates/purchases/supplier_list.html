@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Suppliers</h2>
+
+<div class="erp-card p-3">
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary mb-3">New Supplier</a>
+
+    <table class="table table-sm">
+        <tr>
+            <th>Name</th>
+            <th>Tax ID</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th></th>
+        </tr>
+
+        {% for s in suppliers %}
+        <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.tax_id }}</td>
+            <td>{{ s.email }}</td>
+            <td>{{ s.phone }}</td>
+            <td>
+                <a href="{% url 'supplier_edit' s.id %}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

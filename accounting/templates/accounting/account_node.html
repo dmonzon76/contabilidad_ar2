@@ -1,21 +1,35 @@
-{% with level=account.code|cut:"."|length %}
-<li>
+<li class="level-{{ account.level }}">
 
-    <div class="account-node {% if account.children.count == 0 %}leaf{% endif %}" style="--level: {{ level }};">
-        <div class="account-indent"></div>
+    <div class="account-node {% if not account.children.exists %}leaf{% endif %}"
+         style="--level: {{ account.level }};">
 
         <div class="account-toggle">
-            {% if account.children.count > 0 %}
+            {% if account.children.exists %}
                 ▶
             {% endif %}
         </div>
 
+        <div class="account-indent"></div>
+
         <div>
             <strong>{{ account.code }}</strong> — {{ account.name }}
+
+            <!-- Ícono por tipo -->
+            {% if account.account_type == "ASSET" %} 💰
+            {% elif account.account_type == "LIABILITY" %} 📄
+            {% elif account.account_type == "EQUITY" %} 🏛️
+            {% elif account.account_type == "INCOME" %} 📈
+            {% elif account.account_type == "EXPENSE" %} 📉
+            {% endif %}
+
+            <!-- Acciones -->
+            <a href="{% url 'account_add_child' account.id %}" class="ms-2 text-primary">＋</a>
+            <a href="{% url 'account_edit' account.id %}" class="ms-2 text-secondary">✎</a>
+            <a href="{% url 'account_delete' account.id %}" class="ms-2 text-danger">🗑️</a>
         </div>
     </div>
 
-    {% if account.children.count > 0 %}
+    {% if account.children.exists %}
         <ul class="account-children list-unstyled" style="display:none;">
             {% for child in account.children.all %}
                 {% include "accounting/account_node.html" with account=child %}
@@ -24,26 +38,3 @@
     {% endif %}
 
 </li>
-{% endwith %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
