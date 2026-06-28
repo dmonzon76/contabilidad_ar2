@@ -1,78 +1,21 @@
-# ============================
-# PYTHON / DJANGO
-# ============================
-
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
-.virtualenv/
-
-# Django stuff
-*.log
-*.pot
 *.pyc
-*.pyo
-*.pyd
-*.sqlite3
-db.sqlite3
-media/
-staticfiles/
-static_root/
 
-# Local settings
-local_settings.py
-settings_local.py
+# Virtual env
+venv/
 
-# ============================
-# MIGRATIONS (opcional)
-# ============================
-# Si querés ignorar migraciones viejas, descomentá:
-# */migrations/*.py
-# !*/migrations/__init__.py
-
-# ============================
-# VS CODE
-# ============================
-
-.vscode/
-.history/
-*.code-workspace
-
-# ============================
-# WINDOWS
-# ============================
-
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# ============================
-# GIT / GENERAL
-# ============================
-
-*.bak
-*.tmp
-*.swp
-*.swo
-*.orig
-
-# ============================
-# LOGS
-# ============================
-
-logs/
+# Logs
 *.log
 
-# ============================
-# TOOLS / CACHE
-# ============================
+# IDE / Editor
+.metadata/
+.vscode/
+.idea/
 
-pip-log.txt
-pip-delete-this-directory.txt
-__pypackages__/
+# OS files
+.DS_Store
+Thumbs.db
+
+# Text files
+*.txt
