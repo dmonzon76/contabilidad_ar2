@@ -1,24 +1,59 @@
-from company.models import Company
+from django.shortcuts import redirect
+from django.urls import reverse
+from company.models.models import CompanyUser
+
 
 class ActiveCompanyMiddleware:
+    """
+    Middleware que asegura que el usuario tenga una empresa activa seleccionada.
+    """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        company_id = request.session.get("active_company_id")
+        # Rutas que NO deben forzar selección de empresa
+        exempt_paths = [
+            "/company/select/",
+            "/company/select/clear-flag/",
+            "/admin/",
+            "/login/",
+            "/logout/",
+        ]
 
-        request.active_company = None
-        request.company = None
-        request.current_company = None
+        if any(request.path.startswith(p) for p in exempt_paths):
+            return self.get_response(request)
+
+        # Si el usuario no está autenticado → seguir
+        if not request.user.is_authenticated:
+            return self.get_response(request)
+
+        # Obtener empresa activa desde la sesión
+        company_id = request.session.get("active_company_id")
 
         if company_id:
             try:
-                company = Company.objects.get(id=company_id)
-                request.active_company = company
-                request.company = company
-                request.current_company = company
-            except Company.DoesNotExist:
-                request.session["active_company_id"] = None
+                request.active_company = request.user.companyuser_set.get(
+                    company_id=company_id
+                ).company
+            except CompanyUser.DoesNotExist:
+                request.active_company = None
+        else:
+            request.active_company = None
 
-        response = self.get_response(request)
-        return response
+        # Si no hay empresa activa → redirigir al selector
+        if request.active_company is None:
+            return redirect(reverse("company:company_select"))
+
+        return self.get_response(request)
+
+
+# ============================================================
+# 🔥 Helper que tus vistas necesitan
+# ============================================================
+
+def get_active_company_from_request(request):
+    """
+    Devuelve la empresa activa asociada al request.
+    """
+    return getattr(request, "active_company", None)

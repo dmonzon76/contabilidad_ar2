@@ -38,7 +38,8 @@
                 modal.show();
 
                 // Clear flag on server so it only shows once
-                fetch('{% url "company_clear_modal_flag" %}').catch(function(){});
+                fetch('{% url "company:company_clear_modal_flag" %}')
+
             }
         })();
     </script>

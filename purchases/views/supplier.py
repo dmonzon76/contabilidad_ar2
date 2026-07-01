@@ -1,7 +1,8 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from purchases.models import Supplier
-from company.middleware import get_active_company
+from core.middleware.active_company import get_active_company_from_request
+
 from purchases.forms.supplier import SupplierForm
 
 
@@ -10,7 +11,7 @@ class SupplierListView(ListView):
     template_name = "purchases/suppliers/list.html"
 
     def get_queryset(self):
-        company = get_active_company(self.request)
+        company = get_active_company_from_request(self.request)
         return Supplier.objects.filter(company=company, is_active=True)
 
 
@@ -21,7 +22,7 @@ class SupplierCreateView(CreateView):
     success_url = reverse_lazy("purchases:supplier_list")
 
     def form_valid(self, form):
-        form.instance.company = get_active_company(self.request)
+        form.instance.company = get_active_company_from_request (self.request)
         return super().form_valid(form)
 
 

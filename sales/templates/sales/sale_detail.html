@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Sale {{ sale.number }}</h2>
+
+<div class="erp-card p-3">
+    <p><strong>Date:</strong> {{ sale.date }}</p>
+    <p><strong>Customer:</strong> {{ sale.customer.name }}</p>
+    <p><strong>Net:</strong> {{ sale.net_amount }}</p>
+    <p><strong>IVA:</strong> {{ sale.iva_amount }}</p>
+    <p><strong>Total:</strong> {{ sale.total_amount }}</p>
+</div>
+<hr>
+
+<h4>Items</h4>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in sale.items.all %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit_price }}</td>
+            <td>{{ item.subtotal }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'sales:sale_item_add' sale.id %}" class="btn btn-primary mt-3">Add Item</a>
+
+{% endblock %}

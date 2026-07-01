@@ -5,12 +5,12 @@
     <div class="navbar-nav ms-auto">
 
         {% if active_company %}
-            <a class="nav-link" href="{% url 'company_detail' active_company.id %}">
+            <a class="nav-link" href="{% url 'company:company_detail' active_company.id %}">
                 Active: {{ active_company.name }}
             </a>
         {% endif %}
 
-        <a class="nav-link" href="{% url 'company_select' %}">Change Company</a>
+        <a class="nav-link" href="{% url 'company:company_select' %}">Change Company</a>
         <a class="nav-link" href="{% url 'logout' %}">Logout</a>
     </div>
 

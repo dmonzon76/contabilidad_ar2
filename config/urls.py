@@ -14,7 +14,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
 from django.urls import include, path
 from core.views.auth import ERPLoginView
@@ -23,15 +22,33 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/login/", ERPLoginView.as_view(), name="login"),
     path("accounts/", include("django.contrib.auth.urls")),
-    path("company/", include("company.urls")),
+
+    # Company FIRST (important)
+    path("company/", include(("company.urls", "company"), namespace="company")),
+
+    # Other apps
     path("accounting/", include("accounting.urls")),
-    path("", include("core.urls")),
-    path("api/", include("fiscal.urls")),  # ← ESTA ES LA CLAVE
+    path("api/", include("fiscal.urls")),
     path("sales/", include("sales.urls")),
     path("purchases/", include("purchases.urls")),
     path("inventory/", include("inventory.urls")),
     path("reports/", include("reports.urls")),
+
+    # Core LAST (important)
+    path("", include("core.urls")),
 ]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

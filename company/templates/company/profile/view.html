@@ -24,8 +24,8 @@
     <p>Uses Retentions: {{ profile.uses_retentions }}</p>
 
 </div>
+<a href="{% url 'company:company_tax_profile_edit' company.id %}" class="btn btn-primary mt-3">Edit</a>
 
-<a href="{% url 'company_profile_edit' company.id %}" class="btn btn-primary mt-3">Edit</a>
-<a href="{% url 'company_detail' company.id %}" class="btn btn-secondary mt-3">Back</a>
+<a href="{% url 'company:company_detail' company.id %}" class="btn btn-secondary mt-3">Back</a>
 
 {% endblock %}

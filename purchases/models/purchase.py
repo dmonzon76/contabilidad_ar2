@@ -22,7 +22,8 @@ class Purchase(models.Model):
     retention_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
 
     class Meta:
         ordering = ["-date", "-id"]

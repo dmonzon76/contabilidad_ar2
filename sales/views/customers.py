@@ -1,15 +1,20 @@
+from urllib import request
+
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from fiscal.models import ThirdPartyTaxProfile
 from sales.models import Customer
-from company.middleware import get_active_company
+from core.middleware.active_company import get_active_company_from_request
+from sales.models.customer import Customer
+
 
 class CustomerListView(ListView):
     model = Customer
     template_name = "sales/customers/list.html"
 
     def get_queryset(self):
-        company = get_active_company(self.request)
+        company = get_active_company_from_request(self.request)
+
         return Customer.objects.filter(company=company, is_active=True)
 
 
@@ -20,11 +25,11 @@ class CustomerCreateView(CreateView):
     success_url = reverse_lazy("sales:customer_list")
 
     def form_valid(self, form):
-        form.instance.company = get_active_company(self.request)
+        form.instance.company = get_active_company_from_request(self.request)
         return super().form_valid(form)
 
 def form_valid(self, form):
-    company = get_active_company(self.request)
+    company = get_active_company_from_request   (self.request)
 
     # Crear perfil fiscal por defecto
     tax_profile = ThirdPartyTaxProfile.objects.create(

@@ -1,9 +1,6 @@
 from django.db import models
 from company.models import Company
 from fiscal.models import ThirdPartyTaxProfile
-# Create your models here.
-
-
 
 class Customer(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)

@@ -9,7 +9,13 @@ from purchases.forms.purchase import (
     PurchasePerceptionFormSet,
     PurchaseRetentionFormSet,
 )
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+
+from core.middleware.active_company import get_active_company_from_request
+from purchases.models.purchase import Purchase
+from purchases.forms.purchase import PurchaseForm
 
 def purchase_recalculate(request):
     """
@@ -70,3 +76,48 @@ def purchase_recalculate(request):
     )
 
     return HttpResponse(html)
+
+
+
+
+
+
+
+
+class PurchaseListView(ListView):
+    model = Purchase
+    template_name = "purchases/purchases/list.html"
+
+    def get_queryset(self):
+        company = get_active_company_from_request(self.request)
+        return Purchase.objects.filter(company=company, is_active=True)
+
+
+class PurchaseDetailView(DetailView):
+    model = Purchase
+    template_name = "purchases/purchases/detail.html"
+
+
+class PurchaseCreateView(CreateView):
+    model = Purchase
+    form_class = PurchaseForm
+    template_name = "purchases/purchases/form.html"
+    success_url = reverse_lazy("purchases:purchase_list")
+
+    def form_valid(self, form):
+        company = get_active_company_from_request(self.request)
+        form.instance.company = company
+        return super().form_valid(form)
+
+
+class PurchaseUpdateView(UpdateView):
+    model = Purchase
+    form_class = PurchaseForm
+    template_name = "purchases/purchases/form.html"
+    success_url = reverse_lazy("purchases:purchase_list")
+
+
+class PurchaseDeleteView(DeleteView):
+    model = Purchase
+    template_name = "purchases/purchases/detail.html"
+    success_url = reverse_lazy("purchases:purchase_list")

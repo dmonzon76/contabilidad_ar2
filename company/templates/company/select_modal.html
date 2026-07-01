@@ -13,9 +13,7 @@
             {% if cu.is_active %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
               {{ cu.company.name }}
-              <a href="{% url 'company_set_active' cu.company.id %}" class="btn btn-primary">
-                Select
-              </a>
+              <a href="{% url 'company:company_set_active' cu.company.id %}" class="btn btn-primary"></a>
             </li>
             {% endif %}
           {% endfor %}

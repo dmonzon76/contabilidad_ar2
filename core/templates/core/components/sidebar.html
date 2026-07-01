@@ -20,25 +20,26 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'company_detail' request.session.active_company_id %}">
+            <a class="nav-link" href="{% url 'company:company_detail' request.session.active_company_id %}">
                 <i class="bi bi-building"></i> Company Info
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'company_activity_list' request.session.active_company_id %}">
+            <a class="nav-link" href="{% url 'company:company_activity_list' request.session.active_company_id %}">
                 <i class="bi bi-list-task"></i> Activities
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'company_profile' request.session.active_company_id %}">
+            <a class="nav-link" href="{% url 'company:company_tax_profile' request.session.active_company_id %}">
                 <i class="bi bi-gear"></i> Tax Profile
             </a>
         </li>
 
+
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'company_user_list' request.session.active_company_id %}">
+            <a class="nav-link" href="{% url 'company:company_user_list' request.session.active_company_id %}">
                 <i class="bi bi-people"></i> Users & Roles
             </a>
         </li>
@@ -49,20 +50,25 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'account_list' %}">
+            <a class="nav-link" href="{% url 'accounting:account_list' %}">
                 <i class="bi bi-journal-text"></i> Chart of Accounts
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'journal_list' %}">
+            <a class="nav-link" href="{% url 'accounting:journal_list' %}">
                 <i class="bi bi-book"></i> Journal
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'period_list' %}">
+            <a class="nav-link" href="{% url 'accounting:period_list' %}">
                 <i class="bi bi-calendar3"></i> Fiscal Periods
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'sales:sale_list' %}">
+                <i class="bi bi-receipt"></i> Sales
             </a>
         </li>
 
@@ -74,7 +80,7 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'company_select' %}">
+            <a class="nav-link" href="{% url 'company:company_select' %}">
                 <i class="bi bi-arrow-left-right"></i> Change Company
             </a>
         </li>

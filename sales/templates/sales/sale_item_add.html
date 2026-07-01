@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="erp-title-page">Add Item — Sale {{ sale.number }}</h2>
+
+<form method="post" class="erp-card p-3">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-success">Add Item</button>
+</form>
+
+<a href="{% url 'sales:sale_detail' sale.id %}" class="btn btn-secondary mt-3">Back</a>
+{% endblock %}
