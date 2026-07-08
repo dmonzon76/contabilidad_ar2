@@ -1,46 +1,44 @@
 {
 	"folders": {},
 	"connections": {
-		"mariaDB-19ee1b18f4e-20eec98d28fca3ff": {
+		"mariaDB-19f33d15555-4263ba5e4d5b98df": {
 			"provider": "mysql",
 			"driver": "mariaDB",
 			"name": "contabilidad_ar2",
 			"save-password": true,
 			"configuration": {
-				"host": "127.0.0.1",
-				"port": "3306",
-				"database": "contabilidad_ar2",
-				"url": "jdbc:mariadb://127.0.0.1:3306/contabilidad_ar2",
-				"configurationType": "MANUAL",
-				"home": "MySQL Router 8.0",
-				"type": "dev",
-				"closeIdleConnection": true,
-				"provider-properties": {
-					"@dbeaver-show-all-dbs@": "true"
-				},
-				"auth-model": "native"
-			},
-			"extensions": {
-				"dashboards": "\u003cdashboardList\u003e\u003cdashboards id\u003d\"default\" name\u003d\"Default\"\u003e\u003cview/\u003e\u003cdashboard id\u003d\"database:mysql.sessions\" viewType\u003d\"timeseries\" index\u003d\"0\" widthRatio\u003d\"1.5\" updatePeriod\u003d\"2000\" maxItems\u003d\"300\" maxAge\u003d\"1800000\" legendVisible\u003d\"true\" gridVisible\u003d\"false\" domainTicksVisible\u003d\"true\" rangeTicksVisible\u003d\"true\" description\u003d\"Shows session grouped by command\"/\u003e\u003c/dashboards\u003e\u003c/dashboardList\u003e"
-			}
-		},
-		"mariaDB-19ee1c0cd74-176bd0da022f6c5d": {
-			"provider": "mysql",
-			"driver": "mariaDB",
-			"name": "127.0.0.1",
-			"save-password": true,
-			"configuration": {
 				"host": "localhost",
 				"port": "3306",
-				"url": "jdbc:mariadb://localhost:3306/",
+				"database": "contabilidad_ar2",
+				"url": "jdbc:mariadb://localhost:3306/contabilidad_ar2",
 				"configurationType": "MANUAL",
 				"home": "MySQL Router 8.0",
 				"type": "dev",
 				"closeIdleConnection": true,
+				"properties": {
+					"allowPublicKeyRetrieval": "true"
+				},
 				"provider-properties": {
 					"@dbeaver-show-all-dbs@": "true"
 				},
-				"auth-model": "native"
+				"auth-model": "native",
+				"handlers": {
+					"mysql_ssl": {
+						"type": "CONFIG",
+						"enabled": true,
+						"save-password": true,
+						"properties": {
+							"ssl.ca.cert": "",
+							"ssl.client.cert": "",
+							"ssl.client.key": "",
+							"ssl.method": "CERTIFICATES",
+							"ssl.require": "false",
+							"ssl.verify.server": "false",
+							"ssl.public.key.retrieve": "false",
+							"ssl.cipher.suites": ""
+						}
+					}
+				}
 			}
 		}
 	},
@@ -48,6 +46,7 @@
 		"dev": {
 			"name": "Development",
 			"color": "255,255,255",
+			"colorDark": "255,255,255",
 			"description": "Regular development database",
 			"auto-commit": true,
 			"confirm-execute": false,

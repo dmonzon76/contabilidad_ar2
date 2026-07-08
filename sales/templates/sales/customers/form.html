@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>
+        {% if mode == "create" %}
+            New Customer — {{ company.legal_name }}
+        {% else %}
+            Edit Customer — {{ customer.name }}
+        {% endif %}
+    </h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="btn btn-success">
+            {% if mode == "create" %}Create{% else %}Save{% endif %}
+        </button>
+    </form>
+
+    <a href="{% url 'sales:customer_list' %}" class="btn btn-secondary mt-3">
+        Back
+    </a>
+    <a href="{% url 'sales:customer_tax_edit' customer.id %}" class="btn btn-outline-primary mt-3">
+    Edit Fiscal Profile
+    </a>
+
+</div>
+{% endblock %}

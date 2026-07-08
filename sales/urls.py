@@ -5,6 +5,8 @@ from .views.customers import (
     CustomerCreateView,
     CustomerUpdateView,
     CustomerDeleteView,
+    customer_list,
+    customer_tax_edit,
 )
 from .views.sales import SaleListView, SaleCreateView, SaleDetailView, sale_item_add
 
@@ -23,4 +25,7 @@ urlpatterns = [
     path("customers/add/", CustomerCreateView.as_view(), name="customer_add"),
     path("customers/<int:pk>/edit/", CustomerUpdateView.as_view(), name="customer_edit"),
     path("customers/<int:pk>/delete/", CustomerDeleteView.as_view(), name="customer_delete"),
+    path("customers/", customer_list, name="customer_list"),
+    path("customers/<int:customer_id>/tax/", customer_tax_edit, name="customer_tax_edit"),
+
 ]

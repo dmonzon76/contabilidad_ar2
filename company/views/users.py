@@ -32,7 +32,7 @@ def company_user_create(request, company_id):
         form.instance.company = company
         if form.is_valid():
             form.save()
-            return redirect("company_user_list", company_id=company.id)
+            return redirect("company:company_user_list", company_id=company.id)
     else:
         form = CompanyUserForm()
 
@@ -55,12 +55,31 @@ def company_user_edit(request, company_id, user_id):
         form = CompanyUserForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect("company_user_list", company_id=company.id)
+            return redirect("company:company_user_list", company_id=company.id)
     else:
         form = CompanyUserForm(instance=user)
 
     return render(request, "company/users/edit.html", {
         "company": company,
         "form": form,
+        "user": user,
+    })
+
+
+@login_required
+def company_user_delete(request, company_id, user_id):
+    company = get_object_or_404(Company, id=company_id)
+
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    user = get_object_or_404(CompanyUser, id=user_id, company=company)
+
+    if request.method == "POST":
+        user.delete()
+        return redirect("company:company_user_list", company_id=company.id)
+
+    return render(request, "company/users/delete.html", {
+        "company": company,
         "user": user,
     })

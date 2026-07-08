@@ -46,7 +46,7 @@ def company_detail(request, company_id):
     if not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    return render(request, "company/detail.html", {
+    return render(request, "company/company_detail.html", {
         "company": company,
     })
 

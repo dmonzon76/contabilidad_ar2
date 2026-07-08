@@ -5,7 +5,9 @@
 
 <div class="erp-card p-3">
 
-    <a href="{% url 'company_activity_create' company.id %}" class="btn btn-success mb-3">
+
+    <a href="{% url 'company:company_activity_create' company_id=company.id %}" class="btn btn-success mb-3">
+
         + New Activity
     </a>
 
@@ -36,8 +38,8 @@
                 </td>
 
                 <td class="text-end">
-                    <a href="{% url 'company_activity_edit' company.id a.id %}" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="{% url 'company_activity_delete' company.id a.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="{% url 'company:company_activity_edit' company_id=company.id activity_id=a.id %}" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{% url 'company:company_activity_delete' company_id=company.id activity_id=a.id %}" class="btn btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
         {% empty %}
@@ -50,7 +52,7 @@
         </tbody>
     </table>
 
-    <a href="{% url 'company_detail' company.id %}" class="btn btn-secondary mt-3">
+    <a href="{% url 'company:company_detail' company_id=company.id %}" class="btn btn-secondary mt-3">
         Back to Company
     </a>
 

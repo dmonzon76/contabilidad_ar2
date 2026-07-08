@@ -8,6 +8,7 @@ from accounting.models import Account
 
 
 class Purchase(models.Model):
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     supplier = models.ForeignKey(
         Supplier, on_delete=models.CASCADE, related_name="purchases"
@@ -23,7 +24,7 @@ class Purchase(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["-date", "-id"]
