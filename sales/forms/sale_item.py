@@ -8,5 +8,4 @@ class SaleItemForm(forms.ModelForm):
             "description",
             "quantity",
             "unit_price",
-            "subtotal",
         ]

@@ -1,10 +1,8 @@
-# inventory/urls.py
-
 from django.urls import path
-from inventory.views import product_list
-
-app_name = "inventory"
+from . import views
 
 urlpatterns = [
-    path("products/", product_list, name="product_list"),
+    path("", views.inventory_list, name="inventory_list"),
+    path("<int:pk>/", views.inventory_detail, name="inventory_detail"),
+    path("movement/add/<int:item_id>/", views.movement_add, name="movement_add"),
 ]

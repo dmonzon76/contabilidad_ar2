@@ -1,0 +1,22 @@
+<h2>Suppliers</h2>
+
+<a href="{% url 'supplier_add' %}">Add Supplier</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in suppliers %}
+        <tr>
+            <td><a href="{% url 'supplier_detail' s.pk %}">{{ s.name }}</a></td>
+            <td>{{ s.email }}</td>
+            <td>{{ s.phone }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

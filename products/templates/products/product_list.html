@@ -1,0 +1,20 @@
+<h2>Products</h2>
+
+<a href="{% url 'product_add' %}">Add Product</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>SKU</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in products %}
+        <tr>
+            <td><a href="{% url 'product_detail' p.pk %}">{{ p.name }}</a></td>
+            <td>{{ p.sku }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

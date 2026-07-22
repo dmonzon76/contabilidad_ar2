@@ -52,8 +52,8 @@
     </div>
 
     <div class="mt-4 d-flex justify-content-between">
-        <a href="{% url 'company_list' %}" class="btn btn-secondary">Back</a>
-        <a href="{% url 'company_edit' company.id %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'company:company_list' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'company:company_tax_profile_edit' company.id %}" class="btn btn-primary">Edit</a>
     </div>
 
 </div>

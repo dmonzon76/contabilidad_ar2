@@ -37,10 +37,10 @@
                     {% endif %}
                 </td>
                 <td class="text-end">
-                    <a href="{% url 'company_detail' company.id %}" class="btn btn-primary btn-sm">
+                    <a href="{% url 'company:company_detail' company.id %}" class="btn btn-primary btn-sm">
                         View
                     </a>
-                    <a href="{% url 'company_edit' company.id %}" class="btn btn-secondary btn-sm">
+                    <a href="{% url 'company:company_edit' company.id %}" class="btn btn-secondary btn-sm">
                         Edit
                     </a>
                 </td>

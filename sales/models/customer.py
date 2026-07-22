@@ -47,6 +47,8 @@ class Customer(models.Model):
             ("company", "Company"),
         ],
         default="company",
+        blank=True,
+        null=True   
     )
 
     # --- Internal notes ---

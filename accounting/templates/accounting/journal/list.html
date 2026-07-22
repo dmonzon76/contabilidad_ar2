@@ -1,9 +1,10 @@
-{% extends "core/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <h2 class="erp-title-page">Journal Entries — {{ company.name }}</h2>
 
-<a href="{% url 'journal_create' %}" class="btn btn-primary mb-3">+ New Entry</a>
+<a href="{% url 'accounting:journal_create' %}
+    " class="btn btn-primary mb-3">+ New Entry</a>
 
 <table class="table table-striped">
     <thead>

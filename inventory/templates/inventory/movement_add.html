@@ -1,0 +1,19 @@
+<h2>New Movement — {{ item.product.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Type</label>
+    <select name="movement_type">
+        <option value="IN">Stock In</option>
+        <option value="OUT">Stock Out</option>
+    </select>
+
+    <label>Quantity</label>
+    <input type="number" name="quantity" required>
+
+    <label>Note</label>
+    <input type="text" name="note">
+
+    <button type="submit">Save</button>
+</form>

@@ -1,21 +1,55 @@
-# Python
+# ============================================
+# PYTHON / DJANGO
+# ============================================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.pdb
 
-# Virtual env
+# Virtual environments
 venv/
+.venv/
 
-# Logs
+# Local settings (si algún día usás uno)
+local_settings.py
+
+# SQLite (si lo usás para pruebas)
+*.sqlite3
+
+# ============================================
+# LOGS
+# ============================================
 *.log
 
-# IDE / Editor
-.metadata/
+# ============================================
+# IDE / EDITOR
+# ============================================
 .vscode/
 .idea/
+.metadata/
 
-# OS files
+# ============================================
+# OS FILES
+# ============================================
 .DS_Store
 Thumbs.db
 
-# Text files
+# ============================================
+# TEXT / TEMP FILES
+# ============================================
 *.txt
+*.bak
+*.tmp
+
+# ============================================
+# DBEAVER (NO DEBE ESTAR EN EL REPO)
+# ============================================
+General/.dbeaver/
+
+# ============================================
+# MIGRATIONS (OPCIONAL)
+# Si querés ignorar migraciones locales:
+# **/migrations/
+# Pero normalmente conviene versionarlas.
+# ============================================

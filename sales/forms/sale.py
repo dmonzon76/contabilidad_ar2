@@ -6,9 +6,5 @@ class SaleForm(forms.ModelForm):
         model = Sale
         fields = [
             "customer",
-            "date",
             "number",
-            "net_amount",
-            "iva_amount",
-            "total_amount",
         ]

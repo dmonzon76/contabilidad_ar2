@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import include, path
 from core.views.auth import ERPLoginView
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/login/", ERPLoginView.as_view(), name="login"),
     path("accounts/", include("django.contrib.auth.urls")),
+
 
     # Company FIRST (important)
     path("company/", include(("company.urls", "company"), namespace="company")),
@@ -31,12 +33,47 @@ urlpatterns = [
     path("api/", include("fiscal.urls")),
     path("sales/", include("sales.urls")),
     path("purchases/", include("purchases.urls")),
-    path("inventory/", include("inventory.urls")),
+    path("inventory/", include(("inventory.urls", "inventory"), namespace="inventory")),
     path("reports/", include("reports.urls")),
+    path("products/", include("products.urls")),
+    path("customers/", include("customers.urls")),
+    path("suppliers/", include("suppliers.urls")),
+
+
+
+
+
+
+
+
+
+    # New apps
+    path("customers/", include("customers.urls")),
+    path("suppliers/", include("suppliers.urls")),
+    path("products/", include("products.urls")),
 
     # Core LAST (important)
     path("", include("core.urls")),
 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

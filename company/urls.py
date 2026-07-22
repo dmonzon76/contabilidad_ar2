@@ -68,10 +68,5 @@ urlpatterns = [
     path("<int:company_id>/users/", company_user_list, name="company_user_list"),
     path("<int:company_id>/users/new/", company_user_create, name="company_user_create"),
     path("<int:company_id>/users/<int:user_id>/edit/", company_user_edit, name="company_user_edit"),
-    path("<int:company_id>/users/<int:user_id>/delete/",company_user_delete, name="company_user_delete"),
+    path("<int:company_id>/users/<int:user_id>/delete/", company_user_delete, name="company_user_delete"),
 ]
-
-
-
-
-

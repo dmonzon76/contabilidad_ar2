@@ -17,3 +17,6 @@ class CustomerForm(forms.ModelForm):
             "notes",
             "is_active",
         ]
+        widgets = {
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
