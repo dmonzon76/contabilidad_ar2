@@ -11,31 +11,10 @@ from purchases.models.purchase import (
     PurchaseRetention,
 )
 
-
-# ============================================================
-# SUPPLIER ADMIN
-# ============================================================
-
-@admin.register(Supplier)
-class SupplierAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "company",
-        "tax_id",
-        "email",
-        "phone",
-        "is_active",
-        "created_at",
-    )
-    list_filter = ("company", "is_active")
-    search_fields = ("name", "tax_id", "email", "phone")
-    ordering = ("name",)
-    readonly_fields = ("created_at",)
-
-
 # ============================================================
 # INLINES FOR PURCHASE
 # ============================================================
+
 
 class PurchaseLineInline(admin.TabularInline):
     model = PurchaseLine
@@ -65,6 +44,7 @@ class PurchaseRetentionInline(admin.TabularInline):
 # ============================================================
 # PURCHASE ADMIN
 # ============================================================
+
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
@@ -108,16 +88,19 @@ class PurchaseAdmin(admin.ModelAdmin):
     def view_pdf(self, obj):
         url = reverse("purchases:purchase_pdf", args=[obj.id])
         return format_html('<a class="button" href="{}">PDF</a>', url)
+
     view_pdf.short_description = "PDF"
 
     def duplicate_purchase(self, obj):
         url = reverse("purchases:purchase_duplicate", args=[obj.id])
         return format_html('<a class="button" href="{}">Duplicate</a>', url)
+
     duplicate_purchase.short_description = "Duplicate"
 
     def generate_journal_entry(self, obj):
         url = reverse("purchases:purchase_generate_entry", args=[obj.id])
         return format_html('<a class="button" href="{}">Journal Entry</a>', url)
+
     generate_journal_entry.short_description = "Journal Entry"
 
     # --------------------------------------------------------
@@ -132,4 +115,7 @@ class PurchaseAdmin(admin.ModelAdmin):
             # Aquí iría la lógica real de generación de asiento
             count += 1
         self.message_user(request, f"{count} journal entries generated.")
-    action_generate_entries.short_description = "Generate journal entries for selected purchases"
+
+    action_generate_entries.short_description = (
+        "Generate journal entries for selected purchases"
+    )

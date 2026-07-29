@@ -1,4 +1,4 @@
-from .supplier import Supplier
+from suppliers.models import Supplier
 from .purchase import (
     Purchase,
     PurchaseLine,
@@ -6,12 +6,3 @@ from .purchase import (
     PurchasePerception,
     PurchaseRetention,
 )
-
-
-
-
-
-
-
-
-

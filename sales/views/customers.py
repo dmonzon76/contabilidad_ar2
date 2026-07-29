@@ -17,10 +17,14 @@ def customer_list(request):
     company = get_active_company_from_request(request)
     customers = Customer.objects.filter(company=company).order_by("name")
 
-    return render(request, "sales/customers/list.html", {
-        "company": company,
-        "customers": customers,
-    })
+    return render(
+        request,
+        "sales/customers/list.html",
+        {
+            "company": company,
+            "customers": customers,
+        },
+    )
 
 
 # ---------------------------------------------------------
@@ -55,15 +59,19 @@ def customer_create(request):
             customer.tax_profile = tax_profile
             customer.save()
 
-            return redirect("sales:customer_list")
+            return redirect("sales:customer_tax_edit", customer_id=customer.id)
     else:
         form = CustomerForm()
 
-    return render(request, "sales/customers/form.html", {
-        "company": company,
-        "form": form,
-        "mode": "create",
-    })
+    return render(
+        request,
+        "sales/customers/form.html",
+        {
+            "company": company,
+            "form": form,
+            "mode": "create",
+        },
+    )
 
 
 # ---------------------------------------------------------
@@ -84,11 +92,15 @@ def customer_tax_edit(request, customer_id):
     else:
         form = ThirdPartyTaxProfileForm(instance=tax_profile)
 
-    return render(request, "sales/customers/tax_profile_form.html", {
-        "company": company,
-        "customer": customer,
-        "form": form,
-    })
+    return render(
+        request,
+        "sales/customers/tax_profile_form.html",
+        {
+            "company": company,
+            "customer": customer,
+            "form": form,
+        },
+    )
 
 
 # ---------------------------------------------------------
@@ -107,12 +119,16 @@ def customer_edit(request, customer_id):
     else:
         form = CustomerForm(instance=customer)
 
-    return render(request, "sales/customers/form.html", {
-        "company": company,
-        "form": form,
-        "mode": "edit",
-        "customer": customer,
-    })
+    return render(
+        request,
+        "sales/customers/form.html",
+        {
+            "company": company,
+            "form": form,
+            "mode": "edit",
+            "customer": customer,
+        },
+    )
 
 
 # ---------------------------------------------------------
@@ -127,8 +143,11 @@ def customer_delete(request, customer_id):
         customer.delete()
         return redirect("sales:customer_list")
 
-    return render(request, "sales/customers/delete.html", {
-        "company": company,
-        "customer": customer,
-    })
-
+    return render(
+        request,
+        "sales/customers/delete.html",
+        {
+            "company": company,
+            "customer": customer,
+        },
+    )

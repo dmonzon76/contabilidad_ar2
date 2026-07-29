@@ -23,9 +23,11 @@
     <a href="{% url 'sales:customer_list' %}" class="btn btn-secondary mt-3">
         Back
     </a>
+    {% if customer and customer.id %}
     <a href="{% url 'sales:customer_tax_edit' customer.id %}" class="btn btn-outline-primary mt-3">
-    Edit Fiscal Profile
+        Edit Fiscal Profile
     </a>
+    {% endif %}
 
 </div>
 {% endblock %}

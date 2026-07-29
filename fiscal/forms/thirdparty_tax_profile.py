@@ -1,6 +1,7 @@
 from django import forms
 from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 
+
 class ThirdPartyTaxProfileForm(forms.ModelForm):
     class Meta:
         model = ThirdPartyTaxProfile
@@ -15,4 +16,8 @@ class ThirdPartyTaxProfileForm(forms.ModelForm):
             "iibb_status",
             "uses_perceptions",
             "uses_retentions",
+            "iibb_percentage",
+            "iva_perception_percentage",
+            "ganancias_percentage",
+            "suss_percentage",
         ]

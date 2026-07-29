@@ -1,6 +1,7 @@
 from django.db import models
 from company.models import Company
 
+
 class ThirdPartyTaxProfile(models.Model):
 
     AFIP_CATEGORY_CHOICES = [
@@ -51,6 +52,16 @@ class ThirdPartyTaxProfile(models.Model):
     # Otros
     uses_perceptions = models.BooleanField(default=False)
     uses_retentions = models.BooleanField(default=False)
+
+    # Porcentajes configurables para cálculos
+    iibb_percentage = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    iva_perception_percentage = models.DecimalField(
+        max_digits=6, decimal_places=4, default=0
+    )
+    ganancias_percentage = models.DecimalField(
+        max_digits=6, decimal_places=4, default=0
+    )
+    suss_percentage = models.DecimalField(max_digits=6, decimal_places=4, default=0)
 
     def __str__(self):
         return f"{self.company.name} – Tax Profile"

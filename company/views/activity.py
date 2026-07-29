@@ -4,7 +4,7 @@ from company.models import Company, CompanyActivity
 from company.forms.activity import CompanyActivityForm
 import json
 from django.conf import settings
-from core.utils.company_access import user_has_access   # ← NUEVO
+from core.utils.company_access import user_has_access  # ← NUEVO
 
 
 # ----------------------------------------
@@ -32,10 +32,14 @@ def activity_list(request, company_id):
     # Filtrado por empresa activa
     activities = CompanyActivity.objects.filter(company=company)
 
-    return render(request, "company/activity/list.html", {
-        "company": company,
-        "activities": activities,
-    })
+    return render(
+        request,
+        "company/activity/list.html",
+        {
+            "company": company,
+            "activities": activities,
+        },
+    )
 
 
 # ----------------------------------------
@@ -54,15 +58,19 @@ def activity_create(request, company_id):
         form.instance.company = company
         if form.is_valid():
             form.save()
-            return redirect("company_activity_list", company_id=company.id)
+            return redirect("company:company_activity_list", company_id=company.id)
     else:
         form = CompanyActivityForm()
 
-    return render(request, "company/activity/create.html", {
-        "company": company,
-        "form": form,
-        "afip_codes": load_afip_codes(),
-    })
+    return render(
+        request,
+        "company/activity/create.html",
+        {
+            "company": company,
+            "form": form,
+            "afip_codes": load_afip_codes(),
+        },
+    )
 
 
 # ----------------------------------------
@@ -82,16 +90,20 @@ def activity_edit(request, company_id, activity_id):
         form = CompanyActivityForm(request.POST, instance=activity)
         if form.is_valid():
             form.save()
-            return redirect("company_activity_list", company_id=company.id)
+            return redirect("company:company_activity_list", company_id=company.id)
     else:
         form = CompanyActivityForm(instance=activity)
 
-    return render(request, "company/activity/edit.html", {
-        "company": company,
-        "activity": activity,
-        "form": form,
-        "afip_codes": load_afip_codes(),
-    })
+    return render(
+        request,
+        "company/activity/edit.html",
+        {
+            "company": company,
+            "activity": activity,
+            "form": form,
+            "afip_codes": load_afip_codes(),
+        },
+    )
 
 
 # ----------------------------------------
@@ -109,9 +121,13 @@ def activity_delete(request, company_id, activity_id):
 
     if request.method == "POST":
         activity.delete()
-        return redirect("company_activity_list", company_id=company.id)
+        return redirect("company:company_activity_list", company_id=company.id)
 
-    return render(request, "company/activity/delete.html", {
-        "company": company,
-        "activity": activity,
-    })
+    return render(
+        request,
+        "company/activity/delete.html",
+        {
+            "company": company,
+            "activity": activity,
+        },
+    )

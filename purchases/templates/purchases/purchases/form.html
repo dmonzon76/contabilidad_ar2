@@ -17,6 +17,9 @@
             <div class="col-md-4">
                 {{ form.supplier.label_tag }}
                 {{ form.supplier }}
+                <div class="mt-2">
+                    <a href="{% url 'purchases:supplier_create' %}" class="btn btn-sm btn-outline-secondary">New Supplier</a>
+                </div>
             </div>
             <div class="col-md-4">
                 {{ form.date.label_tag }}

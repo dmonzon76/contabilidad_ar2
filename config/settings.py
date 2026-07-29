@@ -82,13 +82,14 @@ DATABASES = {
         "NAME": "contabilidad_ar2",
         "USER": "django",
         "PASSWORD": "django123",
-        "HOST": "127.0.0.1",
+        "HOST": "localhost",
         "PORT": "3306",
         "OPTIONS": {
             "charset": "utf8mb4",
         },
     }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

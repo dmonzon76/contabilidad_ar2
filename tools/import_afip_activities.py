@@ -1,38 +1,44 @@
-import json
+from django.core.management.base import BaseCommand
+from fiscal.models import AFIPActivity
 from pathlib import Path
 
-# Carpeta donde está este script
-SCRIPT_DIR = Path(__file__).resolve().parent
 
-# Archivo TXT dentro de /tools/
-input_file = SCRIPT_DIR / "ACTIVIDADES_ECONOMICAS_F883.txt"
+class Command(BaseCommand):
+    help = "Importa actividades AFIP desde un archivo TXT oficial separado por ';'"
 
-# Archivo JSON dentro de /fiscal/data/
-output_file = SCRIPT_DIR.parent / "fiscal" / "data" / "afip_activities.json"
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--file",
+            type=str,
+            required=True,
+            help="Ruta al archivo TXT de actividades AFIP",
+        )
 
-print("Leyendo desde:", input_file)
-print("Generando JSON en:", output_file)
+    def handle(self, *args, **options):
+        file_path = Path(options["file"])
 
-actividades = []
+        if not file_path.exists():
+            self.stderr.write(self.style.ERROR(f"Archivo no encontrado: {file_path}"))
+            return
 
-with open(input_file, 'r', encoding='utf-8') as f:
-    next(f)  # saltar cabecera
+        actividades = []
 
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
+        with open(file_path, "r", encoding="utf-8") as f:
+            next(f)  # saltar cabecera
+            for line in f:
+                parts = line.strip().split(";")
+                if len(parts) >= 3:
+                    actividades.append(
+                        AFIPActivity(
+                            code=parts[0].strip(),
+                            description=parts[1].strip(),
+                            description_long=parts[2].strip(),
+                        )
+                    )
 
-        parts = line.split(';')
+        AFIPActivity.objects.all().delete()
+        AFIPActivity.objects.bulk_create(actividades)
 
-        if len(parts) >= 3:
-            actividades.append({
-                "code": parts[0].strip(),
-                "description": parts[1].strip(),
-                "description_long": parts[2].strip()
-            })
-
-with open(output_file, 'w', encoding='utf-8') as f_json:
-    json.dump(actividades, f_json, ensure_ascii=False, indent=2)
-
-print(f"Listo. Procesadas {len(actividades)} actividades.")
+        self.stdout.write(
+            self.style.SUCCESS(f"Importadas {len(actividades)} actividades AFIP.")
+        )

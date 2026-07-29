@@ -40,11 +40,7 @@ class PurchaseLineForm(forms.ModelForm):
 
 
 PurchaseLineFormSet = inlineformset_factory(
-    Purchase,
-    PurchaseLine,
-    form=PurchaseLineForm,
-    extra=1,
-    can_delete=True
+    Purchase, PurchaseLine, form=PurchaseLineForm, extra=1, can_delete=True
 )
 
 
@@ -63,11 +59,7 @@ class PurchaseTaxForm(forms.ModelForm):
 
 
 PurchaseTaxFormSet = inlineformset_factory(
-    Purchase,
-    PurchaseTax,
-    form=PurchaseTaxForm,
-    extra=1,
-    can_delete=True
+    Purchase, PurchaseTax, form=PurchaseTaxForm, extra=1, can_delete=True
 )
 
 
@@ -85,11 +77,7 @@ class PurchasePerceptionForm(forms.ModelForm):
 
 
 PurchasePerceptionFormSet = inlineformset_factory(
-    Purchase,
-    PurchasePerception,
-    form=PurchasePerceptionForm,
-    extra=1,
-    can_delete=True
+    Purchase, PurchasePerception, form=PurchasePerceptionForm, extra=1, can_delete=True
 )
 
 
@@ -107,12 +95,9 @@ class PurchaseRetentionForm(forms.ModelForm):
 
 
 PurchaseRetentionFormSet = inlineformset_factory(
-    Purchase,
-    PurchaseRetention,
-    form=PurchaseRetentionForm,
-    extra=1,
-    can_delete=True
+    Purchase, PurchaseRetention, form=PurchaseRetentionForm, extra=1, can_delete=True
 )
+
 
 class PurchaseTaxForm(forms.ModelForm):
     class Meta:
@@ -142,17 +127,18 @@ class PurchaseTaxForm(forms.ModelForm):
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
         # Ejemplos reales AFIP
-        if vat_type in ["21", "105", "27"] and not profile.discriminates_vat:
+        if vat_type in ["21", "105", "27"] and profile.vat_exempt:
             raise forms.ValidationError(
-                "Supplier cannot apply VAT because it does not discriminate VAT."
+                "Supplier cannot apply VAT because the profile is marked as VAT exempt."
             )
 
-        if vat_type == "0" and not profile.is_exempt:
+        if vat_type == "0" and not profile.vat_exempt:
             raise forms.ValidationError(
                 "Supplier is not VAT exempt; cannot use VAT 0%."
             )
 
         return cleaned
+
 
 class PurchasePerceptionForm(forms.ModelForm):
     class Meta:
@@ -180,13 +166,14 @@ class PurchasePerceptionForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        if ptype == "IIBB" and not profile.iibb_registered:
+        if ptype == "IIBB" and profile.iibb_status == "NO_CORRESPONDE":
             raise forms.ValidationError("Supplier is not registered for IIBB.")
 
-        if ptype == "IVA" and not profile.discriminates_vat:
+        if ptype == "IVA" and profile.vat_exempt:
             raise forms.ValidationError("Supplier cannot apply IVA perceptions.")
 
         return cleaned
+
 
 class PurchaseRetentionForm(forms.ModelForm):
     class Meta:
@@ -214,13 +201,15 @@ class PurchaseRetentionForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        if rtype == "GAN" and not profile.ganancias_subject:
-            raise forms.ValidationError("Supplier is not subject to Ganancias retention.")
+        if rtype == "GAN" and profile.ganancias_status == "NO_CORRESPONDE":
+            raise forms.ValidationError(
+                "Supplier is not subject to Ganancias retention."
+            )
 
-        if rtype == "IVA" and not profile.discriminates_vat:
+        if rtype == "IVA" and profile.vat_exempt:
             raise forms.ValidationError("Supplier is not subject to IVA retention.")
 
-        if rtype == "SUSS" and not profile.suss_subject:
+        if rtype == "SUSS" and not profile.uses_retentions:
             raise forms.ValidationError("Supplier is not subject to SUSS retention.")
 
         return cleaned

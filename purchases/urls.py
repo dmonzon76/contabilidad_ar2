@@ -6,16 +6,17 @@ from purchases.views.purchase import (
     PurchaseCreateView,
     PurchaseUpdateView,
     PurchaseDeleteView,
+    purchase_recalculate,
 )
 
 from purchases.views.supplier import (
-    SupplierListView,
-    SupplierCreateView,
-    SupplierUpdateView,
+    supplier_list,
+    supplier_create,
+    supplier_edit,
+    supplier_tax_edit,
 )
 
 app_name = "purchases"
-
 
 
 urlpatterns = [
@@ -25,26 +26,14 @@ urlpatterns = [
     path("new/", PurchaseCreateView.as_view(), name="purchase_create"),
     path("<int:pk>/edit/", PurchaseUpdateView.as_view(), name="purchase_edit"),
     path("<int:pk>/delete/", PurchaseDeleteView.as_view(), name="purchase_delete"),
-
+    path("recalculate/", purchase_recalculate, name="purchase_recalculate"),
     # Suppliers
-    path("suppliers/", SupplierListView.as_view(), name="supplier_list"),
-    path("suppliers/new/", SupplierCreateView.as_view(), name="supplier_create"),
-    path("suppliers/<int:pk>/edit/", SupplierUpdateView.as_view(), name="supplier_edit"),
+    path("suppliers/", supplier_list, name="supplier_list"),
+    path("suppliers/new/", supplier_create, name="supplier_create"),
+    path("suppliers/<int:supplier_id>/edit/", supplier_edit, name="supplier_edit"),
+    path(
+        "suppliers/<int:supplier_id>/tax/",
+        supplier_tax_edit,
+        name="supplier_tax_edit",
+    ),
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import models
 
 from company.models import Company
-from purchases.models.supplier import Supplier
+from suppliers.models import Supplier
 from accounting.models import Account
 
 
@@ -53,56 +53,69 @@ class Purchase(models.Model):
                 tax.amount = Decimal("0")
             tax.save()
 
-        # 3) Percepciones automáticas (ejemplo, ajustar a tu ThirdPartyTaxProfile)
+        # 3) Percepciones automáticas basadas en el perfil fiscal del supplier
         supplier = self.supplier
         profile = supplier.tax_profile if hasattr(supplier, "tax_profile") else None
 
         for p in self.perceptions.all():
             if not profile:
-                # si no hay perfil, no calculamos nada automático
                 continue
 
             if p.perception_type == "IIBB":
-                # suponemos profile.iibb_rate en %
-                p.amount = self.net_amount * Decimal(str(profile.iibb_rate)) / 100
+                if profile.iibb_status == "INSCRIPTO" and profile.iibb_percentage:
+                    p.amount = self.net_amount * (
+                        profile.iibb_percentage / Decimal("100")
+                    )
+                else:
+                    p.amount = Decimal("0")
 
             elif p.perception_type == "IVA":
-                # ejemplo simple: RI 3%, MONO 1%
-                if getattr(profile, "iva_condition", None) == "RI":
-                    p.amount = self.net_amount * Decimal("0.03")
-                elif getattr(profile, "iva_condition", None) == "MONO":
-                    p.amount = self.net_amount * Decimal("0.01")
+                if (
+                    profile.afip_category in {"RI", "MONO"}
+                    and not profile.vat_exempt
+                    and profile.iva_perception_percentage
+                ):
+                    p.amount = self.net_amount * (
+                        profile.iva_perception_percentage / Decimal("100")
+                    )
                 else:
                     p.amount = Decimal("0")
 
             elif p.perception_type == "MUNI":
-                # suponemos profile.muni_rate en %
-                p.amount = self.net_amount * Decimal(str(profile.muni_rate)) / 100
+                p.amount = Decimal("0")
 
             p.save()
 
-        # 4) Retenciones automáticas (ejemplo, ajustar a tu ThirdPartyTaxProfile)
+        # 4) Retenciones automáticas basadas en el perfil fiscal del supplier
         for r in self.retentions.all():
             if not profile:
                 continue
 
             if r.retention_type == "GAN":
-                # RG 830: si supera mínimo no imponible
-                minimo = getattr(profile, "ganancias_minimo_no_imponible", Decimal("0"))
-                rate = Decimal(str(getattr(profile, "ganancias_rate", 0)))
-                if self.net_amount > minimo:
-                    r.amount = self.net_amount * rate / 100
+                if (
+                    profile.ganancias_status == "INSCRIPTO"
+                    and profile.ganancias_percentage
+                ):
+                    r.amount = self.net_amount * (
+                        profile.ganancias_percentage / Decimal("100")
+                    )
                 else:
                     r.amount = Decimal("0")
 
             elif r.retention_type == "IVA":
-                # RG 2854: 50% del IVA facturado
                 iva_total = sum(t.amount for t in self.taxes.all())
-                r.amount = iva_total * Decimal("0.50")
+                r.amount = (
+                    iva_total * Decimal("0.50")
+                    if profile.afip_category == "RI"
+                    else Decimal("0")
+                )
 
             elif r.retention_type == "SUSS":
-                rate = Decimal(str(getattr(profile, "suss_rate", 0)))
-                r.amount = self.net_amount * rate / 100
+                r.amount = (
+                    self.net_amount * (profile.suss_percentage / Decimal("100"))
+                    if profile.uses_retentions and profile.suss_percentage
+                    else Decimal("0")
+                )
 
             r.save()
 
