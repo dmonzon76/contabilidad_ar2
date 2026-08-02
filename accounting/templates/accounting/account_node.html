@@ -14,7 +14,6 @@
         <div>
             <strong>{{ account.code }}</strong> — {{ account.name }}
 
-            <!-- Ícono por tipo -->
             {% if account.account_type == "ASSET" %} 💰
             {% elif account.account_type == "LIABILITY" %} 📄
             {% elif account.account_type == "EQUITY" %} 🏛️
@@ -22,10 +21,11 @@
             {% elif account.account_type == "EXPENSE" %} 📉
             {% endif %}
 
-            <!-- Acciones -->
-            <a href="{% url 'account_add_child' account.id %}" class="ms-2 text-primary">＋</a>
-            <a href="{% url 'account_edit' account.id %}" class="ms-2 text-secondary">✎</a>
-            <a href="{% url 'account_delete' account.id %}" class="ms-2 text-danger">🗑️</a>
+            <a href="{% url 'accounting:account_add_child' account.id %}" class="ms-2 text-primary">＋</a>
+            <a href="{% url 'accounting:account_edit' account.id %}" class="ms-2 text-secondary">✎</a>
+            <a href="{% url 'accounting:account_delete' account.id %}" class="ms-2 text-danger">🗑️</a>
+
+            <a href="{% url 'accounting:ledger_view' account.id %}" class="ms-2 text-info">📘 Ledger</a>
         </div>
     </div>
 

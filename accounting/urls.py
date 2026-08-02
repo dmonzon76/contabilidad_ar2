@@ -1,21 +1,34 @@
 from django.urls import path
 
+# Accounts
 from accounting.views.account import (
     account_list,
     account_create,
     account_edit,
     account_delete,
-    account_add_child,   # ← NUEVO
+    account_add_child,
     period_list,
     period_open,
     period_close,
     period_lock,
 )
 
+# Journal
 from accounting.views.journal import (
     journal_list,
     journal_create,
 )
+
+# Ledger
+from accounting.views.ledger import ledger_view
+
+# Trial Balance
+from accounting.views.trial_balance import trial_balance_view
+
+# Balance Sheet
+from accounting.views.balance_sheet import balance_sheet_view
+
+
 app_name = "accounting"
 
 urlpatterns = [
@@ -24,8 +37,6 @@ urlpatterns = [
     path("accounts/new/", account_create, name="account_create"),
     path("accounts/<int:account_id>/edit/", account_edit, name="account_edit"),
     path("accounts/<int:account_id>/delete/", account_delete, name="account_delete"),
-
-    # NEW: Add child account
     path("accounts/<int:parent_id>/add-child/", account_add_child, name="account_add_child"),
 
     # Journal
@@ -37,18 +48,13 @@ urlpatterns = [
     path("periods/<int:period_id>/open/", period_open, name="period_open"),
     path("periods/<int:period_id>/close/", period_close, name="period_close"),
     path("periods/<int:period_id>/lock/", period_lock, name="period_lock"),
+
+    # Ledger
+    path("ledger/<int:account_id>/", ledger_view, name="ledger_view"),
+
+    # Trial Balance
+    path("trial-balance/", trial_balance_view, name="trial_balance"),
+
+    # Balance Sheet
+    path("balance-sheet/", balance_sheet_view, name="balance_sheet"),
 ]
-
-from accounting.views.ledger import ledger_view
-
-path("ledger/<int:account_id>/", ledger_view, name="ledger_view"),
-
-from accounting.views.trial_balance import trial_balance_view
-
-path("trial-balance/", trial_balance_view, name="trial_balance"),
-
-from accounting.views.balance_sheet import balance_sheet_view
-
-path("balance-sheet/", balance_sheet_view, name="balance_sheet"),
-
-

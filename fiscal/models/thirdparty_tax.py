@@ -27,6 +27,15 @@ class ThirdPartyTaxProfile(models.Model):
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
+    # 🔥 Relación fiscal correcta: un cliente → un perfil fiscal
+    customer = models.OneToOneField(
+        "sales.Customer",
+        on_delete=models.CASCADE,
+        related_name="customer_tax_profile",
+        null=True,
+        blank=True,
+    )
+
     # IVA
     afip_category = models.CharField(max_length=10, choices=AFIP_CATEGORY_CHOICES)
     vat_21 = models.BooleanField(default=True)
@@ -53,7 +62,7 @@ class ThirdPartyTaxProfile(models.Model):
     uses_perceptions = models.BooleanField(default=False)
     uses_retentions = models.BooleanField(default=False)
 
-    # Porcentajes configurables para cálculos
+    # Porcentajes configurables
     iibb_percentage = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     iva_perception_percentage = models.DecimalField(
         max_digits=6, decimal_places=4, default=0
@@ -64,4 +73,4 @@ class ThirdPartyTaxProfile(models.Model):
     suss_percentage = models.DecimalField(max_digits=6, decimal_places=4, default=0)
 
     def __str__(self):
-        return f"{self.company.name} – Tax Profile"
+        return f"{self.company.name} – Tax Profile for {self.customer.name}"

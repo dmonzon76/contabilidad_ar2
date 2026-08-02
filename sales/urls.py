@@ -28,3 +28,9 @@ urlpatterns = [
         "customers/<int:customer_id>/tax/", customer_tax_edit, name="customer_tax_edit"
     ),
 ]
+from sales.views.invoices import invoice_create, invoice_detail
+
+urlpatterns += [
+    path("invoices/create/", invoice_create, name="invoice_create"),
+    path("invoices/<int:invoice_id>/", invoice_detail, name="invoice_detail"),
+]

@@ -1,0 +1,19 @@
+<h2>Create Invoice</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <h3>Invoice Header</h3>
+    {{ form.as_p }}
+
+    <h3>Invoice Lines</h3>
+    {{ formset.management_form }}
+
+    {% for form in formset %}
+        <div class="line">
+            {{ form.as_p }}
+        </div>
+    {% endfor %}
+
+    <button type="submit">Save Invoice</button>
+</form>

@@ -11,9 +11,7 @@ class Customer(models.Model):
 
     # --- Company association ---
     company = models.ForeignKey(
-        Company,
-        on_delete=models.CASCADE,
-        related_name="customers"
+        Company, on_delete=models.CASCADE, related_name="customers"
     )
 
     # --- Fiscal profile (AFIP / IVA / IIBB / Ganancias) ---
@@ -22,7 +20,7 @@ class Customer(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="customer"
+        related_name="customer_profile",
     )
 
     # --- Basic identity ---
@@ -48,7 +46,7 @@ class Customer(models.Model):
         ],
         default="company",
         blank=True,
-        null=True   
+        null=True,
     )
 
     # --- Internal notes ---

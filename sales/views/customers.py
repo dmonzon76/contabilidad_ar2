@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
@@ -37,27 +38,30 @@ def customer_create(request):
     if request.method == "POST":
         form = CustomerForm(request.POST)
         if form.is_valid():
-            customer = form.save(commit=False)
-            customer.company = company
-            customer.save()
+            with transaction.atomic():
+                customer = form.save(commit=False)
+                customer.company = company
+                customer.save()
 
-            tax_profile = ThirdPartyTaxProfile.objects.create(
-                company=company,
-                customer=customer,
-                afip_category="RI",
-                vat_21=False,
-                vat_105=False,
-                vat_27=False,
-                vat_exempt=False,
-                vat_non_taxed=False,
-                ganancias_status="NO_APLICA",
-                iibb_status="NO_APLICA",
-                uses_perceptions=False,
-                uses_retentions=False,
-            )
+                tax_profile = customer.tax_profile
+                if tax_profile is None:
+                    tax_profile = ThirdPartyTaxProfile.objects.create(
+                        company=company,
+                        customer=customer,
+                        afip_category="RI",
+                        vat_21=False,
+                        vat_105=False,
+                        vat_27=False,
+                        vat_exempt=False,
+                        vat_non_taxed=False,
+                        ganancias_status="NO_CORRESPONDE",
+                        iibb_status="NO_CORRESPONDE",
+                        uses_perceptions=False,
+                        uses_retentions=False,
+                    )
 
-            customer.tax_profile = tax_profile
-            customer.save()
+                    customer.tax_profile = tax_profile
+                    customer.save(update_fields=["tax_profile"])
 
             return redirect("sales:customer_tax_edit", customer_id=customer.id)
     else:
@@ -83,6 +87,23 @@ def customer_tax_edit(request, customer_id):
     customer = get_object_or_404(Customer, id=customer_id, company=company)
 
     tax_profile = customer.tax_profile
+    if tax_profile is None:
+        tax_profile = ThirdPartyTaxProfile.objects.create(
+            company=company,
+            customer=customer,
+            afip_category="RI",
+            vat_21=False,
+            vat_105=False,
+            vat_27=False,
+            vat_exempt=False,
+            vat_non_taxed=False,
+            ganancias_status="NO_CORRESPONDE",
+            iibb_status="NO_CORRESPONDE",
+            uses_perceptions=False,
+            uses_retentions=False,
+        )
+        customer.tax_profile = tax_profile
+        customer.save(update_fields=["tax_profile"])
 
     if request.method == "POST":
         form = ThirdPartyTaxProfileForm(request.POST, instance=tax_profile)

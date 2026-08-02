@@ -1,0 +1,12 @@
+<h2>Invoice {{ invoice.series.code }} {{ invoice.series.point_of_sale }} - {{ invoice.number }}</h2>
+
+<p><strong>Customer:</strong> {{ invoice.customer.name }}</p>
+<p><strong>Date:</strong> {{ invoice.date }}</p>
+<p><strong>Total:</strong> {{ invoice.total }}</p>
+
+<h3>Lines</h3>
+<ul>
+    {% for line in invoice.lines.all %}
+        <li>{{ line.description }} — {{ line.quantity }} × {{ line.unit_price }}</li>
+    {% endfor %}
+</ul>

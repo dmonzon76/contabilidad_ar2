@@ -11,11 +11,11 @@
     {% for account in accounts %}
         {% include "accounting/account_node.html" with account=account %}
     {% endfor %}
-</ul>
-<a href="{% url 'accounting:ledger_view' account.id %}"
-   class="btn btn-sm btn-outline-primary">
-    Ledger
-</a>
+
+
+
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
