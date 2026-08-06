@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from accounting.models import Account
 from accounting.forms import AccountForm
 from company.models import Company
-
 from accounting.models.period import Period
+from core.utils.company_access import user_has_access
 
 
 # ---------------------------------------------------------
@@ -13,14 +13,20 @@ from accounting.models.period import Period
 # ---------------------------------------------------------
 @login_required
 def account_list(request):
-    company_id = request.session.get("active_company_id")
-    accounts = Account.objects.filter(
-        company_id=company_id,
-        parent__isnull=True
-    ).order_by("code")
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    accounts = (
+        Account.objects
+        .filter(company=company, parent__isnull=True)
+        .order_by("code")
+    )
 
     return render(request, "accounting/account_list.html", {
-        "accounts": accounts
+        "company": company,
+        "accounts": accounts,
     })
 
 
@@ -29,8 +35,10 @@ def account_list(request):
 # ---------------------------------------------------------
 @login_required
 def account_create(request):
-    company_id = request.session["active_company_id"]
-    company = Company.objects.get(id=company_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     if request.method == "POST":
         form = AccountForm(request.POST)
@@ -38,7 +46,7 @@ def account_create(request):
             acc = form.save(commit=False)
             acc.company = company
             acc.save()
-            return redirect("account_list")
+            return redirect("accounting:account_list")
     else:
         form = AccountForm()
 
@@ -53,8 +61,10 @@ def account_create(request):
 # ---------------------------------------------------------
 @login_required
 def account_edit(request, account_id):
-    company_id = request.session["active_company_id"]
-    company = Company.objects.get(id=company_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     account = get_object_or_404(Account, id=account_id, company=company)
 
@@ -62,7 +72,7 @@ def account_edit(request, account_id):
         form = AccountForm(request.POST, instance=account)
         if form.is_valid():
             form.save()
-            return redirect("account_list")
+            return redirect("accounting:account_list")
     else:
         form = AccountForm(instance=account)
 
@@ -78,8 +88,10 @@ def account_edit(request, account_id):
 # ---------------------------------------------------------
 @login_required
 def account_delete(request, account_id):
-    company_id = request.session["active_company_id"]
-    company = Company.objects.get(id=company_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     account = get_object_or_404(Account, id=account_id, company=company)
 
@@ -90,7 +102,7 @@ def account_delete(request, account_id):
         })
 
     account.delete()
-    return redirect("account_list")
+    return redirect("accounting:account_list")
 
 
 # ---------------------------------------------------------
@@ -98,8 +110,10 @@ def account_delete(request, account_id):
 # ---------------------------------------------------------
 @login_required
 def account_add_child(request, parent_id):
-    company_id = request.session["active_company_id"]
-    company = Company.objects.get(id=company_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     parent = get_object_or_404(Account, id=parent_id, company=company)
 
@@ -110,9 +124,8 @@ def account_add_child(request, parent_id):
             child.parent = parent
             child.company = company
             child.save()
-            return redirect("account_list")
+            return redirect("accounting:account_list")
     else:
-        # Código sugerido automáticamente
         existing_children = parent.children.order_by("code")
         if existing_children.exists():
             last_code = existing_children.last().code
@@ -134,29 +147,62 @@ def account_add_child(request, parent_id):
 
 
 # ---------------------------------------------------------
-# PERIODOS (lo tuyo, intacto)
+# PERIODOS
 # ---------------------------------------------------------
+@login_required
 def period_list(request):
-    periods = Period.objects.select_related("fiscal_year").order_by("fiscal_year__year", "month")
-    return render(request, "accounting/period_list.html", {"periods": periods})
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    periods = (
+        Period.objects
+        .filter(company=company)
+        .select_related("fiscal_year")
+        .order_by("fiscal_year__year", "month")
+    )
+
+    return render(request, "accounting/period_list.html", {
+        "company": company,
+        "periods": periods,
+    })
 
 
+@login_required
 def period_open(request, period_id):
-    period = get_object_or_404(Period, id=period_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    period = get_object_or_404(Period, id=period_id, company=company)
     period.status = "OPEN"
     period.save()
-    return redirect("period_list")
+    return redirect("accounting:period_list")
 
 
+@login_required
 def period_close(request, period_id):
-    period = get_object_or_404(Period, id=period_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    period = get_object_or_404(Period, id=period_id, company=company)
     period.status = "CLOSED"
     period.save()
-    return redirect("period_list")
+    return redirect("accounting:period_list")
 
 
+@login_required
 def period_lock(request, period_id):
-    period = get_object_or_404(Period, id=period_id)
+    company = request.active_company
+
+    if not company or not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
+
+    period = get_object_or_404(Period, id=period_id, company=company)
     period.status = "LOCKED"
     period.save()
-    return redirect("period_list")
+    return redirect("accounting:period_list")

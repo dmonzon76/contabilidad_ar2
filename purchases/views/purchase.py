@@ -2,6 +2,12 @@ from decimal import Decimal
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
+from core.middleware.active_company import get_active_company_from_request
+
+from purchases.models.purchase import Purchase
 from purchases.forms.purchase import (
     PurchaseForm,
     PurchaseLineFormSet,
@@ -9,19 +15,12 @@ from purchases.forms.purchase import (
     PurchasePerceptionFormSet,
     PurchaseRetentionFormSet,
 )
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 
-from core.middleware.active_company import get_active_company_from_request
-from purchases.models.purchase import Purchase
-from purchases.forms.purchase import PurchaseForm
-
+# ---------------------------------------------------------
+# HTMX: Recalcular totales sin guardar
+# ---------------------------------------------------------
 def purchase_recalculate(request):
-    """
-    Vista HTMX que recalcula totales sin guardar la compra.
-    """
-
     form = PurchaseForm(request.POST)
     line_formset = PurchaseLineFormSet(request.POST)
     tax_formset = PurchaseTaxFormSet(request.POST)
@@ -78,12 +77,9 @@ def purchase_recalculate(request):
     return HttpResponse(html)
 
 
-
-
-
-
-
-
+# ---------------------------------------------------------
+# LIST / DETAIL
+# ---------------------------------------------------------
 class PurchaseListView(ListView):
     model = Purchase
     template_name = "purchases/purchases/list.html"
@@ -98,25 +94,121 @@ class PurchaseDetailView(DetailView):
     template_name = "purchases/purchases/detail.html"
 
 
+# ---------------------------------------------------------
+# CREATE (CON FORMSETS)
+# ---------------------------------------------------------
 class PurchaseCreateView(CreateView):
     model = Purchase
     form_class = PurchaseForm
     template_name = "purchases/purchases/form.html"
     success_url = reverse_lazy("purchases:purchase_list")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.POST:
+            context["line_formset"] = PurchaseLineFormSet(self.request.POST)
+            context["tax_formset"] = PurchaseTaxFormSet(self.request.POST)
+            context["perception_formset"] = PurchasePerceptionFormSet(self.request.POST)
+            context["retention_formset"] = PurchaseRetentionFormSet(self.request.POST)
+        else:
+            context["line_formset"] = PurchaseLineFormSet()
+            context["tax_formset"] = PurchaseTaxFormSet()
+            context["perception_formset"] = PurchasePerceptionFormSet()
+            context["retention_formset"] = PurchaseRetentionFormSet()
+
+        return context
+
     def form_valid(self, form):
-        company = get_active_company_from_request(self.request)
-        form.instance.company = company
-        return super().form_valid(form)
+        context = self.get_context_data()
+        line_formset = context["line_formset"]
+        tax_formset = context["tax_formset"]
+        perception_formset = context["perception_formset"]
+        retention_formset = context["retention_formset"]
+
+        if (
+            line_formset.is_valid()
+            and tax_formset.is_valid()
+            and perception_formset.is_valid()
+            and retention_formset.is_valid()
+        ):
+            company = get_active_company_from_request(self.request)
+            form.instance.company = company
+            self.object = form.save()
+
+            line_formset.instance = self.object
+            tax_formset.instance = self.object
+            perception_formset.instance = self.object
+            retention_formset.instance = self.object
+
+            line_formset.save()
+            tax_formset.save()
+            perception_formset.save()
+            retention_formset.save()
+
+            return super().form_valid(form)
+
+        return self.form_invalid(form)
 
 
+# ---------------------------------------------------------
+# UPDATE (CON FORMSETS)
+# ---------------------------------------------------------
 class PurchaseUpdateView(UpdateView):
     model = Purchase
     form_class = PurchaseForm
     template_name = "purchases/purchases/form.html"
     success_url = reverse_lazy("purchases:purchase_list")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
+        if self.request.POST:
+            context["line_formset"] = PurchaseLineFormSet(self.request.POST, instance=self.object)
+            context["tax_formset"] = PurchaseTaxFormSet(self.request.POST, instance=self.object)
+            context["perception_formset"] = PurchasePerceptionFormSet(self.request.POST, instance=self.object)
+            context["retention_formset"] = PurchaseRetentionFormSet(self.request.POST, instance=self.object)
+        else:
+            context["line_formset"] = PurchaseLineFormSet(instance=self.object)
+            context["tax_formset"] = PurchaseTaxFormSet(instance=self.object)
+            context["perception_formset"] = PurchasePerceptionFormSet(instance=self.object)
+            context["retention_formset"] = PurchaseRetentionFormSet(instance=self.object)
+
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        line_formset = context["line_formset"]
+        tax_formset = context["tax_formset"]
+        perception_formset = context["perception_formset"]
+        retention_formset = context["retention_formset"]
+
+        if (
+            line_formset.is_valid()
+            and tax_formset.is_valid()
+            and perception_formset.is_valid()
+            and retention_formset.is_valid()
+        ):
+            self.object = form.save()
+
+            line_formset.instance = self.object
+            tax_formset.instance = self.object
+            perception_formset.instance = self.object
+            retention_formset.instance = self.object
+
+            line_formset.save()
+            tax_formset.save()
+            perception_formset.save()
+            retention_formset.save()
+
+            return super().form_valid(form)
+
+        return self.form_invalid(form)
+
+
+# ---------------------------------------------------------
+# DELETE
+# ---------------------------------------------------------
 class PurchaseDeleteView(DeleteView):
     model = Purchase
     template_name = "purchases/purchases/detail.html"

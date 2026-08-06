@@ -8,11 +8,9 @@ from core.utils.company_access import user_has_access
 def trial_balance_view(request):
     company = request.active_company
 
-    # Seguridad multi-company
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    # Todas las cuentas de la empresa
     accounts = Account.objects.filter(company=company).order_by("code")
 
     rows = []

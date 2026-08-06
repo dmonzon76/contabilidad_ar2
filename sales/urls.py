@@ -1,36 +1,28 @@
 from django.urls import path
-from .views.sales import SaleListView, SaleCreateView, SaleDetailView
+from .views.dashboard import sales_dashboard
+from .views.invoices import invoice_create, invoice_detail
 from .views.customers import (
     customer_list,
     customer_create,
     customer_edit,
-    customer_delete,
-    customer_tax_edit,
+    customer_deactivate,
 )
-from .views.sales import SaleListView, SaleCreateView, SaleDetailView, sale_item_add
 
 app_name = "sales"
 
 urlpatterns = [
-    # Sales
-    path("sales/", SaleListView.as_view(), name="sale_list"),
-    path("sales/new/", SaleCreateView.as_view(), name="sale_create"),
-    path("sales/<int:pk>/", SaleDetailView.as_view(), name="sale_detail"),
-    path("sales/<int:sale_id>/items/add/", sale_item_add, name="sale_item_add"),
-    # Customers
+    # Dashboard principal de ventas
+    path("", sales_dashboard, name="sales_dashboard"),
+    # Facturación
+    path("invoices/create/", invoice_create, name="invoice_create"),
+    path("invoices/<int:invoice_id>/", invoice_detail, name="invoice_detail"),
+    # Clientes
     path("customers/", customer_list, name="customer_list"),
     path("customers/add/", customer_create, name="customer_add"),
     path("customers/<int:customer_id>/edit/", customer_edit, name="customer_edit"),
     path(
-        "customers/<int:customer_id>/delete/", customer_delete, name="customer_delete"
+        "customers/<int:customer_id>/deactivate/",
+        customer_deactivate,
+        name="customer_deactivate",
     ),
-    path(
-        "customers/<int:customer_id>/tax/", customer_tax_edit, name="customer_tax_edit"
-    ),
-]
-from sales.views.invoices import invoice_create, invoice_detail
-
-urlpatterns += [
-    path("invoices/create/", invoice_create, name="invoice_create"),
-    path("invoices/<int:invoice_id>/", invoice_detail, name="invoice_detail"),
 ]

@@ -23,8 +23,11 @@ def invoice_create(request):
     company = get_active_company_from_request(request)
 
     if request.method == "POST":
+        # El form sí acepta company
         form = InvoiceForm(request.POST, company=company)
-        formset = InvoiceLineFormSet(request.POST, company=company)
+
+        # El formset NO acepta company → corregido
+        formset = InvoiceLineFormSet(request.POST)
 
         if form.is_valid() and formset.is_valid():
             invoice = form.save(commit=False)
@@ -69,15 +72,13 @@ def invoice_create(request):
                 + perception_total
                 - retention_total
             )
-
             invoice.save()
 
             # ---------------------------------------------------------
-            # INTEGRACIÓN DE STOCK + KARDEX (CORRECTA)
+            # INTEGRACIÓN DE STOCK + KARDEX
             # ---------------------------------------------------------
             for line in lines:
                 if line.product:
-                    # Obtener el item de inventario asociado al producto
                     try:
                         item = InventoryItem.objects.get(product=line.product)
                     except InventoryItem.DoesNotExist:
@@ -89,7 +90,7 @@ def invoice_create(request):
 
                     # Control opcional de stock negativo
                     if item.quantity < line.quantity:
-                        pass  # si querés bloquear la venta, acá va el return
+                        pass  # acá podés bloquear la venta
 
                     # Descontar stock
                     item.quantity -= line.quantity
@@ -184,7 +185,7 @@ def invoice_create(request):
 
     else:
         form = InvoiceForm(company=company)
-        formset = InvoiceLineFormSet(company=company)
+        formset = InvoiceLineFormSet()  # ✔ corregido
 
     return render(
         request,

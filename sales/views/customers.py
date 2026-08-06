@@ -153,6 +153,19 @@ def customer_edit(request, customer_id):
 
 
 # ---------------------------------------------------------
+# DEACTIVATE VIEW
+# ---------------------------------------------------------
+@login_required
+def customer_deactivate(request, customer_id):
+    company = get_active_company_from_request(request)
+    customer = get_object_or_404(Customer, id=customer_id, company=company)
+    customer.is_active = False
+    customer.save(update_fields=["is_active"])
+
+    return redirect("sales:customer_list")
+
+
+# ---------------------------------------------------------
 # DELETE VIEW
 # ---------------------------------------------------------
 @login_required

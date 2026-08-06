@@ -8,16 +8,13 @@ from core.utils.company_access import user_has_access
 def balance_sheet_view(request):
     company = request.active_company
 
-    # Seguridad multi-company
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    # Filtrar cuentas por tipo IFRS
-    assets = Account.objects.filter(company=company, type="ASSET").order_by("code")
-    liabilities = Account.objects.filter(company=company, type="LIABILITY").order_by("code")
-    equity = Account.objects.filter(company=company, type="EQUITY").order_by("code")
+    assets = Account.objects.filter(company=company, account_type="ASSET").order_by("code")
+    liabilities = Account.objects.filter(company=company, account_type="LIABILITY").order_by("code")
+    equity = Account.objects.filter(company=company, account_type="EQUITY").order_by("code")
 
-    # Calcular saldos
     def rows_for(accounts):
         rows = []
         total = 0
@@ -34,7 +31,6 @@ def balance_sheet_view(request):
     liability_rows, total_liabilities = rows_for(liabilities)
     equity_rows, total_equity = rows_for(equity)
 
-    # IFRS: Activo = Pasivo + Patrimonio
     is_balanced = total_assets == (total_liabilities + total_equity)
 
     return render(request, "accounting/balance_sheet.html", {

@@ -1,3 +1,5 @@
+{% load core_modules %}
+
 <aside class="erp-sidebar bg-light border-end">
 
     <div class="p-3">
@@ -6,87 +8,37 @@
 
     <ul class="nav flex-column">
 
+        <!-- Dashboard -->
         <li class="nav-item">
             <a class="nav-link" href="{% url 'dashboard' %}">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
         </li>
 
-        {% if request.session.active_company_id %}
+        {% get_modules as MODULES %}
 
-        <!-- Company Section -->
-        <li class="nav-item mt-3 px-3 text-muted small">
-            Company
-        </li>
+        {% for m in MODULES %}
+            {% if not m.requires_company or request.session.active_company_id %}
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'company:company_detail' request.session.active_company_id %}">
-                <i class="bi bi-building"></i> Company Info
-            </a>
-        </li>
+                <!-- Section Title -->
+                <li class="nav-item mt-3 px-3 text-muted small">
+                    {{ m.name }}
+                </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'company:company_activity_list' request.session.active_company_id %}">
-                <i class="bi bi-list-task"></i> Activities
-            </a>
-        </li>
+                <!-- Module Link -->
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="{% if m.requires_company %}
+                                {% url m.url request.session.active_company_id %}
+                             {% else %}
+                                {% url m.url %}
+                             {% endif %}">
+                        <i class="{{ m.icon }}"></i> {{ m.name }}
+                    </a>
+                </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'company:company_tax_profile' request.session.active_company_id %}">
-                <i class="bi bi-gear"></i> Tax Profile
-            </a>
-        </li>
-
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'company:company_user_list' request.session.active_company_id %}">
-                <i class="bi bi-people"></i> Users & Roles
-            </a>
-        </li>
-
-        <!-- Accounting Section -->
-        <li class="nav-item mt-3 px-3 text-muted small">
-            Accounting
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounting:account_list' %}">
-                <i class="bi bi-journal-text"></i> Chart of Accounts
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounting:journal_list' %}">
-                <i class="bi bi-book"></i> Journal
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounting:period_list' %}">
-                <i class="bi bi-calendar3"></i> Fiscal Periods
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'sales:sale_list' %}">
-                <i class="bi bi-receipt"></i> Sales
-            </a>
-        </li>
-        <li>
-            <a href="{% url 'inventory:inventory_list' %}">
-
-            <i class="bi bi-box"></i> Inventory
-        </a>
-        </li>
-
-        <li class="ms-4">
-            <a href="{% url 'inventory:inventory_dashboard' %}">
-
-                <i class="bi bi-graph-up"></i> Inventory Dashboard
-            </a>
-        </li>
-
-
-        {% endif %}
+            {% endif %}
+        {% endfor %}
 
         <!-- System Section -->
         <li class="nav-item mt-3 px-3 text-muted small">
@@ -102,86 +54,3 @@
     </ul>
 
 </aside>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
