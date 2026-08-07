@@ -10,16 +10,10 @@ from core.utils.company_access import user_has_access
 @login_required
 def journal_list(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    entries = (
-        JournalEntry.objects
-        .filter(company=company)
-        .select_related("period")
-        .order_by("-date", "-id")
-    )
+    entries = JournalEntry.objects.filter(company=company).select_related("period").order_by("-date", "-id")
 
     return render(request, "accounting/journal/list.html", {
         "company": company,
@@ -30,7 +24,6 @@ def journal_list(request):
 @login_required
 def journal_create(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 

@@ -8,21 +8,16 @@ from accounting.models.period import Period
 from core.utils.company_access import user_has_access
 
 
-# ---------------------------------------------------------
-# LISTA (Árbol contable)
-# ---------------------------------------------------------
 @login_required
 def account_list(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    accounts = (
-        Account.objects
-        .filter(company=company, parent__isnull=True)
-        .order_by("code")
-    )
+    accounts = Account.objects.filter(
+        company=company,
+        parent__isnull=True
+    ).order_by("code")
 
     return render(request, "accounting/account_list.html", {
         "company": company,
@@ -30,13 +25,9 @@ def account_list(request):
     })
 
 
-# ---------------------------------------------------------
-# CREAR CUENTA RAÍZ
-# ---------------------------------------------------------
 @login_required
 def account_create(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -56,13 +47,9 @@ def account_create(request):
     })
 
 
-# ---------------------------------------------------------
-# EDITAR CUENTA
-# ---------------------------------------------------------
 @login_required
 def account_edit(request, account_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -83,13 +70,9 @@ def account_edit(request, account_id):
     })
 
 
-# ---------------------------------------------------------
-# ELIMINAR CUENTA (solo si no tiene hijos)
-# ---------------------------------------------------------
 @login_required
 def account_delete(request, account_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -105,13 +88,9 @@ def account_delete(request, account_id):
     return redirect("accounting:account_list")
 
 
-# ---------------------------------------------------------
-# NUEVO: CREAR SUBCUENTA (Add Child)
-# ---------------------------------------------------------
 @login_required
 def account_add_child(request, parent_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -146,21 +125,14 @@ def account_add_child(request, parent_id):
     })
 
 
-# ---------------------------------------------------------
-# PERIODOS
-# ---------------------------------------------------------
 @login_required
 def period_list(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    periods = (
-        Period.objects
-        .filter(company=company)
-        .select_related("fiscal_year")
-        .order_by("fiscal_year__year", "month")
+    periods = Period.objects.filter(company=company).select_related("fiscal_year").order_by(
+        "fiscal_year__year", "month"
     )
 
     return render(request, "accounting/period_list.html", {
@@ -172,7 +144,6 @@ def period_list(request):
 @login_required
 def period_open(request, period_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -185,7 +156,6 @@ def period_open(request, period_id):
 @login_required
 def period_close(request, period_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
@@ -198,7 +168,6 @@ def period_close(request, period_id):
 @login_required
 def period_lock(request, period_id):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 

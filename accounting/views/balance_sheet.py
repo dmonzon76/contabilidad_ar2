@@ -7,7 +7,6 @@ from core.utils.company_access import user_has_access
 @login_required
 def balance_sheet_view(request):
     company = request.active_company
-
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
