@@ -1,19 +1,17 @@
-<h2>New Movement — {{ item.product.name }}</h2>
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Movement</h2>
+
+<p>
+    <strong>{{ item.product.name }}</strong> — {{ item.location.code }}
+</p>
 
 <form method="post">
     {% csrf_token %}
+    {{ form.as_p }}
 
-    <label>Type</label>
-    <select name="movement_type">
-        <option value="IN">Stock In</option>
-        <option value="OUT">Stock Out</option>
-    </select>
-
-    <label>Quantity</label>
-    <input type="number" name="quantity" required>
-
-    <label>Note</label>
-    <input type="text" name="note">
-
-    <button type="submit">Save</button>
+    <button class="btn btn-success">Save</button>
+    <a href="{% url 'inventory:inventory_detail' item.id %}" class="btn btn-secondary">Cancel</a>
 </form>
+{% endblock %}

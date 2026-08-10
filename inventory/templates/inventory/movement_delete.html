@@ -1,8 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h2>Delete Movement</h2>
 
-<p>Are you sure?</p>
+<p>Are you sure you want to delete this movement?</p>
+
+<p>
+    <strong>{{ movement.get_movement_type_display }} {{ movement.quantity }}</strong><br>
+    {{ movement.item.product.name }} — {{ movement.item.location.code }}
+</p>
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit">Confirm</button>
+    <button class="btn btn-danger">Delete</button>
+    <a href="{% url 'inventory:inventory_detail' movement.item.id %}" class="btn btn-secondary">Cancel</a>
 </form>
+{% endblock %}

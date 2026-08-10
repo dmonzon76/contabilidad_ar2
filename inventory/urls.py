@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from .views import inventory_list, inventory_detail
 urlpatterns = [
     # Dashboard
     path("dashboard/", views.inventory_dashboard, name="inventory_dashboard"),
@@ -17,3 +17,11 @@ urlpatterns = [
     path("movement/<int:pk>/edit/", views.movement_edit, name="movement_edit"),
     path("movement/<int:pk>/delete/", views.movement_delete, name="movement_delete"),
 ]
+
+
+
+
+
+
+
+

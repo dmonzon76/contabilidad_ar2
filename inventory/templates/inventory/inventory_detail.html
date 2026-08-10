@@ -1,31 +1,47 @@
-<h2>{{ item.product.name }}</h2>
+{% extends "base.html" %}
 
-<p><strong>Current stock:</strong> {{ item.quantity }}</p>
-<p><strong>Minimum stock:</strong> {{ item.min_stock }}</p>
+{% block content %}
+<h2>Inventory Detail</h2>
 
-<a href="{% url 'movement_add' item.pk %}">New Movement</a>
+<div class="mb-3">
+    <strong>Product:</strong> {{ item.product.name }}<br>
+    <strong>Location:</strong> {{ item.location.code }} — {{ item.location.name }}<br>
+    <strong>Quantity:</strong> {{ item.quantity }}<br>
+    <strong>Min Stock:</strong> {{ item.min_stock }}
+</div>
 
-<hr>
+<a href="{% url 'inventory:movement_add' item.id %}" class="btn btn-primary mb-3">Add Movement</a>
 
 <h3>Movements</h3>
 
-<table>
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Date</th>
             <th>Type</th>
             <th>Quantity</th>
             <th>Note</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         {% for m in movements %}
         <tr>
-            <td>{{ m.date }}</td>
+            <td>{{ m.date|date:"Y-m-d H:i" }}</td>
             <td>{{ m.get_movement_type_display }}</td>
             <td>{{ m.quantity }}</td>
             <td>{{ m.note }}</td>
+            <td>
+                <a href="{% url 'inventory:movement_edit' m.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'inventory:movement_delete' m.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No movements found</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+{% endblock %}

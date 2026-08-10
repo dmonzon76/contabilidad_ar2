@@ -1,11 +1,18 @@
-<h2>Inventory</h2>
+{% extends "base.html" %}
 
-<table>
+
+{% block content %}
+<h2>Inventory Items</h2>
+
+<a href="{% url 'inventory:inventory_add' %}" class="btn btn-primary mb-3">Add Item</a>
+
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Product</th>
-            <th>Stock</th>
-            <th>Minimum</th>
+            <th>Location</th>
+            <th>Quantity</th>
+            <th>Min Stock</th>
             <th></th>
         </tr>
     </thead>
@@ -13,12 +20,20 @@
         {% for item in items %}
         <tr>
             <td>{{ item.product.name }}</td>
+            <td>{{ item.location.code }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.min_stock }}</td>
             <td>
-                <a href="{% url 'inventory_detail' item.pk %}">See</a>
+                <a href="{% url 'inventory:inventory_detail' item.id %}" class="btn btn-sm btn-info">View</a>
+                <a href="{% url 'inventory:inventory_edit' item.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'inventory:inventory_delete' item.id %}" class="btn btn-sm btn-danger">Delete</a>
             </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No inventory items found</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+{% endblock %}

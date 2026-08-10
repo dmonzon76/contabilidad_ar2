@@ -4,8 +4,59 @@ from django.db import models
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .forms import InventoryItemForm, InventoryMovementForm
-from .models import InventoryItem, InventoryMovement
+from .forms import InventoryItemForm, InventoryMovementForm, LocationForm
+from .models import InventoryItem, InventoryMovement, Location
+
+
+# ============================
+# Locations (CRUD)
+# ============================
+
+def location_list(request):
+    locations = Location.objects.all().order_by("code")
+    return render(request, "inventory/location_list.html", {"locations": locations})
+
+
+def location_create(request):
+    if request.method == "POST":
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("inventory:location_list")
+    else:
+        form = LocationForm()
+
+    return render(request, "inventory/location_form.html", {
+        "form": form,
+        "title": "Create Location"
+    })
+
+
+def location_edit(request, pk):
+    location = get_object_or_404(Location, pk=pk)
+
+    if request.method == "POST":
+        form = LocationForm(request.POST, instance=location)
+        if form.is_valid():
+            form.save()
+            return redirect("inventory:location_list")
+    else:
+        form = LocationForm(instance=location)
+
+    return render(request, "inventory/location_form.html", {
+        "form": form,
+        "title": "Edit Location"
+    })
+
+
+def location_delete(request, pk):
+    location = get_object_or_404(Location, pk=pk)
+
+    if request.method == "POST":
+        location.delete()
+        return redirect("inventory:location_list")
+
+    return render(request, "inventory/location_delete.html", {"location": location})
 
 
 # ============================
@@ -13,18 +64,17 @@ from .models import InventoryItem, InventoryMovement
 # ============================
 
 def inventory_list(request):
-    items = InventoryItem.objects.select_related("product").all()
+    items = InventoryItem.objects.select_related("product", "location").all()
     return render(request, "inventory/inventory_list.html", {"items": items})
 
 
 def inventory_detail(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     movements = item.movements.order_by("-date")
-    return render(
-        request,
-        "inventory/inventory_detail.html",
-        {"item": item, "movements": movements},
-    )
+    return render(request, "inventory/inventory_detail.html", {
+        "item": item,
+        "movements": movements
+    })
 
 
 def inventory_add(request):
@@ -36,7 +86,10 @@ def inventory_add(request):
     else:
         form = InventoryItemForm()
 
-    return render(request, "inventory/inventory_add.html", {"form": form})
+    return render(request, "inventory/inventory_item_form.html", {
+        "form": form,
+        "title": "Create Inventory Item"
+    })
 
 
 def inventory_edit(request, pk):
@@ -50,11 +103,10 @@ def inventory_edit(request, pk):
     else:
         form = InventoryItemForm(instance=item)
 
-    return render(
-        request,
-        "inventory/inventory_edit.html",
-        {"form": form, "item": item},
-    )
+    return render(request, "inventory/inventory_item_form.html", {
+        "form": form,
+        "title": "Edit Inventory Item"
+    })
 
 
 def inventory_delete(request, pk):
@@ -75,38 +127,58 @@ def movement_add(request, item_id):
     item = get_object_or_404(InventoryItem, pk=item_id)
 
     if request.method == "POST":
-        movement_type = request.POST.get("movement_type")
-        quantity = int(request.POST.get("quantity"))
-        note = request.POST.get("note")
+        form = InventoryMovementForm(request.POST)
+        if form.is_valid():
+            movement = form.save(commit=False)
+            movement.item = item
+            movement.save()
 
-        InventoryMovement.objects.create(
-            item=item,
-            movement_type=movement_type,
-            quantity=quantity,
-            note=note,
-        )
+            # actualizar stock
+            if movement.movement_type == "IN":
+                item.quantity += movement.quantity
+            else:
+                item.quantity -= movement.quantity
 
-        # actualizar stock
-        if movement_type == "IN":
-            item.quantity += quantity
-        else:
-            item.quantity -= quantity
+            item.save()
 
-        item.save()
+            return redirect("inventory:inventory_detail", pk=item_id)
+    else:
+        form = InventoryMovementForm()
 
-        return redirect("inventory:inventory_detail", pk=item_id)
-
-    return render(request, "inventory/movement_add.html", {"item": item})
+    return render(request, "inventory/movement_add.html", {
+        "item": item,
+        "form": form
+    })
 
 
 def movement_edit(request, pk):
     movement = get_object_or_404(InventoryMovement, pk=pk)
+    item = movement.item
 
     if request.method == "POST":
+        old_qty = movement.quantity
+        old_type = movement.movement_type
+
         form = InventoryMovementForm(request.POST, instance=movement)
         if form.is_valid():
-            form.save()
-            return redirect("inventory:inventory_detail", pk=movement.item.pk)
+            new_movement = form.save(commit=False)
+
+            # revertir movimiento anterior
+            if old_type == "IN":
+                item.quantity -= old_qty
+            else:
+                item.quantity += old_qty
+
+            # aplicar movimiento nuevo
+            if new_movement.movement_type == "IN":
+                item.quantity += new_movement.quantity
+            else:
+                item.quantity -= new_movement.quantity
+
+            item.save()
+            new_movement.save()
+
+            return redirect("inventory:inventory_detail", pk=item.pk)
     else:
         form = InventoryMovementForm(instance=movement)
 
@@ -115,11 +187,19 @@ def movement_edit(request, pk):
 
 def movement_delete(request, pk):
     movement = get_object_or_404(InventoryMovement, pk=pk)
-    item_id = movement.item.pk
+    item = movement.item
 
     if request.method == "POST":
+        # revertir movimiento
+        if movement.movement_type == "IN":
+            item.quantity -= movement.quantity
+        else:
+            item.quantity += movement.quantity
+
+        item.save()
         movement.delete()
-        return redirect("inventory:inventory_detail", pk=item_id)
+
+        return redirect("inventory:inventory_detail", pk=item.pk)
 
     return render(request, "inventory/movement_delete.html", {"movement": movement})
 
@@ -127,12 +207,13 @@ def movement_delete(request, pk):
 # ============================
 # Inventory Dashboard (KPIs + Charts)
 # ============================
+
 def inventory_dashboard(request):
     today = date.today()
     month = today.month
     year = today.year
 
-    items = InventoryItem.objects.select_related("product").all()
+    items = InventoryItem.objects.select_related("product", "location").all()
 
     # KPIs
     total_stock = items.aggregate(total=Sum("quantity"))["total"] or 0
@@ -152,12 +233,11 @@ def inventory_dashboard(request):
         .order_by("-total")[:5]
     )
 
-    # Convertir datos para Chart.js
     top_out_labels = [item["item__product__name"] for item in top_out_raw]
     top_out_values = [item["total"] for item in top_out_raw]
 
     # Datos para gráficos
-    stock_labels = [item.product.name for item in items]
+    stock_labels = [f"{item.product.name} ({item.location.code})" for item in items]
     stock_values = [item.quantity for item in items]
 
     movement_labels = list(range(1, 32))
@@ -187,47 +267,3 @@ def inventory_dashboard(request):
     }
 
     return render(request, "inventory/dashboard.html", context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,83 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h2>Inventory Dashboard</h2>
 
-<div class="row">
+<div class="row mb-4">
     <div class="col-md-3">
-        <div class="kpi-card">
+        <div class="card p-3">
             <h4>Total Stock</h4>
             <p>{{ total_stock }}</p>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="kpi-card">
+        <div class="card p-3">
             <h4>Low Stock</h4>
             <p>{{ low_stock }}</p>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="kpi-card">
-            <h4>Critical Items</h4>
+        <div class="card p-3">
+            <h4>Critical Stock</h4>
             <p>{{ critical_stock }}</p>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="kpi-card">
+        <div class="card p-3">
             <h4>Movements This Month</h4>
             <p>{{ movements_month }}</p>
         </div>
     </div>
 </div>
 
-<hr>
-
-<h3>Stock by Product</h3>
+<h3>Stock by Product & Location</h3>
 <canvas id="stockChart"></canvas>
 
-<h3>Movements This Month</h3>
+<h3 class="mt-5">Daily Movements</h3>
 <canvas id="movementChart"></canvas>
 
-<h3>Top 5 Most Moved Items (OUT)</h3>
+<h3 class="mt-5">Top OUT Products</h3>
 <canvas id="topOutChart"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-new Chart(document.getElementById('stockChart'), {
-    type: 'bar',
-    data: {
-        labels: {{ stock_labels|safe }},
-        datasets: [{
-            label: 'Stock',
-            data: {{ stock_values|safe }},
-            backgroundColor: 'rgba(54, 162, 235, 0.6)'
-        }]
-    }
-});
+    const stockCtx = document.getElementById('stockChart');
+    new Chart(stockCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ stock_labels|safe }},
+            datasets: [{
+                label: 'Stock',
+                data: {{ stock_values|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        }
+    });
 
-new Chart(document.getElementById('movementChart'), {
-    type: 'line',
-    data: {
-        labels: {{ movement_labels|safe }},
-        datasets: [{
-            label: 'Movements',
-            data: {{ movement_values|safe }},
-            borderColor: 'rgba(255, 99, 132, 1)',
-            fill: false
-        }]
-    }
-});
+    const movementCtx = document.getElementById('movementChart');
+    new Chart(movementCtx, {
+        type: 'line',
+        data: {
+            labels: {{ movement_labels|safe }},
+            datasets: [{
+                label: 'Movements',
+                data: {{ movement_values|safe }},
+                borderColor: 'rgba(255, 99, 132, 0.8)'
+            }]
+        }
+    });
 
-new Chart(document.getElementById('topOutChart'), {
-    type: 'bar',
-    data: {
-        labels: {{ top_out_labels|safe }},
-        datasets: [{
-            label: 'Quantity OUT',
-            data: {{ top_out_values|safe }},
-            backgroundColor: 'rgba(255, 159, 64, 0.6)'
-        }]
-    }
-});
+    const topOutCtx = document.getElementById('topOutChart');
+    new Chart(topOutCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ top_out_labels|safe }},
+            datasets: [{
+                label: 'OUT Quantity',
+                data: {{ top_out_values|safe }},
+                backgroundColor: 'rgba(255, 159, 64, 0.6)'
+            }]
+        }
+    });
 </script>
+
+{% endblock %}
