@@ -1,0 +1,26 @@
+<h2>Electronic Voucher Books</h2>
+
+<a href="{% url 'electronic_voucher_book_create' %}">New Electronic Voucher Book</a>
+
+<table>
+    <tr>
+        <th>Type</th>
+        <th>Point of Sale</th>
+        <th>Current Number</th>
+        <th>Enabled</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for b in books %}
+    <tr>
+        <td>{{ b.get_voucher_type_display }}</td>
+        <td>{{ b.point_of_sale }}</td>
+        <td>{{ b.current_number }}</td>
+        <td>{{ b.enabled }}</td>
+        <td>
+            <a href="{% url 'electronic_voucher_book_edit' b.id %}">Edit</a>
+            <a href="{% url 'electronic_voucher_book_delete' b.id %}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

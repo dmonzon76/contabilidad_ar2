@@ -3,13 +3,13 @@
 
 {% block content %}
 
-<h2 class="erp-title-page">
+<h2 class="dashboard-title">
     Dashboard{% if active_company %} — {{ active_company.name }}{% endif %}
 </h2>
 
 {% get_modules as MODULES %}
 
-<div class="row g-3 mt-3">
+<div class="row g-4 mt-2">
 
     {% for m in MODULES %}
         {% if not m.requires_company or active_company %}
@@ -20,10 +20,14 @@
                          {% else %}
                             {% url m.url %}
                          {% endif %}"
-                   class="erp-card text-center p-4 d-block">
+                   class="dashboard-card text-center d-block">
 
-                    <h4>{{ m.name }}</h4>
-                    <p class="text-muted">{{ m.description }}</p>
+                    <div class="dashboard-card-icon">
+                        <i class="bi bi-grid"></i>
+                    </div>
+
+                    <div class="dashboard-card-title">{{ m.name }}</div>
+                    <div class="dashboard-card-desc">{{ m.description }}</div>
 
                 </a>
             </div>

@@ -50,3 +50,43 @@
     margin-left: 12px;
     padding-left: 12px;
 }
+.dashboard-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #0D6EFD;
+    margin-bottom: 25px;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 28px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid #e9ecef;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    color: #343a40;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border-color: #0D6EFD;
+}
+
+.dashboard-card-icon {
+    font-size: 40px;
+    color: #0D6EFD;
+    margin-bottom: 12px;
+}
+
+.dashboard-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.dashboard-card-desc {
+    font-size: 0.9rem;
+    color: #6c757d;
+}

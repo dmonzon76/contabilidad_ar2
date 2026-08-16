@@ -9,6 +9,17 @@ from fiscal.views.thirdparty_tax import (
     thirdparty_tax_list,
     thirdparty_tax_edit,
 )
+from fiscal.views.electronic_voucher_book import (
+   electronic_voucher_book_list,
+   electronic_voucher_book_create,
+   electronic_voucher_book_edit,
+   electronic_voucher_book_delete,
+)
+
+
+
+
+
 
 app_name = "fiscal"
 
@@ -21,4 +32,15 @@ urlpatterns = [
 
     path("thirdparty/", thirdparty_tax_list, name="thirdparty_tax_list"),
     path("thirdparty/<int:pk>/edit/", thirdparty_tax_edit, name="thirdparty_tax_edit"),
+
+
+    path("electronic-voucher-books/", electronic_voucher_book_list, name="electronic_voucher_book_list"),
+    path("electronic-voucher-books/new/", electronic_voucher_book_create, name="electronic_voucher_book_create"),
+    path("electronic-voucher-books/<int:book_id>/edit/", electronic_voucher_book_edit, name="electronic_voucher_book_edit"),
+    path("electronic-voucher-books/<int:book_id>/delete/", electronic_voucher_book_delete, name="electronic_voucher_book_delete"),
 ]
+
+
+
+
+

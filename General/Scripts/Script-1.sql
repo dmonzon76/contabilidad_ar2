@@ -1,0 +1,3 @@
+CREATE DATABASE biblos CHARACTER SET utf8mb4;
+USE biblos;
+
