@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">
+    {% if mode == "create" %}New Product{% else %}Edit Product{% endif %}
+</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">
+        {% if mode == "create" %}Create{% else %}Save{% endif %}
+    </button>
+</form>
+{% endblock %}

@@ -42,25 +42,10 @@ MODULES = [
     {
         "code": "sales",
         "name": "Sales",
-        "description": "Invoices & Customers",
-        "url": "sales:sales_dashboard",
+        "description": "Sales & Customers",
+        "url": "sales:sale_list",
         "icon": "bi bi-receipt",
         "requires_company": False,
     },
-    {
-        "code": "purchases",
-        "name": "Purchases",
-        "description": "Suppliers & Expenses",
-        "url": "purchases:purchase_list",
-        "icon": "bi bi-cart",
-        "requires_company": False,
-    },
-    {
-        "code": "inventory",
-        "name": "Inventory",
-        "description": "Stock & Products",
-        "url": "inventory:inventory_list",
-        "icon": "bi bi-box",
-        "requires_company": False,
-    },
 ]
+

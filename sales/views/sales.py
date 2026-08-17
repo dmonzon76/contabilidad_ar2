@@ -8,6 +8,8 @@ from sales.forms.sale import SaleForm
 from sales.forms.sale_item import SaleItemForm
 
 from django.shortcuts import get_object_or_404, redirect, render
+from fiscal.models import FiscalSale
+
 
 
 class SaleListView(ListView):
@@ -55,3 +57,30 @@ def sale_item_add(request, sale_id):
         form = SaleItemForm()
 
     return render(request, "sales/sale_item_add.html", {"form": form, "sale": sale})
+
+from fiscal.models import FiscalSale
+
+class SaleDetailView(DetailView):
+    model = Sale
+    template_name = "sales/sale_detail.html"
+    context_object_name = "sale"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sale = context["sale"]
+
+        fiscal_sale = FiscalSale.objects.filter(sale=sale).first()
+        context["fiscal_sale"] = fiscal_sale
+
+        return context
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Fiscal Services</h2>
+
+<a href="{% url 'fiscal:fiscal_service_create' %}" class="btn btn-primary mb-3">New Service</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>VAT</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+        <tr>
+            <td>{{ service.name }}</td>
+            <td>${{ service.price }}</td>
+            <td>{{ service.vat_rate }}%</td>
+            <td>
+                <a href="{% url 'fiscal:fiscal_service_edit' service.id %}" class="btn btn-sm btn-secondary">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

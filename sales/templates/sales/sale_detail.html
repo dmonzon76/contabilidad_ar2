@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4">Sale {{ sale.number }}</h2>
+
+    <p><strong>Date:</strong> {{ sale.date }}</p>
+    <p><strong>Customer:</strong> {{ sale.customer.name }}</p>
+    <p><strong>Total:</strong> ${{ sale.total }}</p>
+
+    <hr>
+
+    <h4>Items</h4>
+    <ul>
+        {% for item in sale.items.all %}
+            <li>{{ item.product.name }} — {{ item.quantity }} × {{ item.unit_price }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'sales:sale_item_add' sale.id %}" class="btn btn-primary mt-3">Add Item</a>
+
+    <hr>
+
+    <!-- Fiscal Integration -->
+    {% if fiscal_sale %}
+        {% if fiscal_sale.invoice %}
+            <a href="{% url 'fiscal:fiscal_invoice_edit' fiscal_sale.invoice.id %}" class="btn btn-secondary">
+                View Fiscal Invoice
+            </a>
+        {% else %}
+            <a href="{% url 'fiscal:fiscal_sale_generate_invoice' fiscal_sale.id %}" class="btn btn-success">
+                Generate Fiscal Invoice
+            </a>
+        {% endif %}
+    {% else %}
+        <a href="{% url 'fiscal:fiscal_sale_create' %}?sale_id={{ sale.id }}" class="btn btn-warning">
+            Create Fiscal Sale
+        </a>
+    {% endif %}
+
+</div>
+{% endblock %}

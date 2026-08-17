@@ -1,37 +1,46 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from company.models import Company
-import logging
+from django.utils.timezone import now
 
-logger = logging.getLogger(__name__)
+from sales.models import Sale
+from fiscal.models import FiscalInvoice
+from accounting.models import JournalEntry
+from company.models import Company
 
 
 @login_required
 def dashboard(request):
+    today = now().date()
     company_id = request.session.get("active_company_id")
 
     if not company_id:
-        # Ask UI to show company selector as a modal on the dashboard
-        request.session["show_company_select_modal"] = True
-        active_company = None
-    else:
-        active_company = Company.objects.get(id=company_id)
+        return redirect("company:company_select")
 
-    logger.debug(
-        "Dashboard view: user=%s authenticated=%s sessionid=%s session_key=%s show_modal=%s session_keys=%s cookies=%s",
-        request.user,
-        request.user.is_authenticated,
-        request.COOKIES.get("sessionid"),
-        request.session.session_key,
-        request.session.get("show_company_select_modal"),
-        list(request.session.keys()),
-        dict(request.COOKIES),
-    )
+    company = get_object_or_404(Company, id=company_id)
 
-    return render(request, "core/dashboard.html", {"active_company": active_company})
+    # --- Sales KPIs ---
+    sales_qs = Sale.objects.filter(company_id=company_id)
+    sales_today = sales_qs.filter(date=today).count()
+    sales_month = sales_qs.filter(
+        date__year=today.year, date__month=today.month
+    ).count()
 
+    # --- Fiscal KPIs ---
+    fiscal_today = FiscalInvoice.objects.filter(
+        company_id=company_id, date=today
+    ).count()
 
-def home(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-    return redirect("login")
+    # --- Accounting KPIs ---
+    journal_today = JournalEntry.objects.filter(
+        company_id=company_id, date=today
+    ).count()
+
+    context = {
+        "sales_today": sales_today,
+        "sales_month": sales_month,
+        "fiscal_today": fiscal_today,
+        "journal_today": journal_today,
+        "company": company,
+    }
+
+    return render(request, "core/dashboard.html", context)

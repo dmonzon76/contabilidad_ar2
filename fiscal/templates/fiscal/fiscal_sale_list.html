@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Fiscal Sales</h2>
+
+<a href="{% url 'fiscal:fiscal_sale_create' %}" class="btn btn-primary mb-3">New Fiscal Sale</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Sale</th>
+            <th>Voucher Book</th>
+            <th>Invoice</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fs in sales %}
+        <tr>
+            <td>#{{ fs.sale.id }} - {{ fs.sale.customer.name }}</td>
+            <td>{{ fs.voucher_book }}</td>
+            <td>
+                {% if fs.invoice %}
+                    {{ fs.invoice }}
+                {% else %}
+                    <span class="text-muted">No invoice</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if not fs.invoice %}
+                <a href="{% url 'fiscal:fiscal_sale_generate_invoice' fs.id %}" class="btn btn-sm btn-success">
+                    Generate Invoice
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

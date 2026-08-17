@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Fiscal Products</h2>
+
+<a href="{% url 'fiscal:fiscal_product_create' %}" class="btn btn-primary mb-3">New Product</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>VAT</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>${{ product.price }}</td>
+            <td>{{ product.vat_rate }}%</td>
+            <td>
+                <a href="{% url 'fiscal:fiscal_product_edit' product.id %}" class="btn btn-sm btn-secondary">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

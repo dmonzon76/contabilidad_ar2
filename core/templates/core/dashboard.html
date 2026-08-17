@@ -1,40 +1,119 @@
+
 {% extends "base.html" %}
-{% load core_modules %}
 
 {% block content %}
+<div class="container-fluid py-4">
 
-<h2 class="dashboard-title">
-    Dashboard{% if active_company %} — {{ active_company.name }}{% endif %}
-</h2>
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Dashboard</h2>
+            <small class="text-muted">Active company: {{ request.session.active_company_id }}</small>
+        </div>
+    </div>
 
-{% get_modules as MODULES %}
+    <!-- KPIs -->
+    <div class="row mb-4">
 
-<div class="row g-4 mt-2">
-
-    {% for m in MODULES %}
-        {% if not m.requires_company or active_company %}
-
-            <div class="col-md-3">
-                <a href="{% if m.requires_company %}
-                            {% url m.url active_company.id %}
-                         {% else %}
-                            {% url m.url %}
-                         {% endif %}"
-                   class="dashboard-card text-center d-block">
-
-                    <div class="dashboard-card-icon">
-                        <i class="bi bi-grid"></i>
-                    </div>
-
-                    <div class="dashboard-card-title">{{ m.name }}</div>
-                    <div class="dashboard-card-desc">{{ m.description }}</div>
-
-                </a>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Sales Today</h6>
+                    <h3 class="mb-0">{{ sales_today }}</h3>
+                </div>
             </div>
+        </div>
 
-        {% endif %}
-    {% endfor %}
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Sales This Month</h6>
+                    <h3 class="mb-0">{{ sales_month }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Fiscal Invoices Today</h6>
+                    <h3 class="mb-0">{{ fiscal_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Journal Entries Today</h6>
+                    <h3 class="mb-0">{{ journal_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modules -->
+    <div class="row">
+
+        <!-- Sales -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-receipt me-2"></i>Sales</h5>
+                    <p class="text-muted mb-3">Sales & Customers</p>
+                    <a href="{% url 'sales:sale_list' %}" class="btn btn-primary btn-sm">Sales</a>
+                    <a href="{% url 'sales:customer_list' %}" class="btn btn-outline-secondary btn-sm ms-2">Customers</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fiscal -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-file-earmark-text me-2"></i>Fiscal</h5>
+                    <p class="text-muted mb-3">Fiscal invoices & AFIP</p>
+                    <a href="{% url 'fiscal:fiscal_invoice_list' %}" class="btn btn-primary btn-sm">Fiscal Invoices</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounting -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-book me-2"></i>Accounting</h5>
+                    <p class="text-muted mb-3">Journal, Ledger, Balances</p>
+                    <a href="{% url 'accounting:journal_list' %}" class="btn btn-primary btn-sm">Journal</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-building me-2"></i>Company</h5>
+                    <p class="text-muted mb-3">General information & tax profile</p>
+                    <a href="{% url 'company:company_detail' request.session.active_company_id %}" class="btn btn-primary btn-sm">Company</a>
+                    <a href="{% url 'company:company_tax_profile' request.session.active_company_id %}" class="btn btn-outline-secondary btn-sm ms-2">Tax Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-people me-2"></i>Users</h5>
+                    <p class="text-muted mb-3">Roles & permissions</p>
+                    <a href="{% url 'company:company_user_list' request.session.active_company_id %}" class="btn btn-primary btn-sm">Users</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
 </div>
-
 {% endblock %}
