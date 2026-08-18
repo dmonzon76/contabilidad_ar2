@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -8,40 +7,85 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-0">Dashboard</h2>
-            <small class="text-muted">Active company: {{ request.session.active_company_id }}</small>
+            <small class="text-muted">Active company: {{ company.name }}</small>
         </div>
     </div>
 
     <!-- KPIs -->
     <div class="row mb-4">
 
+        <!-- Total Sales Today -->
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">Sales Today</h6>
-                    <h3 class="mb-0">{{ sales_today }}</h3>
+                    <h3 class="mb-0">${{ sales_total }}</h3>
+                    <small>{{ sales_count }} operations</small>
                 </div>
             </div>
         </div>
 
+        <!-- IVA Today -->
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted text-uppercase mb-2">Sales This Month</h6>
-                    <h3 class="mb-0">{{ sales_month }}</h3>
+                    <h6 class="text-muted text-uppercase mb-2">IVA Today</h6>
+                    <h3 class="mb-0">${{ sales_iva }}</h3>
                 </div>
             </div>
         </div>
 
+        <!-- Margin Today -->
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted text-uppercase mb-2">Fiscal Invoices Today</h6>
-                    <h3 class="mb-0">{{ fiscal_today }}</h3>
+                    <h6 class="text-muted text-uppercase mb-2">Margin Today</h6>
+                    <h3 class="mb-0">${{ sales_margin }}</h3>
                 </div>
             </div>
         </div>
 
+        <!-- Fiscal Total -->
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Fiscal Total</h6>
+                    <h3 class="mb-0">${{ fiscal_total }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exempt -->
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Exempt</h6>
+                    <h3 class="mb-0">${{ fiscal_exempt }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Non Taxed -->
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Non Taxed</h6>
+                    <h3 class="mb-0">${{ fiscal_non_taxed }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAE Expiring -->
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">CAE Expiring</h6>
+                    <h3 class="mb-0">{{ cae_expiring }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Journal Entries -->
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">

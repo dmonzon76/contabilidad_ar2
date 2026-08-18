@@ -22,25 +22,23 @@ from fiscal.views.electronic_voucher_book import (
 )
 
 # --- NEW FISCAL MODULE VIEWS ---
-from fiscal.views import (
+from fiscal.views.fiscal_invoice import (
     fiscal_invoice_list,
+    fiscal_invoice_detail,
     fiscal_invoice_create,
-    fiscal_invoice_edit,
-    fiscal_invoice_line_create,
+)
 
+from fiscal.views.fiscal_product import (
     fiscal_product_list,
     fiscal_product_create,
     fiscal_product_edit,
+)
 
+from fiscal.views.fiscal_service import (
     fiscal_service_list,
     fiscal_service_create,
     fiscal_service_edit,
-
-    fiscal_sale_list,
-    fiscal_sale_create,
-    fiscal_sale_generate_invoice,
 )
-
 
 app_name = "fiscal"
 
@@ -73,14 +71,11 @@ urlpatterns = [
     path("electronic-voucher-books/<int:book_id>/delete/", electronic_voucher_book_delete, name="electronic_voucher_book_delete"),
 
     # -------------------------
-    # FISCAL INVOICES
+    # FISCAL INVOICES (nuevo flujo)
     # -------------------------
     path("invoices/", fiscal_invoice_list, name="fiscal_invoice_list"),
-    path("invoices/new/", fiscal_invoice_create, name="fiscal_invoice_create"),
-    path("invoices/<int:pk>/edit/", fiscal_invoice_edit, name="fiscal_invoice_edit"),
-
-    # Invoice Lines
-    path("invoices/<int:invoice_id>/lines/new/", fiscal_invoice_line_create, name="fiscal_invoice_line_create"),
+    path("invoices/<int:pk>/", fiscal_invoice_detail, name="fiscal_invoice_detail"),
+    path("invoices/create/<int:sale_id>/", fiscal_invoice_create, name="fiscal_invoice_create"),
 
     # -------------------------
     # FISCAL PRODUCTS
@@ -95,11 +90,4 @@ urlpatterns = [
     path("services/", fiscal_service_list, name="fiscal_service_list"),
     path("services/new/", fiscal_service_create, name="fiscal_service_create"),
     path("services/<int:pk>/edit/", fiscal_service_edit, name="fiscal_service_edit"),
-
-    # -------------------------
-    # FISCAL SALES
-    # -------------------------
-    path("sales/", fiscal_sale_list, name="fiscal_sale_list"),
-    path("sales/new/", fiscal_sale_create, name="fiscal_sale_create"),
-    path("sales/<int:pk>/generate-invoice/", fiscal_sale_generate_invoice, name="fiscal_sale_generate_invoice"),
 ]
