@@ -50,7 +50,7 @@ MIDDLEWARE = [
     # Custom ERP middlewares
     "company.middleware.active_company.ActiveCompanyMiddleware",
     "company.middleware.role_permissions.RolePermissionMiddleware",
-    "core.middleware.active_company.ActiveCompanyMiddleware",
+    #"core.middleware.active_company.ActiveCompanyMiddleware",
 ]
 
 handler403 = "core.views.errors.error_403"

@@ -1,5 +1,7 @@
 import logging
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 logger = logging.getLogger(__name__)
 
@@ -24,3 +26,8 @@ class ERPLoginView(LoginView):
             {k: v.value for k, v in response.cookies.items()},
         )
         return response
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")

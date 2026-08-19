@@ -5,11 +5,11 @@ from company.models import Company
 from core.utils.company_access import user_has_access
 
 
-
 @login_required
 def company_list(request):
     companies = Company.objects.all()
     return render(request, "company/company_list.html", {"companies": companies})
+
 
 @login_required
 def company_create(request):
@@ -33,7 +33,7 @@ def company_create(request):
         # Crear perfil fiscal vacío
         CompanyProfile.objects.create(company=company)
 
-        return redirect("company_list")
+        return redirect("company:company_list")
 
     return render(request, "company/company_create.html")
 
@@ -46,27 +46,13 @@ def company_detail(request, company_id):
     if not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    return render(request, "company/company_detail.html", {
-        "company": company,
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return render(
+        request,
+        "company/company_detail.html",
+        {
+            "company": company,
+        },
+    )
 
 
 @login_required
@@ -82,16 +68,6 @@ def company_edit(request, company_id):
         company.province = request.POST.get("province")
         company.save()
 
-        return redirect("company_detail", company_id=company.id)
+        return redirect("company:company_detail", company_id=company.id)
 
     return render(request, "company/company_edit.html", {"company": company})
-
-
-
-
-
-
-
-
-
-

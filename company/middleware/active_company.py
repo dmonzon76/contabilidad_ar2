@@ -47,7 +47,14 @@ class ActiveCompanyMiddleware:
         # Check active company
         active_company_id = request.session.get("active_company_id")
 
+        # ⭐ FIX: allow admin even if no company is selected
         if not active_company_id:
+
+            # If user is accessing admin → allow without company
+            if request.path.startswith("/admin/"):
+                logger.debug("Admin access without company allowed.")
+                return self.get_response(request)
+
             logger.debug("No active company — redirecting to dashboard")
             request.session["show_company_select_modal"] = True
 
