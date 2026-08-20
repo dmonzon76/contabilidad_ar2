@@ -1,39 +1,41 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block content %}
-<div class="container mt-4">
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+<h2 class="erp-title-page">Select Company</h2>
 
-            <h2 class="mb-3">Select Company</h2>
-            <p class="text-muted">Select the company you want to work with:</p>
+<p>Select the company you want to work with:</p>
 
-            <!-- Botón para crear una nueva Company -->
-            <a href="{% url 'company:company_create' %}" class="btn btn-success mb-4">
-                + Add Company
-            </a>
+<div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'company:company_create' %}" class="btn btn-success">
+        + Add Company
+    </a>
+</div>
 
-            {% if companies %}
-                <ul class="list-group">
-                    {% for company in companies %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>{{ company.name }}</span>
-                            <a href="{% url 'company:company_set_active' company.id %}" class="btn btn-primary btn-sm">
-                                Select
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <div class="alert alert-info mt-3">
-                    No companies found. Please create one using the button above.
+<div class="erp-card p-3">
+
+    {% if companies %}
+        <ul class="list-group">
+            {% for company in companies %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ company.name }}</strong><br>
+                    <small class="text-muted">{{ company.tax_id }} — {{ company.city }}</small>
                 </div>
-            {% endif %}
 
-        </div>
-    </div>
+                <form method="post" action="{% url 'company:company_set_active' company.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Select
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No companies available.</p>
+    {% endif %}
 
 </div>
+
 {% endblock %}

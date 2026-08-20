@@ -8,12 +8,9 @@ from .views.sales import (
 from .views.customers import (
     customer_list,
     customer_create,
+    customer_tax_edit,
     customer_edit,
 )
-
-
-
-
 
 app_name = "sales"
 
@@ -23,14 +20,11 @@ urlpatterns = [
     path("new/", SaleCreateView.as_view(), name="sale_create"),
     path("<int:pk>/", SaleDetailView.as_view(), name="sale_detail"),
     path("<int:sale_id>/add-item/", sale_item_add, name="sale_item_add"),
-
     # Customers
     path("customers/", customer_list, name="customer_list"),
     path("customers/new/", customer_create, name="customer_create"),
-    path("customers/<int:pk>/edit/", customer_edit, name="customer_edit"),
-
-    
-    
-    
-    
+    path(
+        "customers/<int:customer_id>/tax/", customer_tax_edit, name="customer_tax_edit"
+    ),
+    path("customers/<int:customer_id>/edit/", customer_edit, name="customer_edit"),
 ]

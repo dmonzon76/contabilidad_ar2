@@ -3,7 +3,13 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 
 from core.middleware.active_company import get_active_company_from_request
 
@@ -21,7 +27,6 @@ from purchases.forms.purchase import (
 # HTMX: Recalcular totales sin guardar
 # ---------------------------------------------------------
 def purchase_recalculate(request):
-    form = PurchaseForm(request.POST)
     line_formset = PurchaseLineFormSet(request.POST)
     tax_formset = PurchaseTaxFormSet(request.POST)
     perception_formset = PurchasePerceptionFormSet(request.POST)
@@ -71,7 +76,7 @@ def purchase_recalculate(request):
             "perceptions": perceptions,
             "retentions": retentions,
             "total": total,
-        }
+        },
     )
 
     return HttpResponse(html)
@@ -93,6 +98,10 @@ class PurchaseDetailView(DetailView):
     model = Purchase
     template_name = "purchases/purchases/detail.html"
 
+    def get_queryset(self):
+        company = get_active_company_from_request(self.request)
+        return Purchase.objects.filter(company=company, is_active=True)
+
 
 # ---------------------------------------------------------
 # CREATE (CON FORMSETS)
@@ -102,6 +111,12 @@ class PurchaseCreateView(CreateView):
     form_class = PurchaseForm
     template_name = "purchases/purchases/form.html"
     success_url = reverse_lazy("purchases:purchase_list")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        company = get_active_company_from_request(self.request)
+        kwargs["company_id"] = company.id if company else None
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -160,19 +175,41 @@ class PurchaseUpdateView(UpdateView):
     template_name = "purchases/purchases/form.html"
     success_url = reverse_lazy("purchases:purchase_list")
 
+    def get_queryset(self):
+        company = get_active_company_from_request(self.request)
+        return Purchase.objects.filter(company=company, is_active=True)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        company = get_active_company_from_request(self.request)
+        kwargs["company_id"] = company.id if company else None
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         if self.request.POST:
-            context["line_formset"] = PurchaseLineFormSet(self.request.POST, instance=self.object)
-            context["tax_formset"] = PurchaseTaxFormSet(self.request.POST, instance=self.object)
-            context["perception_formset"] = PurchasePerceptionFormSet(self.request.POST, instance=self.object)
-            context["retention_formset"] = PurchaseRetentionFormSet(self.request.POST, instance=self.object)
+            context["line_formset"] = PurchaseLineFormSet(
+                self.request.POST, instance=self.object
+            )
+            context["tax_formset"] = PurchaseTaxFormSet(
+                self.request.POST, instance=self.object
+            )
+            context["perception_formset"] = PurchasePerceptionFormSet(
+                self.request.POST, instance=self.object
+            )
+            context["retention_formset"] = PurchaseRetentionFormSet(
+                self.request.POST, instance=self.object
+            )
         else:
             context["line_formset"] = PurchaseLineFormSet(instance=self.object)
             context["tax_formset"] = PurchaseTaxFormSet(instance=self.object)
-            context["perception_formset"] = PurchasePerceptionFormSet(instance=self.object)
-            context["retention_formset"] = PurchaseRetentionFormSet(instance=self.object)
+            context["perception_formset"] = PurchasePerceptionFormSet(
+                instance=self.object
+            )
+            context["retention_formset"] = PurchaseRetentionFormSet(
+                instance=self.object
+            )
 
         return context
 
@@ -213,3 +250,7 @@ class PurchaseDeleteView(DeleteView):
     model = Purchase
     template_name = "purchases/purchases/detail.html"
     success_url = reverse_lazy("purchases:purchase_list")
+
+    def get_queryset(self):
+        company = get_active_company_from_request(self.request)
+        return Purchase.objects.filter(company=company, is_active=True)

@@ -52,8 +52,28 @@ class ActiveCompanyMiddleware:
 # 🔥 Helper que tus vistas necesitan
 # ============================================================
 
+
 def get_active_company_from_request(request):
     """
     Devuelve la empresa activa asociada al request.
     """
-    return getattr(request, "active_company", None)
+    active_company = getattr(request, "active_company", None)
+    if active_company is not None:
+        return active_company
+
+    if not request.user.is_authenticated:
+        return None
+
+    company_id = request.session.get("active_company_id")
+    if not company_id:
+        return None
+
+    company_user = (
+        request.user.companyuser_set.filter(
+            company_id=company_id,
+            is_active=True,
+        )
+        .select_related("company")
+        .first()
+    )
+    return company_user.company if company_user else None

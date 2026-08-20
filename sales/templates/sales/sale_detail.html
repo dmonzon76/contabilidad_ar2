@@ -23,18 +23,12 @@
     <hr>
 
     <!-- Fiscal Integration -->
-    {% if fiscal_sale %}
-        {% if fiscal_sale.invoice %}
-            <a href="{% url 'fiscal:fiscal_invoice_edit' fiscal_sale.invoice.id %}" class="btn btn-secondary">
+    {% if fiscal_invoice %}
+            <a href="{% url 'fiscal:fiscal_invoice_detail' fiscal_invoice.id %}" class="btn btn-secondary">
                 View Fiscal Invoice
             </a>
-        {% else %}
-            <a href="{% url 'fiscal:fiscal_sale_generate_invoice' fiscal_sale.id %}" class="btn btn-success">
-                Generate Fiscal Invoice
-            </a>
-        {% endif %}
     {% else %}
-        <a href="{% url 'fiscal:fiscal_sale_create' %}?sale_id={{ sale.id }}" class="btn btn-warning">
+        <a href="{% url 'fiscal:fiscal_invoice_create' sale.id %}" class="btn btn-warning">
             Create Fiscal Sale
         </a>
     {% endif %}

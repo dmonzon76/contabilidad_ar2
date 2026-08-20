@@ -10,12 +10,13 @@
         <p>Select the company you want to work with:</p>
         <ul class="list-group">
           {% for cu in companies %}
-            {% if cu.is_active %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ cu.company.name }}
-              <a href="{% url 'company:company_set_active' cu.company.id %}" class="btn btn-primary"></a>
-            </li>
-            {% endif %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ cu.company.name }}
+            <form method="post" action="{% url 'company:company_set_active' cu.company.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary btn-sm">Select</button>
+            </form>
+          </li>
           {% endfor %}
         </ul>
       </div>

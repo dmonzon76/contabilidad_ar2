@@ -1,5 +1,6 @@
 # core/utils/company_access.py
 
+
 def user_has_access(request, company):
     """
     Verifica que el usuario tenga acceso a la empresa.
@@ -9,4 +10,7 @@ def user_has_access(request, company):
     if not request.user.is_authenticated:
         return False
 
-    return request.user.companyuser_set.filter(company=company).exists()
+    return request.user.companyuser_set.filter(
+        company=company,
+        is_active=True,
+    ).exists()

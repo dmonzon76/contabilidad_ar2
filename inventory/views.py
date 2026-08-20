@@ -1,7 +1,5 @@
 from datetime import date
-
-from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .forms import InventoryItemForm, InventoryMovementForm, LocationForm
@@ -9,27 +7,29 @@ from .models import InventoryItem, InventoryMovement, Location
 
 
 # ============================
-# Locations (CRUD)
+# Locations
 # ============================
 
 def location_list(request):
-    locations = Location.objects.all().order_by("code")
+    company = request.user.active_company
+    locations = Location.objects.filter(company=company).order_by("code")
     return render(request, "inventory/location_list.html", {"locations": locations})
 
 
 def location_create(request):
+    company = request.user.active_company
+
     if request.method == "POST":
         form = LocationForm(request.POST)
         if form.is_valid():
-            form.save()
+            loc = form.save(commit=False)
+            loc.company = company
+            loc.save()
             return redirect("inventory:location_list")
     else:
         form = LocationForm()
 
-    return render(request, "inventory/location_form.html", {
-        "form": form,
-        "title": "Create Location"
-    })
+    return render(request, "inventory/location_form.html", {"form": form})
 
 
 def location_edit(request, pk):
@@ -43,10 +43,7 @@ def location_edit(request, pk):
     else:
         form = LocationForm(instance=location)
 
-    return render(request, "inventory/location_form.html", {
-        "form": form,
-        "title": "Edit Location"
-    })
+    return render(request, "inventory/location_form.html", {"form": form})
 
 
 def location_delete(request, pk):
@@ -60,36 +57,35 @@ def location_delete(request, pk):
 
 
 # ============================
-# Inventory Items (CRUD)
+# Inventory Items
 # ============================
 
 def inventory_list(request):
-    items = InventoryItem.objects.select_related("product", "location").all()
+    company = request.user.active_company
+    items = InventoryItem.objects.filter(company=company).select_related("product", "location")
     return render(request, "inventory/inventory_list.html", {"items": items})
 
 
 def inventory_detail(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     movements = item.movements.order_by("-date")
-    return render(request, "inventory/inventory_detail.html", {
-        "item": item,
-        "movements": movements
-    })
+    return render(request, "inventory/inventory_detail.html", {"item": item, "movements": movements})
 
 
 def inventory_add(request):
+    company = request.user.active_company
+
     if request.method == "POST":
         form = InventoryItemForm(request.POST)
         if form.is_valid():
-            form.save()
+            item = form.save(commit=False)
+            item.company = company
+            item.save()
             return redirect("inventory:inventory_list")
     else:
         form = InventoryItemForm()
 
-    return render(request, "inventory/inventory_item_form.html", {
-        "form": form,
-        "title": "Create Inventory Item"
-    })
+    return render(request, "inventory/inventory_item_form.html", {"form": form})
 
 
 def inventory_edit(request, pk):
@@ -103,10 +99,7 @@ def inventory_edit(request, pk):
     else:
         form = InventoryItemForm(instance=item)
 
-    return render(request, "inventory/inventory_item_form.html", {
-        "form": form,
-        "title": "Edit Inventory Item"
-    })
+    return render(request, "inventory/inventory_item_form.html", {"form": form})
 
 
 def inventory_delete(request, pk):
@@ -120,7 +113,7 @@ def inventory_delete(request, pk):
 
 
 # ============================
-# Inventory Movements (CRUD)
+# Movements
 # ============================
 
 def movement_add(request, item_id):
@@ -130,10 +123,10 @@ def movement_add(request, item_id):
         form = InventoryMovementForm(request.POST)
         if form.is_valid():
             movement = form.save(commit=False)
+            movement.company = item.company
             movement.item = item
             movement.save()
 
-            # actualizar stock
             if movement.movement_type == "IN":
                 item.quantity += movement.quantity
             else:
@@ -145,10 +138,7 @@ def movement_add(request, item_id):
     else:
         form = InventoryMovementForm()
 
-    return render(request, "inventory/movement_add.html", {
-        "item": item,
-        "form": form
-    })
+    return render(request, "inventory/movement_add.html", {"item": item, "form": form})
 
 
 def movement_edit(request, pk):
@@ -190,7 +180,6 @@ def movement_delete(request, pk):
     item = movement.item
 
     if request.method == "POST":
-        # revertir movimiento
         if movement.movement_type == "IN":
             item.quantity -= movement.quantity
         else:
@@ -205,65 +194,30 @@ def movement_delete(request, pk):
 
 
 # ============================
-# Inventory Dashboard (KPIs + Charts)
+# Dashboard
 # ============================
 
 def inventory_dashboard(request):
+    company = request.user.active_company
     today = date.today()
-    month = today.month
-    year = today.year
 
-    items = InventoryItem.objects.select_related("product", "location").all()
+    items = InventoryItem.objects.filter(company=company)
 
-    # KPIs
     total_stock = items.aggregate(total=Sum("quantity"))["total"] or 0
-    low_stock = items.filter(quantity__lt=models.F("min_stock")).count()
+    low_stock = items.filter(quantity__lt=F("min_stock")).count()
     critical_stock = items.filter(quantity=0).count()
 
     movements_month = InventoryMovement.objects.filter(
-        date__year=year,
-        date__month=month,
+        company=company,
+        date__year=today.year,
+        date__month=today.month,
     ).count()
-
-    # Top 5 productos con más salidas
-    top_out_raw = (
-        InventoryMovement.objects.filter(movement_type="OUT")
-        .values("item__product__name")
-        .annotate(total=Sum("quantity"))
-        .order_by("-total")[:5]
-    )
-
-    top_out_labels = [item["item__product__name"] for item in top_out_raw]
-    top_out_values = [item["total"] for item in top_out_raw]
-
-    # Datos para gráficos
-    stock_labels = [f"{item.product.name} ({item.location.code})" for item in items]
-    stock_values = [item.quantity for item in items]
-
-    movement_labels = list(range(1, 32))
-    movement_values = [
-        InventoryMovement.objects.filter(
-            date__year=year,
-            date__month=month,
-            date__day=day,
-        ).count()
-        for day in movement_labels
-    ]
 
     context = {
         "total_stock": total_stock,
         "low_stock": low_stock,
         "critical_stock": critical_stock,
         "movements_month": movements_month,
-
-        "stock_labels": stock_labels,
-        "stock_values": stock_values,
-
-        "movement_labels": movement_labels,
-        "movement_values": movement_values,
-
-        "top_out_labels": top_out_labels,
-        "top_out_values": top_out_values,
     }
 
     return render(request, "inventory/dashboard.html", context)

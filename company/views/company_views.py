@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from company.models import Company, CompanyProfile
-from company.models import Company
+from company.models import Company, CompanyProfile, CompanyUser
 from core.utils.company_access import user_has_access
 
 
 @login_required
 def company_list(request):
-    companies = Company.objects.all()
+    companies = Company.objects.filter(
+        company_users__user=request.user,
+        company_users__is_active=True,
+    )
     return render(request, "company/company_list.html", {"companies": companies})
 
 
@@ -32,6 +34,12 @@ def company_create(request):
 
         # Crear perfil fiscal vacío
         CompanyProfile.objects.create(company=company)
+        CompanyUser.objects.create(
+            user=request.user,
+            company=company,
+            role="OWNER",
+        )
+        request.session["active_company_id"] = company.id
 
         return redirect("company:company_list")
 
@@ -58,6 +66,9 @@ def company_detail(request, company_id):
 @login_required
 def company_edit(request, company_id):
     company = get_object_or_404(Company, id=company_id)
+
+    if not user_has_access(request, company):
+        return render(request, "errors/403.html", status=403)
 
     if request.method == "POST":
         company.name = request.POST.get("name")

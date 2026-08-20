@@ -31,12 +31,13 @@ class ActiveCompanyMiddleware:
 
         # Paths that must NOT be blocked
         EXEMPT_PREFIXES = (
-            "/admin",            # admin root + all subpaths
+            "/admin",  # admin root + all subpaths
             "/accounts/login/",
             "/accounts/logout/",
             "/static/",
             "/media/",
             "/company/select/",
+            "/company/new/",
         )
 
         # Allow admin, login, logout, static, media, selector
@@ -70,9 +71,14 @@ class ActiveCompanyMiddleware:
             return redirect("dashboard")
 
         # Validate that the user has access to that company
-        if not CompanyUser.objects.filter(
-            user=request.user, company_id=active_company_id, is_active=True
-        ).exists():
+        company_user = (
+            CompanyUser.objects.filter(
+                user=request.user, company_id=active_company_id, is_active=True
+            )
+            .select_related("company")
+            .first()
+        )
+        if company_user is None:
 
             logger.debug(
                 "User %s does not have access to company %s — resetting",
@@ -92,6 +98,8 @@ class ActiveCompanyMiddleware:
                 return self.get_response(request)
 
             return redirect("dashboard")
+
+        request.active_company = company_user.company
 
         # All good → continue
         return self.get_response(request)

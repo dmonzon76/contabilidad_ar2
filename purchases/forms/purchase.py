@@ -14,6 +14,14 @@ from purchases.models.purchase import (
 # Purchase (header)
 # -----------------------------
 class PurchaseForm(forms.ModelForm):
+    def __init__(self, *args, company_id=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if company_id is not None:
+            self.fields["supplier"].queryset = self.fields["supplier"].queryset.filter(
+                company_id=company_id,
+                is_active=True,
+            )
+
     class Meta:
         model = Purchase
         fields = ["supplier", "date", "invoice_number"]
@@ -28,6 +36,18 @@ class PurchaseForm(forms.ModelForm):
 # Purchase Line
 # -----------------------------
 class PurchaseLineForm(forms.ModelForm):
+    def clean_quantity(self):
+        quantity = self.cleaned_data["quantity"]
+        if quantity <= 0:
+            raise forms.ValidationError("Quantity must be greater than zero.")
+        return quantity
+
+    def clean_unit_price(self):
+        unit_price = self.cleaned_data["unit_price"]
+        if unit_price < 0:
+            raise forms.ValidationError("Unit price cannot be negative.")
+        return unit_price
+
     class Meta:
         model = PurchaseLine
         fields = ["description", "quantity", "unit_price", "expense_account"]
