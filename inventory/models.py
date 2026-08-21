@@ -31,7 +31,9 @@ class InventoryMovement(models.Model):
     )
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE, related_name="movements")
+    item = models.ForeignKey(
+        InventoryItem, on_delete=models.CASCADE, related_name="movements"
+    )
 
     movement_type = models.CharField(max_length=3, choices=MOVEMENT_TYPES)
     quantity = models.DecimalField(max_digits=12, decimal_places=2)

@@ -1,20 +1,37 @@
-<h2>Products</h2>
+{% extends "base.html" %}
 
-<a href="{% url 'product_add' %}">Add Product</a>
+{% block content %}
+<div class="container py-4">
+    <h2>Products & Services</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>SKU</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for p in products %}
-        <tr>
-            <td><a href="{% url 'product_detail' p.pk %}">{{ p.name }}</a></td>
-            <td>{{ p.sku }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <a href="{% url 'products:product_add' %}" class="btn btn-primary mb-3">
+        Add Product / Service
+    </a>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td>{{ p.name }}</td>
+                <td>{{ p.sku }}</td>
+                <td>{{ p.get_type_display }}</td>
+                <td>${{ p.price }}</td>
+                <td>
+                    <a href="{% url 'products:product_edit' p.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="{% url 'products:product_delete' p.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

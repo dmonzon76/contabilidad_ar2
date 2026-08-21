@@ -21,6 +21,8 @@ from purchases.forms.purchase import (
     PurchasePerceptionFormSet,
     PurchaseRetentionFormSet,
 )
+from accounting.integration import create_purchase_journal_entry
+from inventory.integration import update_inventory_from_purchase
 
 
 # ---------------------------------------------------------
@@ -160,6 +162,16 @@ class PurchaseCreateView(CreateView):
             tax_formset.save()
             perception_formset.save()
             retention_formset.save()
+
+            # -----------------------------------------
+            # INTEGRACIÓN INVENTARIO (ENTRADA DE STOCK)
+            # -----------------------------------------
+            update_inventory_from_purchase(self.object)
+
+            # -----------------------------------------
+            # INTEGRACIÓN CONTABLE (ASIENTO DE COMPRA)
+            # -----------------------------------------
+            create_purchase_journal_entry(self.object)
 
             return super().form_valid(form)
 

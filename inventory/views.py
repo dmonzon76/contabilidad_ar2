@@ -192,6 +192,10 @@ def movement_delete(request, pk):
 
     return render(request, "inventory/movement_delete.html", {"movement": movement})
 
+def movement_list(request):
+    company = request.user.active_company
+    movements = InventoryMovement.objects.filter(company=company).order_by("-date")
+    return render(request, "inventory/movement_list.html", {"movements": movements})
 
 # ============================
 # Dashboard

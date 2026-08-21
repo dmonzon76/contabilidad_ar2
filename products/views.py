@@ -1,24 +1,50 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product
+from products.models import Product
+from products.forms import ProductForm
+from core.middleware.active_company import get_active_company_from_request
+
 
 def product_list(request):
-    products = Product.objects.all()
+    company = get_active_company_from_request(request)
+    products = Product.objects.filter(company=company)
     return render(request, "products/product_list.html", {"products": products})
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    return render(request, "products/product_detail.html", {"product": product})
 
 def product_add(request):
-    if request.method == "POST":
-        Product.objects.create(
-            name=request.POST.get("name"),
-            sku=request.POST.get("sku"),
-            description=request.POST.get("description"),
-        )
-        return redirect("product_list")
+    company = get_active_company_from_request(request)
 
-    return render(request, "products/product_add.html")
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            p = form.save(commit=False)
+            p.company = company
+            p.save()
+            return redirect("products:product_list")
+    else:
+        form = ProductForm()
+
+    return render(request, "products/product_form.html", {"form": form})
+
+
+def product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect("products:product_list")
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, "products/product_form.html", {"form": form})
+
+
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == "POST":
+        product.delete()
+        return redirect("products:product_list")
+
+    return render(request, "products/product_delete.html", {"product": product})

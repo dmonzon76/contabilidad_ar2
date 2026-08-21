@@ -9,6 +9,7 @@ from sales.forms.sale_item import SaleItemForm
 
 from django.shortcuts import get_object_or_404, redirect, render
 from inventory.integration import update_inventory_from_sale
+from accounting.integration import create_sale_journal_entry, create_cmv_journal_entry
 
 class SaleListView(ListView):
     model = Sale
@@ -80,7 +81,18 @@ def sale_item_add(request, sale_id):
             # INTEGRACIÓN INVENTORY (SALIDAS DE STOCK)
             from inventory.integration import update_inventory_from_sale
             update_inventory_from_sale(sale)
-
+            # Actualizar totales
+            sale.recalc_totals()
+            
+            # Actualizar inventario (salida de stock)
+            update_inventory_from_sale(sale)
+            
+            # Asiento contable de la venta
+            create_sale_journal_entry(sale)
+            
+            # Asiento contable del CMV
+            create_cmv_journal_entry(sale)
+            
             return redirect("sales:sale_detail", pk=sale.id)
     else:
         form = SaleItemForm()
