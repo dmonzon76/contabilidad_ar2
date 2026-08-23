@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <h2 class="mb-4">Inventory Dashboard</h2>
+
+    <!-- KPIs -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Total Stock (Units)</h6>
+                    <h3 class="mb-0">{{ total_stock_units }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Stock Value</h6>
+                    <h3 class="mb-0">${{ total_stock_value }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Low Stock Products</h6>
+                    <h3 class="mb-0">{{ low_stock_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">No Movement (60 days)</h6>
+                    <h3 class="mb-0">{{ no_movement_60_days }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Movements Today -->
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">IN Movements Today</h6>
+                    <h3 class="mb-0">{{ mov_in_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">OUT Movements Today</h6>
+                    <h3 class="mb-0">{{ mov_out_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Total Movements</h6>
+                    <h3 class="mb-0">{{ mov_total_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Rotation by Category -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Rotation by Category</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-end">Quantity OUT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rotation_by_category %}
+                    <tr>
+                        <td>{{ r.item__product__category__name }}</td>
+                        <td class="text-end">{{ r.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No movements</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Products OUT -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Top Products OUT Today</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-end">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in top_products_out_today %}
+                    <tr>
+                        <td>{{ p.item__product__name }}</td>
+                        <td class="text-end">{{ p.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No OUT movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Suppliers IN -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Top Suppliers IN Today</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Supplier</th>
+                        <th class="text-end">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in top_suppliers_in_today %}
+                    <tr>
+                        <td>{{ s.purchase__supplier__name }}</td>
+                        <td class="text-end">{{ s.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No IN movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movements by Hour -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Movements by Hour</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Hour</th>
+                        <th class="text-end">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in mov_by_hour_today %}
+                    <tr>
+                        <td>{{ h.created_at__hour }}:00</td>
+                        <td class="text-end">{{ h.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

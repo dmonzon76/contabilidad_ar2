@@ -1,22 +1,38 @@
-<h2>Suppliers</h2>
+{% extends "base.html" %}
 
-<a href="{% url 'supplier_add' %}">Add Supplier</a>
+{% block content %}
+<div class="container py-4">
 
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for s in suppliers %}
-        <tr>
-            <td><a href="{% url 'supplier_detail' s.pk %}">{{ s.name }}</a></td>
-            <td>{{ s.email }}</td>
-            <td>{{ s.phone }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h2 class="mb-4">Suppliers</h2>
+
+    <a href="{% url 'suppliers:supplier_add' %}" class="btn btn-primary mb-3">Add Supplier</a>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>CUIT</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>IVA</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in suppliers %}
+            <tr>
+                <td>
+                    <a href="{% url 'suppliers:supplier_detail' s.pk %}">
+                        {{ s.name }}
+                    </a>
+                </td>
+                <td>{{ s.tax_id }}</td>
+                <td>{{ s.email }}</td>
+                <td>{{ s.phone }}</td>
+                <td>{{ s.get_iva_condition_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

@@ -1,268 +1,144 @@
-from decimal import Decimal
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import ListView, CreateView, DetailView, UpdateView
 from django.urls import reverse_lazy
-from django.views.generic import (
-    ListView,
-    DetailView,
-    CreateView,
-    UpdateView,
-    DeleteView,
-)
-
-from core.middleware.active_company import get_active_company_from_request
 
 from purchases.models.purchase import Purchase
-from purchases.forms.purchase import (
-    PurchaseForm,
-    PurchaseLineFormSet,
-    PurchaseTaxFormSet,
-    PurchasePerceptionFormSet,
-    PurchaseRetentionFormSet,
+from purchases.forms.purchase import PurchaseForm
+
+from inventory.integration import (
+    update_inventory_from_purchase,
+    revert_inventory_from_purchase
 )
-from accounting.integration import create_purchase_journal_entry
-from inventory.integration import update_inventory_from_purchase
+
+from accounting.integration import (
+    create_purchase_journal_entry,
+    delete_journal_entries_for_purchase,
+    create_supplier_cc_from_purchase,
+    delete_supplier_cc_from_purchase
+)
 
 
-# ---------------------------------------------------------
-# HTMX: Recalcular totales sin guardar
-# ---------------------------------------------------------
-def purchase_recalculate(request):
-    line_formset = PurchaseLineFormSet(request.POST)
-    tax_formset = PurchaseTaxFormSet(request.POST)
-    perception_formset = PurchasePerceptionFormSet(request.POST)
-    retention_formset = PurchaseRetentionFormSet(request.POST)
+# ============================================================
+# LISTA DE COMPRAS
+# ============================================================
 
-    # NETO
-    net = Decimal("0")
-    for lf in line_formset:
-        if lf.is_valid():
-            qty = lf.cleaned_data.get("quantity") or Decimal("0")
-            price = lf.cleaned_data.get("unit_price") or Decimal("0")
-            net += qty * price
-
-    # IVA
-    iva = Decimal("0")
-    for tf in tax_formset:
-        if tf.is_valid():
-            base = tf.cleaned_data.get("base_amount") or Decimal("0")
-            vat = tf.cleaned_data.get("vat_type")
-            if vat == "21":
-                iva += base * Decimal("0.21")
-            elif vat == "105":
-                iva += base * Decimal("0.105")
-            elif vat == "27":
-                iva += base * Decimal("0.27")
-
-    # PERCEPCIONES
-    perceptions = Decimal("0")
-    for pf in perception_formset:
-        if pf.is_valid():
-            perceptions += pf.cleaned_data.get("amount") or Decimal("0")
-
-    # RETENCIONES
-    retentions = Decimal("0")
-    for rf in retention_formset:
-        if rf.is_valid():
-            retentions += rf.cleaned_data.get("amount") or Decimal("0")
-
-    # TOTAL
-    total = net + iva + perceptions - retentions
-
-    html = render_to_string(
-        "purchases/purchases/partials/totals.html",
-        {
-            "net": net,
-            "iva": iva,
-            "perceptions": perceptions,
-            "retentions": retentions,
-            "total": total,
-        },
-    )
-
-    return HttpResponse(html)
-
-
-# ---------------------------------------------------------
-# LIST / DETAIL
-# ---------------------------------------------------------
 class PurchaseListView(ListView):
     model = Purchase
-    template_name = "purchases/purchases/list.html"
+    template_name = "purchases/purchase_list.html"
+    context_object_name = "purchases"
 
     def get_queryset(self):
-        company = get_active_company_from_request(self.request)
-        return Purchase.objects.filter(company=company, is_active=True)
+        return Purchase.objects.filter(
+            company_id=self.request.session.get("active_company_id")
+        )
 
+
+# ============================================================
+# DETALLE DE COMPRA (ALIMENTA purchase_detail.html)
+# ============================================================
 
 class PurchaseDetailView(DetailView):
     model = Purchase
-    template_name = "purchases/purchases/detail.html"
+    template_name = "purchases/purchase_detail.html"
+    context_object_name = "purchase"
 
     def get_queryset(self):
-        company = get_active_company_from_request(self.request)
-        return Purchase.objects.filter(company=company, is_active=True)
+        return Purchase.objects.filter(
+            company_id=self.request.session.get("active_company_id")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        purchase = context["purchase"]
+
+        # Líneas de compra
+        context["lines"] = purchase.lines.all()
+
+        # Movimientos de inventario asociados
+        context["inventory_movements"] = purchase.inventory_movements.all()
+
+        # Asientos contables asociados
+        context["journal_entries"] = purchase.journal_entries.all()
+
+        # Movimientos de cuenta corriente proveedor
+        context["cc_movements"] = purchase.accountmovement_set.all()
+
+        return context
 
 
-# ---------------------------------------------------------
-# CREATE (CON FORMSETS)
-# ---------------------------------------------------------
+# ============================================================
+# CREAR COMPRA
+# ============================================================
+
 class PurchaseCreateView(CreateView):
     model = Purchase
     form_class = PurchaseForm
-    template_name = "purchases/purchases/form.html"
-    success_url = reverse_lazy("purchases:purchase_list")
+    template_name = "purchases/purchase_create.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        company = get_active_company_from_request(self.request)
-        kwargs["company_id"] = company.id if company else None
+        kwargs["company_id"] = self.request.session.get("active_company_id")
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        if self.request.POST:
-            context["line_formset"] = PurchaseLineFormSet(self.request.POST)
-            context["tax_formset"] = PurchaseTaxFormSet(self.request.POST)
-            context["perception_formset"] = PurchasePerceptionFormSet(self.request.POST)
-            context["retention_formset"] = PurchaseRetentionFormSet(self.request.POST)
-        else:
-            context["line_formset"] = PurchaseLineFormSet()
-            context["tax_formset"] = PurchaseTaxFormSet()
-            context["perception_formset"] = PurchasePerceptionFormSet()
-            context["retention_formset"] = PurchaseRetentionFormSet()
-
-        return context
-
     def form_valid(self, form):
-        context = self.get_context_data()
-        line_formset = context["line_formset"]
-        tax_formset = context["tax_formset"]
-        perception_formset = context["perception_formset"]
-        retention_formset = context["retention_formset"]
+        form.instance.company_id = self.request.session.get("active_company_id")
+        purchase = form.save()
 
-        if (
-            line_formset.is_valid()
-            and tax_formset.is_valid()
-            and perception_formset.is_valid()
-            and retention_formset.is_valid()
-        ):
-            company = get_active_company_from_request(self.request)
-            form.instance.company = company
-            self.object = form.save()
+        # Integraciones automáticas
+        update_inventory_from_purchase(purchase)
+        create_purchase_journal_entry(purchase)
+        create_supplier_cc_from_purchase(purchase)
 
-            line_formset.instance = self.object
-            tax_formset.instance = self.object
-            perception_formset.instance = self.object
-            retention_formset.instance = self.object
-
-            line_formset.save()
-            tax_formset.save()
-            perception_formset.save()
-            retention_formset.save()
-
-            # -----------------------------------------
-            # INTEGRACIÓN INVENTARIO (ENTRADA DE STOCK)
-            # -----------------------------------------
-            update_inventory_from_purchase(self.object)
-
-            # -----------------------------------------
-            # INTEGRACIÓN CONTABLE (ASIENTO DE COMPRA)
-            # -----------------------------------------
-            create_purchase_journal_entry(self.object)
-
-            return super().form_valid(form)
-
-        return self.form_invalid(form)
+        return redirect("purchases:purchase_list")
 
 
-# ---------------------------------------------------------
-# UPDATE (CON FORMSETS)
-# ---------------------------------------------------------
+# ============================================================
+# EDITAR COMPRA
+# ============================================================
+
 class PurchaseUpdateView(UpdateView):
     model = Purchase
     form_class = PurchaseForm
-    template_name = "purchases/purchases/form.html"
-    success_url = reverse_lazy("purchases:purchase_list")
-
-    def get_queryset(self):
-        company = get_active_company_from_request(self.request)
-        return Purchase.objects.filter(company=company, is_active=True)
+    template_name = "purchases/purchase_edit.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        company = get_active_company_from_request(self.request)
-        kwargs["company_id"] = company.id if company else None
+        kwargs["company_id"] = self.request.session.get("active_company_id")
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        if self.request.POST:
-            context["line_formset"] = PurchaseLineFormSet(
-                self.request.POST, instance=self.object
-            )
-            context["tax_formset"] = PurchaseTaxFormSet(
-                self.request.POST, instance=self.object
-            )
-            context["perception_formset"] = PurchasePerceptionFormSet(
-                self.request.POST, instance=self.object
-            )
-            context["retention_formset"] = PurchaseRetentionFormSet(
-                self.request.POST, instance=self.object
-            )
-        else:
-            context["line_formset"] = PurchaseLineFormSet(instance=self.object)
-            context["tax_formset"] = PurchaseTaxFormSet(instance=self.object)
-            context["perception_formset"] = PurchasePerceptionFormSet(
-                instance=self.object
-            )
-            context["retention_formset"] = PurchaseRetentionFormSet(
-                instance=self.object
-            )
-
-        return context
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        line_formset = context["line_formset"]
-        tax_formset = context["tax_formset"]
-        perception_formset = context["perception_formset"]
-        retention_formset = context["retention_formset"]
-
-        if (
-            line_formset.is_valid()
-            and tax_formset.is_valid()
-            and perception_formset.is_valid()
-            and retention_formset.is_valid()
-        ):
-            self.object = form.save()
-
-            line_formset.instance = self.object
-            tax_formset.instance = self.object
-            perception_formset.instance = self.object
-            retention_formset.instance = self.object
-
-            line_formset.save()
-            tax_formset.save()
-            perception_formset.save()
-            retention_formset.save()
-
-            return super().form_valid(form)
-
-        return self.form_invalid(form)
+    def get_success_url(self):
+        return reverse_lazy("purchases:purchase_detail", kwargs={"pk": self.object.pk})
 
 
-# ---------------------------------------------------------
-# DELETE
-# ---------------------------------------------------------
-class PurchaseDeleteView(DeleteView):
+# ============================================================
+# ELIMINAR COMPRA (REVERSIÓN COMPLETA)
+# ============================================================
+
+class PurchaseDeleteView(DetailView):
     model = Purchase
-    template_name = "purchases/purchases/detail.html"
-    success_url = reverse_lazy("purchases:purchase_list")
+    template_name = "purchases/purchase_delete.html"
 
-    def get_queryset(self):
-        company = get_active_company_from_request(self.request)
-        return Purchase.objects.filter(company=company, is_active=True)
+    def post(self, request, *args, **kwargs):
+        purchase = self.get_object()
+
+        # Reversión contable
+        delete_journal_entries_for_purchase(purchase)
+
+        # Reversión cuenta corriente proveedor
+        delete_supplier_cc_from_purchase(purchase)
+
+        # Reversión inventario
+        revert_inventory_from_purchase(purchase)
+
+        purchase.delete()
+
+        return redirect("purchases:purchase_list")
+
+
+# ============================================================
+# RECALCULAR COMPRA (si lo usás)
+# ============================================================
+
+def purchase_recalculate(request):
+    # Si tenés lógica de recálculo, va aquí
+    return redirect("purchases:purchase_list")

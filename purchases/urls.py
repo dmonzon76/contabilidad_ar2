@@ -18,7 +18,6 @@ from purchases.views.supplier import (
 
 app_name = "purchases"
 
-
 urlpatterns = [
     # Purchases
     path("", PurchaseListView.as_view(), name="purchase_list"),
@@ -27,6 +26,7 @@ urlpatterns = [
     path("<int:pk>/edit/", PurchaseUpdateView.as_view(), name="purchase_edit"),
     path("<int:pk>/delete/", PurchaseDeleteView.as_view(), name="purchase_delete"),
     path("recalculate/", purchase_recalculate, name="purchase_recalculate"),
+
     # Suppliers
     path("suppliers/", supplier_list, name="supplier_list"),
     path("suppliers/new/", supplier_create, name="supplier_create"),

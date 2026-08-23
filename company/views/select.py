@@ -30,7 +30,7 @@ def set_active_company(request, company_id):
     # No validamos CompanyUser porque no lo usamos más
     request.session["active_company_id"] = company_id
 
-    return redirect("dashboard")
+    return redirect("core:dashboard")
 
 
 @login_required

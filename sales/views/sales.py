@@ -1,5 +1,6 @@
 from django.views.generic import ListView, CreateView, DetailView
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect, render
 
 from sales.models.sale import Sale
 from sales.models.sale_item import SaleItem
@@ -7,9 +8,24 @@ from sales.models.sale_item import SaleItem
 from sales.forms.sale import SaleForm
 from sales.forms.sale_item import SaleItemForm
 
-from django.shortcuts import get_object_or_404, redirect, render
-from inventory.integration import update_inventory_from_sale
-from accounting.integration import create_sale_journal_entry, create_cmv_journal_entry
+from inventory.integration import (
+    update_inventory_from_sale,
+    revert_inventory_from_sale
+)
+
+from accounting.integration import (
+    create_sale_journal_entry,
+    create_cmv_journal_entry,
+    delete_journal_entries_for_sale,
+    delete_cmv_journal_entry,
+    create_customer_cc_from_sale,
+    delete_customer_cc_from_sale
+)
+
+
+# ============================================================
+# LISTA DE VENTAS
+# ============================================================
 
 class SaleListView(ListView):
     model = Sale
@@ -21,6 +37,10 @@ class SaleListView(ListView):
             company_id=self.request.session.get("active_company_id")
         )
 
+
+# ============================================================
+# CREACIÓN DE VENTA
+# ============================================================
 
 class SaleCreateView(CreateView):
     model = Sale
@@ -40,6 +60,10 @@ class SaleCreateView(CreateView):
         return reverse_lazy("sales:sale_list")
 
 
+# ============================================================
+# DETALLE DE VENTA
+# ============================================================
+
 class SaleDetailView(DetailView):
     model = Sale
     template_name = "sales/sale_detail.html"
@@ -50,16 +74,10 @@ class SaleDetailView(DetailView):
             company_id=self.request.session.get("active_company_id")
         )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        sale = context["sale"]
 
-        # Nueva integración fiscal moderna:
-        # Si existe factura fiscal, se agrega al contexto
-        fiscal_invoice = getattr(sale, "fiscal_invoice", None)
-        context["fiscal_invoice"] = fiscal_invoice
-
-        return context
+# ============================================================
+# AGREGAR ÍTEM A LA VENTA
+# ============================================================
 
 def sale_item_add(request, sale_id):
     sale = get_object_or_404(
@@ -75,50 +93,44 @@ def sale_item_add(request, sale_id):
             item.sale = sale
             item.save()
 
-            # Actualizar totales
             sale.recalc_totals()
 
-            # INTEGRACIÓN INVENTORY (SALIDAS DE STOCK)
-            from inventory.integration import update_inventory_from_sale
+            # Reversión previa
+            delete_journal_entries_for_sale(sale)
+            delete_cmv_journal_entry(sale)
+            delete_customer_cc_from_sale(sale)
+            revert_inventory_from_sale(sale)
+
+            # Integraciones nuevas
             update_inventory_from_sale(sale)
-            # Actualizar totales
-            sale.recalc_totals()
-            
-            # Actualizar inventario (salida de stock)
-            update_inventory_from_sale(sale)
-            
-            # Asiento contable de la venta
             create_sale_journal_entry(sale)
-            
-            # Asiento contable del CMV
             create_cmv_journal_entry(sale)
-            
+            create_customer_cc_from_sale(sale)
+
             return redirect("sales:sale_detail", pk=sale.id)
+
     else:
         form = SaleItemForm()
 
     return render(request, "sales/sale_item_add.html", {"form": form, "sale": sale})
 
 
+# ============================================================
+# ELIMINAR VENTA
+# ============================================================
 
+def sale_delete(request, pk):
+    sale = get_object_or_404(
+        Sale,
+        pk=pk,
+        company_id=request.session.get("active_company_id"),
+    )
 
+    delete_journal_entries_for_sale(sale)
+    delete_cmv_journal_entry(sale)
+    delete_customer_cc_from_sale(sale)
+    revert_inventory_from_sale(sale)
 
+    sale.delete()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-def sale_create(request):
-    ...
-    sale.recalc_totals()
-    update_inventory_from_sale(sale)
-    ...
+    return redirect("sales:sale_list")

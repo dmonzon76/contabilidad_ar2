@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <h2 class="mb-4">Accounting Dashboard</h2>
+
+    <!-- KPIs -->
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Journal Entries Today</h6>
+                    <h3 class="mb-0">{{ journal_entries_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Journal Lines Today</h6>
+                    <h3 class="mb-0">{{ journal_lines_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">IVA Debit</h6>
+                    <h3 class="mb-0">${{ iva_debit_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">IVA Credit</h6>
+                    <h3 class="mb-0">${{ iva_credit_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CMV & Profit -->
+    <div class="row mb-4">
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">CMV Today</h6>
+                    <h3 class="mb-0">${{ cmv_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Profit Today</h6>
+                    <h3 class="mb-0">${{ profit_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Top Accounts -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Top Accounts Today</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th class="text-end">Debit</th>
+                        <th class="text-end">Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in top_accounts_today %}
+                    <tr>
+                        <td>{{ a.account__name }}</td>
+                        <td class="text-end">${{ a.debit_total }}</td>
+                        <td class="text-end">${{ a.credit_total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movements by Account Type -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Movements by Account Type</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th class="text-end">Debit</th>
+                        <th class="text-end">Credit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in journal_by_account_type_today %}
+                    <tr>
+                        <td>{{ t.account__type }}</td>
+                        <td class="text-end">${{ t.debit_total }}</td>
+                        <td class="text-end">${{ t.credit_total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movements by Hour -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Movements by Hour</h5>
+
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Hour</th>
+                        <th class="text-end">Entries</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in journal_by_hour_today %}
+                    <tr>
+                        <td>{{ h.created_at__hour }}:00</td>
+                        <td class="text-end">{{ h.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted">No movements today</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Balance Today -->
+    <div class="row mb-4">
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Debit Total</h6>
+                    <h3 class="mb-0">${{ balance_today_debit }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase mb-2">Credit Total</h6>
+                    <h3 class="mb-0">${{ balance_today_credit }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

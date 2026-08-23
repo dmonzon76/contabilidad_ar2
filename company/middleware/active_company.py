@@ -2,7 +2,6 @@ import logging
 
 from django.shortcuts import redirect
 from company.models import CompanyUser
-from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -56,19 +55,9 @@ class ActiveCompanyMiddleware:
                 logger.debug("Admin access without company allowed.")
                 return self.get_response(request)
 
-            logger.debug("No active company — redirecting to dashboard")
+            logger.debug("No active company — redirecting to company selector")
             request.session["show_company_select_modal"] = True
-
-            try:
-                dashboard_path = reverse("dashboard")
-            except Exception:
-                dashboard_path = "/dashboard/"
-
-            # Avoid redirect loop
-            if request.path == dashboard_path:
-                return self.get_response(request)
-
-            return redirect("dashboard")
+            return redirect("company:company_select")
 
         # Validate that the user has access to that company
         company_user = (
@@ -89,15 +78,7 @@ class ActiveCompanyMiddleware:
             request.session.pop("active_company_id", None)
             request.session["show_company_select_modal"] = True
 
-            try:
-                dashboard_path = reverse("dashboard")
-            except Exception:
-                dashboard_path = "/dashboard/"
-
-            if request.path == dashboard_path:
-                return self.get_response(request)
-
-            return redirect("dashboard")
+            return redirect("company:company_select")
 
         request.active_company = company_user.company
 

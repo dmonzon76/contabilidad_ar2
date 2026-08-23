@@ -28,7 +28,7 @@ class DashboardActiveCompanyTests(TestCase):
         session["active_company_id"] = company.id
         session.save()
 
-        response = self.client.get(reverse("dashboard"))
+        response = self.client.get(reverse("core:dashboard"))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["company"].id, company.id)

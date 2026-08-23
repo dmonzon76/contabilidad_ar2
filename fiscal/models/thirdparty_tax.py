@@ -25,7 +25,11 @@ class ThirdPartyTaxProfile(models.Model):
         ("NO_CORRESPONDE", "No corresponde"),
     ]
 
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="fiscal_tax_profiles",
+    )
 
     # 🔥 Relación fiscal correcta: un cliente → un perfil fiscal
     customer = models.OneToOneField(

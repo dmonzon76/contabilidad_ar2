@@ -1,16 +1,44 @@
 from django import forms
 from suppliers.models import Supplier
 
+class SupplierForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = [
+            "name",
+            "email",
+            "phone",
+            "address",
+            "tax_id",
+            "iva_condition",
+            "iibb_rate",
+            "is_iibb_exempt",
+            "ganancias_rate",
+            "is_ganancias_exempt",
+            "is_active",
+        ]
+# suppliers/forms/supplier.py
+from django import forms
+from suppliers.models import Supplier, ThirdPartyTaxProfile
+from suppliers.utils import validate_cuit  # función que agregamos
 
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
-        fields = ["name", "tax_id", "email", "phone", "address", "is_active"]
+        fields = [
+            "name","email","phone","address",
+            "tax_id","iva_condition","iibb_rate","is_iibb_exempt",
+            "ganancias_rate","is_ganancias_exempt","tax_profile","is_active",
+        ]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "tax_id": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "phone": forms.TextInput(attrs={"class": "form-control"}),
-            "address": forms.TextInput(attrs={"class": "form-control"}),
-            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "tax_profile": forms.Select(attrs={"class":"form-select"}),
+            "iva_condition": forms.Select(attrs={"class":"form-select"}),
         }
+
+    def clean_tax_id(self):
+        tax_id = self.cleaned_data.get("tax_id")
+        if tax_id:
+            tax_id = tax_id.replace("-", "").strip()
+            if not validate_cuit(tax_id):
+                raise forms.ValidationError("CUIT inválido")
+        return tax_id

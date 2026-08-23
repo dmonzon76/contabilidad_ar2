@@ -1,5 +1,29 @@
-<h2>{{ supplier.name }}</h2>
+{% extends "base.html" %}
 
-<p><strong>Email:</strong> {{ supplier.email }}</p>
-<p><strong>Phone:</strong> {{ supplier.phone }}</p>
-<p><strong>Address:</strong> {{ supplier.address }}</p>
+{% block content %}
+<div class="container py-4">
+
+    <h2 class="mb-4">{{ supplier.name }}</h2>
+
+    <div class="card p-4 shadow-sm">
+
+        <h5 class="mb-3">Basic Information</h5>
+        <p><strong>Email:</strong> {{ supplier.email }}</p>
+        <p><strong>Phone:</strong> {{ supplier.phone }}</p>
+        <p><strong>Address:</strong> {{ supplier.address }}</p>
+
+        <hr class="my-4">
+
+        <h5 class="mb-3">Fiscal Information</h5>
+        <p><strong>CUIT:</strong> {{ supplier.tax_id }}</p>
+        <p><strong>IVA Condition:</strong> {{ supplier.get_iva_condition_display }}</p>
+        <p><strong>IIBB Rate:</strong> {{ supplier.iibb_rate }}%</p>
+        <p><strong>IIBB Exempt:</strong> {{ supplier.is_iibb_exempt|yesno:"Yes,No" }}</p>
+        <p><strong>Ganancias Rate:</strong> {{ supplier.ganancias_rate }}%</p>
+        <p><strong>Ganancias Exempt:</strong> {{ supplier.is_ganancias_exempt|yesno:"Yes,No" }}</p>
+
+        <a href="{% url 'suppliers:supplier_list' %}" class="btn btn-secondary mt-3">Back</a>
+    </div>
+
+</div>
+{% endblock %}

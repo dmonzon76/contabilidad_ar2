@@ -4,18 +4,16 @@ from django.forms import inlineformset_factory
 from purchases.models.purchase import (
     Purchase,
     PurchaseLine,
-    PurchaseTax,
     PurchasePerception,
     PurchaseRetention,
+    PurchaseTax,
 )
 
 
-# -----------------------------
-# Purchase (header)
-# -----------------------------
 class PurchaseForm(forms.ModelForm):
     def __init__(self, *args, company_id=None, **kwargs):
         super().__init__(*args, **kwargs)
+
         if company_id is not None:
             self.fields["supplier"].queryset = self.fields["supplier"].queryset.filter(
                 company_id=company_id,
@@ -32,9 +30,6 @@ class PurchaseForm(forms.ModelForm):
         }
 
 
-# -----------------------------
-# Purchase Line
-# -----------------------------
 class PurchaseLineForm(forms.ModelForm):
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
@@ -60,62 +55,11 @@ class PurchaseLineForm(forms.ModelForm):
 
 
 PurchaseLineFormSet = inlineformset_factory(
-    Purchase, PurchaseLine, form=PurchaseLineForm, extra=1, can_delete=True
-)
-
-
-# -----------------------------
-# Purchase Tax
-# -----------------------------
-class PurchaseTaxForm(forms.ModelForm):
-    class Meta:
-        model = PurchaseTax
-        fields = ["vat_type", "base_amount", "amount"]
-        widgets = {
-            "vat_type": forms.Select(attrs={"class": "form-control"}),
-            "base_amount": forms.NumberInput(attrs={"class": "form-control"}),
-            "amount": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-
-PurchaseTaxFormSet = inlineformset_factory(
-    Purchase, PurchaseTax, form=PurchaseTaxForm, extra=1, can_delete=True
-)
-
-
-# -----------------------------
-# Purchase Perception
-# -----------------------------
-class PurchasePerceptionForm(forms.ModelForm):
-    class Meta:
-        model = PurchasePerception
-        fields = ["perception_type", "amount"]
-        widgets = {
-            "perception_type": forms.Select(attrs={"class": "form-control"}),
-            "amount": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-
-PurchasePerceptionFormSet = inlineformset_factory(
-    Purchase, PurchasePerception, form=PurchasePerceptionForm, extra=1, can_delete=True
-)
-
-
-# -----------------------------
-# Purchase Retention
-# -----------------------------
-class PurchaseRetentionForm(forms.ModelForm):
-    class Meta:
-        model = PurchaseRetention
-        fields = ["retention_type", "amount"]
-        widgets = {
-            "retention_type": forms.Select(attrs={"class": "form-control"}),
-            "amount": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-
-PurchaseRetentionFormSet = inlineformset_factory(
-    Purchase, PurchaseRetention, form=PurchaseRetentionForm, extra=1, can_delete=True
+    Purchase,
+    PurchaseLine,
+    form=PurchaseLineForm,
+    extra=1,
+    can_delete=True,
 )
 
 
@@ -130,7 +74,7 @@ class PurchaseTaxForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.purchase = kwargs.get("instance", None)
+        self.purchase = kwargs.get("instance")
         super().__init__(*args, **kwargs)
 
     def clean(self):
@@ -146,7 +90,6 @@ class PurchaseTaxForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        # Ejemplos reales AFIP
         if vat_type in ["21", "105", "27"] and profile.vat_exempt:
             raise forms.ValidationError(
                 "Supplier cannot apply VAT because the profile is marked as VAT exempt."
@@ -160,6 +103,15 @@ class PurchaseTaxForm(forms.ModelForm):
         return cleaned
 
 
+PurchaseTaxFormSet = inlineformset_factory(
+    Purchase,
+    PurchaseTax,
+    form=PurchaseTaxForm,
+    extra=1,
+    can_delete=True,
+)
+
+
 class PurchasePerceptionForm(forms.ModelForm):
     class Meta:
         model = PurchasePerception
@@ -170,12 +122,12 @@ class PurchasePerceptionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.purchase = kwargs.get("instance", None)
+        self.purchase = kwargs.get("instance")
         super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
-        ptype = cleaned.get("perception_type")
+        perception_type = cleaned.get("perception_type")
 
         if not self.purchase:
             return cleaned
@@ -186,13 +138,22 @@ class PurchasePerceptionForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        if ptype == "IIBB" and profile.iibb_status == "NO_CORRESPONDE":
+        if perception_type == "IIBB" and profile.iibb_status == "NO_CORRESPONDE":
             raise forms.ValidationError("Supplier is not registered for IIBB.")
 
-        if ptype == "IVA" and profile.vat_exempt:
+        if perception_type == "IVA" and profile.vat_exempt:
             raise forms.ValidationError("Supplier cannot apply IVA perceptions.")
 
         return cleaned
+
+
+PurchasePerceptionFormSet = inlineformset_factory(
+    Purchase,
+    PurchasePerception,
+    form=PurchasePerceptionForm,
+    extra=1,
+    can_delete=True,
+)
 
 
 class PurchaseRetentionForm(forms.ModelForm):
@@ -205,12 +166,12 @@ class PurchaseRetentionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.purchase = kwargs.get("instance", None)
+        self.purchase = kwargs.get("instance")
         super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
-        rtype = cleaned.get("retention_type")
+        retention_type = cleaned.get("retention_type")
 
         if not self.purchase:
             return cleaned
@@ -221,15 +182,24 @@ class PurchaseRetentionForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        if rtype == "GAN" and profile.ganancias_status == "NO_CORRESPONDE":
+        if retention_type == "GAN" and profile.ganancias_status == "NO_CORRESPONDE":
             raise forms.ValidationError(
                 "Supplier is not subject to Ganancias retention."
             )
 
-        if rtype == "IVA" and profile.vat_exempt:
+        if retention_type == "IVA" and profile.vat_exempt:
             raise forms.ValidationError("Supplier is not subject to IVA retention.")
 
-        if rtype == "SUSS" and not profile.uses_retentions:
+        if retention_type == "SUSS" and not profile.uses_retentions:
             raise forms.ValidationError("Supplier is not subject to SUSS retention.")
 
         return cleaned
+
+
+PurchaseRetentionFormSet = inlineformset_factory(
+    Purchase,
+    PurchaseRetention,
+    form=PurchaseRetentionForm,
+    extra=1,
+    can_delete=True,
+)

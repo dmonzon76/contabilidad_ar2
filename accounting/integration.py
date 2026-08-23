@@ -1,14 +1,18 @@
-from accounting.models import JournalEntry, JournalEntryLine, Account
 from django.utils import timezone
 from accounting.models import JournalEntry, JournalEntryLine, Account
-from django.utils import timezone
+from accounting.models.account_movement import AccountMovement
+
+
+# ============================================================
+# UTILIDAD
+# ============================================================
 
 def get_account(company, code):
     return Account.objects.get(company=company, code=code)
 
 
 # ============================================================
-# ASIENTO AUTOMÁTICO DE COMPRAS
+# ASIENTOS AUTOMÁTICOS DE COMPRAS
 # ============================================================
 
 def create_purchase_journal_entry(purchase):
@@ -20,38 +24,31 @@ def create_purchase_journal_entry(purchase):
         description=f"Compra {purchase.invoice_number}",
     )
 
-    # 1) Mercaderías (DEBE)
-    acc_merch = get_account(company, "1.1.4.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_merch,
-        debit=purchase.net_amount,
-        credit=0,
-    )
+    acc_inventory = get_account(company, "1.1.09")
+    acc_iva_credit = get_account(company, "7.2")
+    acc_prov = get_account(company, "2.1.01")
 
-    # 2) IVA Crédito Fiscal (DEBE)
-    acc_iva_credit = get_account(company, "1.1.3.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_iva_credit,
-        debit=purchase.vat_amount,
-        credit=0,
-    )
+    JournalEntryLine.objects.create(entry=entry, account=acc_inventory,
+                                    debit=purchase.net_amount, credit=0)
 
-    # 3) Proveedores (HABER)
-    acc_prov = get_account(company, "2.1.1.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_prov,
-        debit=0,
-        credit=purchase.total_amount,
-    )
+    JournalEntryLine.objects.create(entry=entry, account=acc_iva_credit,
+                                    debit=purchase.vat_amount, credit=0)
+
+    JournalEntryLine.objects.create(entry=entry, account=acc_prov,
+                                    debit=0, credit=purchase.total_amount)
 
     return entry
 
 
+def delete_journal_entries_for_purchase(purchase):
+    JournalEntry.objects.filter(
+        company=purchase.company,
+        description__icontains=f"Compra {purchase.invoice_number}"
+    ).delete()
+
+
 # ============================================================
-# ASIENTO AUTOMÁTICO DE VENTAS
+# ASIENTOS AUTOMÁTICOS DE VENTAS
 # ============================================================
 
 def create_sale_journal_entry(sale):
@@ -63,38 +60,31 @@ def create_sale_journal_entry(sale):
         description=f"Venta {sale.number}",
     )
 
-    # 1) Clientes (DEBE)
-    acc_clients = get_account(company, "1.1.2.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_clients,
-        debit=sale.total_amount,
-        credit=0,
-    )
-
-    # 2) Ventas de Mercaderías (HABER)
+    acc_clients = get_account(company, "1.1.04")
     acc_sales = get_account(company, "4.1.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_sales,
-        debit=0,
-        credit=sale.net_amount,
-    )
+    acc_iva_debit = get_account(company, "7.1")
 
-    # 3) IVA Débito Fiscal (HABER)
-    acc_iva_debit = get_account(company, "2.1.2.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_iva_debit,
-        debit=0,
-        credit=sale.vat_amount,
-    )
+    JournalEntryLine.objects.create(entry=entry, account=acc_clients,
+                                    debit=sale.total_amount, credit=0)
+
+    JournalEntryLine.objects.create(entry=entry, account=acc_sales,
+                                    debit=0, credit=sale.net_amount)
+
+    JournalEntryLine.objects.create(entry=entry, account=acc_iva_debit,
+                                    debit=0, credit=sale.vat_amount)
 
     return entry
 
 
+def delete_journal_entries_for_sale(sale):
+    JournalEntry.objects.filter(
+        company=sale.company,
+        description__icontains=f"Venta {sale.number}"
+    ).delete()
+
+
 # ============================================================
-# ASIENTO AUTOMÁTICO DE CMV
+# CMV
 # ============================================================
 
 def create_cmv_journal_entry(sale):
@@ -106,106 +96,64 @@ def create_cmv_journal_entry(sale):
         description=f"CMV Venta {sale.number}",
     )
 
-    # 1) CMV (DEBE)
-    acc_cmv = get_account(company, "5.3")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_cmv,
-        debit=sale.cost_total,
-        credit=0,
-    )
+    acc_cmv = get_account(company, "5.1.01")
+    acc_inventory = get_account(company, "1.1.09")
 
-    # 2) Mercaderías (HABER)
-    acc_merch = get_account(company, "1.1.4.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_merch,
-        debit=0,
-        credit=sale.cost_total,
-    )
+    JournalEntryLine.objects.create(entry=entry, account=acc_cmv,
+                                    debit=sale.cost_total, credit=0)
+
+    JournalEntryLine.objects.create(entry=entry, account=acc_inventory,
+                                    debit=0, credit=sale.cost_total)
 
     return entry
 
 
-
-
-
-def get_account(company, code):
-    return Account.objects.get(company=company, code=code)
+def delete_cmv_journal_entry(sale):
+    JournalEntry.objects.filter(
+        company=sale.company,
+        description__icontains=f"CMV Venta {sale.number}"
+    ).delete()
 
 
 # ============================================================
-# ASIENTO AUTOMÁTICO DE VENTAS
+# CUENTA CORRIENTE CLIENTES
 # ============================================================
 
-def create_sale_journal_entry(sale):
-    company = sale.company
-
-    entry = JournalEntry.objects.create(
-        company=company,
-        date=timezone.now(),
+def create_customer_cc_from_sale(sale):
+    AccountMovement.objects.create(
+        company=sale.company,
+        customer=sale.customer,
+        sale=sale,
+        movement_type="DEBIT",
+        amount=sale.total_amount,
         description=f"Venta {sale.number}",
     )
 
-    # 1) Clientes (DEBE)
-    acc_clients = get_account(company, "1.1.2.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_clients,
-        debit=sale.total_amount,
-        credit=0,
-    )
 
-    # 2) Ventas de Mercaderías (HABER)
-    acc_sales = get_account(company, "4.1.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_sales,
-        debit=0,
-        credit=sale.net_amount,
-    )
-
-    # 3) IVA Débito Fiscal (HABER)
-    acc_iva_debit = get_account(company, "2.1.2.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_iva_debit,
-        debit=0,
-        credit=sale.vat_amount,
-    )
-
-    return entry
+def delete_customer_cc_from_sale(sale):
+    AccountMovement.objects.filter(
+        company=sale.company,
+        sale=sale
+    ).delete()
 
 
 # ============================================================
-# ASIENTO AUTOMÁTICO DE CMV
+# CUENTA CORRIENTE PROVEEDORES
 # ============================================================
 
-def create_cmv_journal_entry(sale):
-    company = sale.company
-
-    entry = JournalEntry.objects.create(
-        company=company,
-        date=timezone.now(),
-        description=f"CMV Venta {sale.number}",
+def create_supplier_cc_from_purchase(purchase):
+    AccountMovement.objects.create(
+        company=purchase.company,
+        supplier=purchase.supplier,
+        purchase=purchase,
+        movement_type="CREDIT",
+        amount=purchase.total_amount,
+        description=f"Compra {purchase.invoice_number}",
     )
 
-    # 1) CMV (DEBE)
-    acc_cmv = get_account(company, "5.3")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_cmv,
-        debit=sale.cost_total,
-        credit=0,
-    )
 
-    # 2) Mercaderías (HABER)
-    acc_merch = get_account(company, "1.1.4.01")
-    JournalEntryLine.objects.create(
-        entry=entry,
-        account=acc_merch,
-        debit=0,
-        credit=sale.cost_total,
-    )
-
-    return entry
+def delete_supplier_cc_from_purchase(purchase):
+    AccountMovement.objects.filter(
+        company=purchase.company,
+        purchase=purchase
+    ).delete()
