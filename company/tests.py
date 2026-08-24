@@ -110,7 +110,7 @@ class CompanyAccessTests(TestCase):
             )
         )
 
-        self.assertRedirects(response, reverse("core:dashboard"))
+        self.assertRedirects(response, reverse("main_dashboard"))
         self.assertEqual(
             self.client.session.get("active_company_id"),
             self.other_company.id,

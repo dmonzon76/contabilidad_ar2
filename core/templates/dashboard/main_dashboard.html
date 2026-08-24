@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Main Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Top header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1 class="app-title">Main Dashboard</h1>
+            <span class="app-subtitle">Main Control Panel</span>
+        </div>
+        <div class="header-right">
+            <span class="header-item">Active Company: {{ active_company.name }}</span>
+            <span class="header-item">Date: {{ today|date:"Y-m-d" }}</span>
+        </div>
+    </header>
+
+    <!-- KPI row -->
+    <section class="dashboard-row kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-label">Total Sales (Month)</div>
+            <div class="kpi-value" data-target="{{ kpi.total_sales_month|default:0 }}">0</div>
+            <div class="kpi-footer">ARS</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Total Purchases (Month)</div>
+            <div class="kpi-value" data-target="{{ kpi.total_purchases_month|default:0 }}">0</div>
+            <div class="kpi-footer">ARS</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Cash Flow (Month)</div>
+            <div class="kpi-value" data-target="{{ kpi.cash_flow_month|default:0 }}">0</div>
+            <div class="kpi-footer">ARS</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Inventory Value</div>
+            <div class="kpi-value" data-target="{{ kpi.inventory_value|default:0 }}">0</div>
+            <div class="kpi-footer">ARS</div>
+        </div>
+    </section>
+
+    <!-- Charts row -->
+    <section class="dashboard-row charts-row">
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Sales vs Purchases</span>
+                <select class="chart-range-select" id="range-sales-purchases">
+                    <option value="month">Month</option>
+                    <option value="quarter">Quarter</option>
+                    <option value="year">Year</option>
+                </select>
+            </div>
+            <canvas id="chartSalesPurchases"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Cash Flow</span>
+                <select class="chart-range-select" id="range-cash-flow">
+                    <option value="month">Month</option>
+                    <option value="quarter">Quarter</option>
+                    <option value="year">Year</option>
+                </select>
+            </div>
+            <canvas id="chartCashFlow"></canvas>
+        </div>
+    </section>
+
+    <!-- Tables row -->
+    <section class="dashboard-row tables-row">
+        <div class="table-card">
+            <div class="table-header">
+                <span class="table-title">Top Products</span>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty Sold</th>
+                        <th>Margin</th>
+                        <th>Share %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in top_products %}
+                    <tr>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.qty_sold }}</td>
+                        <td>{{ p.margin }}</td>
+                        <td>{{ p.share_percent }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="table-empty">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <span class="table-title">Top Customers</span>
+            </div>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Total Invoiced</th>
+                        <th>Last Purchase</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in top_customers %}
+                    <tr>
+                        <td>{{ c.name }}</td>
+                        <td>{{ c.total_invoiced }}</td>
+                        <td>{{ c.last_purchase|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="table-empty">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-card alerts-card">
+            <div class="table-header">
+                <span class="table-title">Alerts</span>
+            </div>
+            <ul class="alerts-list">
+                {% for alert in alerts %}
+                <li class="alert-item alert-{{ alert.level }}">
+                    <span class="alert-label">{{ alert.title }}</span>
+                    <span class="alert-detail">{{ alert.detail }}</span>
+                </li>
+                {% empty %}
+                <li class="alert-item alert-info">
+                    <span class="alert-label">No alerts</span>
+                    <span class="alert-detail">System is stable</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <!-- Navigation row -->
+    <section class="dashboard-row navigation-row">
+        <a href="{% url 'sales:sale_list' %}" class="nav-button">Sales</a>
+        <a href="{% url 'purchases:purchase_list' %}" class="nav-button">Purchases</a>
+        <a href="{% url 'inventory:inventory_dashboard' %}" class="nav-button">Inventory Dashboard</a>
+    </section>
+
+</div>
+
+{{ dashboard_data_json|json_script:"dashboard-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    window.dashboardData = JSON.parse(document.getElementById("dashboard-data").textContent);
+</script>
+<script src="{% static 'js/dashboard_main.js' %}"></script>
+{% endblock %}

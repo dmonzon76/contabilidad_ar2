@@ -1,0 +1,245 @@
+.dashboard-container {
+    padding: 24px;
+    background-color: #f5f7fb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+}
+
+.app-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2933;
+    margin: 0;
+}
+
+.app-subtitle {
+    font-size: 13px;
+    color: #6b7c93;
+}
+
+.header-right {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.header-item {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: #e5edf7;
+}
+
+/* Rows */
+.dashboard-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* KPI cards */
+.kpi-row .kpi-card {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: #6b7c93;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.kpi-footer {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+/* Charts */
+.charts-row .chart-card {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.chart-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2933;
+}
+
+.chart-range-select {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+}
+
+/* Tables */
+.tables-row .table-card {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.table-header {
+    margin-bottom: 8px;
+}
+
+.table-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2933;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.dashboard-table thead {
+    background-color: #f3f4f6;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-table th {
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.dashboard-table td {
+    color: #374151;
+}
+
+.table-empty {
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Alerts */
+.alerts-card {
+    max-width: 260px;
+}
+
+.alerts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.alert-item {
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.alert-label {
+    display: block;
+    font-weight: 500;
+}
+
+.alert-detail {
+    display: block;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.alert-info {
+    background-color: #e5f4ff;
+    color: #1d4ed8;
+}
+
+.alert-warning {
+    background-color: #fff7e6;
+    color: #b45309;
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Navigation buttons */
+.navigation-row {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.nav-button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    text-decoration: none;
+    margin-right: 8px;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-button:hover {
+    background-color: #f3f4f6;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+.nav-button-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.nav-button-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-row {
+        flex-direction: column;
+    }
+
+    .alerts-card {
+        max-width: none;
+    }
+}

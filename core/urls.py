@@ -1,10 +1,11 @@
 from django.urls import path
-from core.views.dashboard import dashboard
-from core.views.auth import logout_view
+from django.shortcuts import redirect
+from core.views.dashboard import main_dashboard
 
-app_name = "core"
+def root_redirect(request):
+    return redirect("main_dashboard")
 
 urlpatterns = [
-    path("", dashboard, name="dashboard"),
-    path("accounts/logout/", logout_view, name="logout"),
+    path("", root_redirect, name="root_redirect"),
+    path("dashboard/", main_dashboard, name="main_dashboard"),
 ]

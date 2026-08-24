@@ -114,6 +114,7 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Session behavior
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

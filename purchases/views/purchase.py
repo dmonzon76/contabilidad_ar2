@@ -24,7 +24,7 @@ from accounting.integration import (
 
 class PurchaseListView(ListView):
     model = Purchase
-    template_name = "purchases/purchase_list.html"
+    template_name = "purchases/purchases/list.html"
     context_object_name = "purchases"
 
     def get_queryset(self):
@@ -39,7 +39,7 @@ class PurchaseListView(ListView):
 
 class PurchaseDetailView(DetailView):
     model = Purchase
-    template_name = "purchases/purchase_detail.html"
+    template_name = "purchases/purchases/detail.html"
     context_object_name = "purchase"
 
     def get_queryset(self):
@@ -73,7 +73,7 @@ class PurchaseDetailView(DetailView):
 class PurchaseCreateView(CreateView):
     model = Purchase
     form_class = PurchaseForm
-    template_name = "purchases/purchase_create.html"
+    template_name = "purchases/purchases/form.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -99,7 +99,7 @@ class PurchaseCreateView(CreateView):
 class PurchaseUpdateView(UpdateView):
     model = Purchase
     form_class = PurchaseForm
-    template_name = "purchases/purchase_edit.html"
+    template_name = "purchases/purchases/form.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -116,7 +116,7 @@ class PurchaseUpdateView(UpdateView):
 
 class PurchaseDeleteView(DetailView):
     model = Purchase
-    template_name = "purchases/purchase_delete.html"
+    template_name = "purchases/purchases/delete.html"
 
     def post(self, request, *args, **kwargs):
         purchase = self.get_object()

@@ -11,13 +11,13 @@ from .models import InventoryItem, InventoryMovement, Location
 # ============================
 
 def location_list(request):
-    company = request.user.active_company
+    company = request.active_company
     locations = Location.objects.filter(company=company).order_by("code")
     return render(request, "inventory/location_list.html", {"locations": locations})
 
 
 def location_create(request):
-    company = request.user.active_company
+    company = request.active_company
 
     if request.method == "POST":
         form = LocationForm(request.POST)
@@ -61,7 +61,7 @@ def location_delete(request, pk):
 # ============================
 
 def inventory_list(request):
-    company = request.user.active_company
+    company = request.active_company
     items = InventoryItem.objects.filter(company=company).select_related("product", "location")
     return render(request, "inventory/inventory_list.html", {"items": items})
 
@@ -73,7 +73,7 @@ def inventory_detail(request, pk):
 
 
 def inventory_add(request):
-    company = request.user.active_company
+    company = request.active_company
 
     if request.method == "POST":
         form = InventoryItemForm(request.POST)
@@ -193,7 +193,7 @@ def movement_delete(request, pk):
     return render(request, "inventory/movement_delete.html", {"movement": movement})
 
 def movement_list(request):
-    company = request.user.active_company
+    company = request.active_company
     movements = InventoryMovement.objects.filter(company=company).order_by("-date")
     return render(request, "inventory/movement_list.html", {"movements": movements})
 
@@ -202,7 +202,7 @@ def movement_list(request):
 # ============================
 
 def inventory_dashboard(request):
-    company = request.user.active_company
+    company = request.active_company
     today = date.today()
 
     items = InventoryItem.objects.filter(company=company)
