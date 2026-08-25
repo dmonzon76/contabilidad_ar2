@@ -113,8 +113,13 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "core" / "static",
+]
+
 
 # Session behavior
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
