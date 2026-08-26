@@ -148,3 +148,8 @@ LOGGING = {
     },
     "root": {"handlers": ["console", "file"], "level": "DEBUG"},
 }
+AFIP_MODE = "testing"
+AFIP_WSFE_TEST_URL = "https://afip-testing.example/wsfe"
+AFIP_WSFE_PROD_URL = "https://afip-prod.example/wsfe"
+AFIP_CERT = "/path/to/testing-cert.pem"
+AFIP_KEY = "/path/to/testing-key.pem"

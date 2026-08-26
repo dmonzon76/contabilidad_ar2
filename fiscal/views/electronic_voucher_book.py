@@ -1,33 +1,72 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, permission_required
+from django.views.decorators.http import require_POST, require_http_methods
+from django.http import HttpResponseForbidden
 from fiscal.models import ElectronicVoucherBook
 from fiscal.forms import ElectronicVoucherBookForm
+from core.utils import get_active_company
 
+
+@login_required
 def electronic_voucher_book_list(request):
-    books = ElectronicVoucherBook.objects.all()
+    company = get_active_company(request)
+    if not company:
+        return HttpResponseForbidden("No active company")
+
+    books = ElectronicVoucherBook.objects.filter(company=company)
     return render(request, 'fiscal/electronic_voucher_book_list.html', {'books': books})
 
+
+@login_required
+@permission_required("fiscal.add_electronicvoucherbook", raise_exception=True)
+@require_http_methods(["GET", "POST"])
 def electronic_voucher_book_create(request):
-    if request.method == 'POST':
+    company = get_active_company(request)
+    if not company:
+        return HttpResponseForbidden("No active company")
+
+    if request.method == "POST":
         form = ElectronicVoucherBookForm(request.POST)
         if form.is_valid():
-            form.save()
+            book = form.save(commit=False)
+            book.company = company
+            book.save()
             return redirect('electronic_voucher_book_list')
     else:
         form = ElectronicVoucherBookForm()
+
     return render(request, 'fiscal/electronic_voucher_book_form.html', {'form': form})
 
+
+@login_required
+@permission_required("fiscal.change_electronicvoucherbook", raise_exception=True)
+@require_http_methods(["GET", "POST"])
 def electronic_voucher_book_edit(request, book_id):
-    book = get_object_or_404(ElectronicVoucherBook, id=book_id)
-    if request.method == 'POST':
+    company = get_active_company(request)
+    if not company:
+        return HttpResponseForbidden("No active company")
+
+    book = get_object_or_404(ElectronicVoucherBook, id=book_id, company=company)
+
+    if request.method == "POST":
         form = ElectronicVoucherBookForm(request.POST, instance=book)
         if form.is_valid():
             form.save()
             return redirect('electronic_voucher_book_list')
     else:
         form = ElectronicVoucherBookForm(instance=book)
+
     return render(request, 'fiscal/electronic_voucher_book_form.html', {'form': form})
 
+
+@login_required
+@permission_required("fiscal.delete_electronicvoucherbook", raise_exception=True)
+@require_http_methods(["POST"])
 def electronic_voucher_book_delete(request, book_id):
-    book = get_object_or_404(ElectronicVoucherBook, id=book_id)
+    company = get_active_company(request)
+    if not company:
+        return HttpResponseForbidden("No active company")
+
+    book = get_object_or_404(ElectronicVoucherBook, id=book_id, company=company)
     book.delete()
     return redirect('electronic_voucher_book_list')
