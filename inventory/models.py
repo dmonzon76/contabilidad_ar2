@@ -1,6 +1,8 @@
 from django.db import models
 from company.models import Company
 from products.models import Product
+from sales.models.sale import Sale
+from purchases.models.purchase import Purchase
 
 
 class Location(models.Model):
@@ -40,42 +42,22 @@ class InventoryMovement(models.Model):
     note = models.CharField(max_length=200, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
+    # ✔ AHORA SÍ dentro del modelo
+    sale = models.ForeignKey(
+        Sale,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="inventory_movements"
+    )
+
+    purchase = models.ForeignKey(
+        Purchase,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="inventory_movements"
+    )
+
     def __str__(self):
         return f"{self.get_movement_type_display()} {self.quantity} — {self.item.product.name}"
-
-from sales.models.sale import Sale
-from purchases.models.purchase import Purchase
-
-sale = models.ForeignKey(
-    Sale,
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name="inventory_movements"
-)
-
-purchase = models.ForeignKey(
-    Purchase,
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name="inventory_movements"
-)
-from sales.models.sale import Sale
-from purchases.models.purchase import Purchase
-
-sale = models.ForeignKey(
-    Sale,
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name="inventory_movements"
-)
-
-purchase = models.ForeignKey(
-    Purchase,
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name="inventory_movements"
-)

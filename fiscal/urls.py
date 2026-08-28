@@ -28,6 +28,11 @@ from fiscal.views.fiscal_invoice import (
     fiscal_invoice_create,
 )
 
+from fiscal.views.fiscal_invoice_line import (
+    fiscal_invoice_line_add,
+    fiscal_invoice_line_delete,
+)
+
 from fiscal.views.fiscal_product import (
     fiscal_product_list,
     fiscal_product_create,
@@ -71,11 +76,17 @@ urlpatterns = [
     path("electronic-voucher-books/<int:book_id>/delete/", electronic_voucher_book_delete, name="electronic_voucher_book_delete"),
 
     # -------------------------
-    # FISCAL INVOICES (nuevo flujo)
+    # FISCAL INVOICES
     # -------------------------
     path("invoices/", fiscal_invoice_list, name="fiscal_invoice_list"),
     path("invoices/<int:pk>/", fiscal_invoice_detail, name="fiscal_invoice_detail"),
     path("invoices/create/<int:sale_id>/", fiscal_invoice_create, name="fiscal_invoice_create"),
+
+    # -------------------------
+    # FISCAL INVOICE LINES (nuevo)
+    # -------------------------
+    path("invoices/<int:invoice_id>/lines/add/", fiscal_invoice_line_add, name="fiscal_invoice_line_add"),
+    path("invoices/lines/<int:line_id>/delete/", fiscal_invoice_line_delete, name="fiscal_invoice_line_delete"),
 
     # -------------------------
     # FISCAL PRODUCTS
