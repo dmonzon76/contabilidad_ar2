@@ -6,7 +6,6 @@ from accounting.models.period import Period
 from fiscal.models import FiscalInvoiceLine
 
 
-
 def get_account(company, code):
     return Account.objects.get(company=company, code=code)
 
@@ -30,7 +29,7 @@ def generate_accounting_entry(invoice, user):
         company=company,
         period=period,
         date=invoice.date,
-        description=f"Fiscal sale {invoice.voucher_number}",
+        description=f"Fiscal invoice {invoice.number}",
         created_by=user,
     )
 
@@ -39,7 +38,7 @@ def generate_accounting_entry(invoice, user):
     JournalEntryLine.objects.create(
         entry=entry,
         account=cash_account,
-        debit=invoice.total,
+        debit=invoice.total_amount,
         description="Cobro de venta fiscal",
     )
 
@@ -47,17 +46,18 @@ def generate_accounting_entry(invoice, user):
     lines = FiscalInvoiceLine.objects.filter(invoice=invoice)
 
     for line in lines:
-        total_line = line.line_total()
+        if line.tax is None:
+            continue
+
+        total_line = line.line_total
         tax = line.tax
 
-        # Cuenta de ventas (puede ser parametrizable por producto)
         sales_account = get_account(company, "VENTAS")
 
         if tax.is_vat:
             base_amount = total_line
             vat_amount = total_line * (tax.rate / 100)
 
-            # Ventas gravadas
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=sales_account,
@@ -65,7 +65,6 @@ def generate_accounting_entry(invoice, user):
                 description=f"Venta gravada {tax.rate}%",
             )
 
-            # IVA Débito
             if tax.account_code:
                 vat_account = get_account(company, tax.account_code)
                 JournalEntryLine.objects.create(
@@ -92,7 +91,6 @@ def generate_accounting_entry(invoice, user):
             )
 
         else:
-            # Percepciones, retenciones, impuestos internos
             if tax.account_code:
                 tax_account = get_account(company, tax.account_code)
                 JournalEntryLine.objects.create(
@@ -101,25 +99,5 @@ def generate_accounting_entry(invoice, user):
                     credit=total_line,
                     description=f"Impuesto {tax.name}",
                 )
-
-    # 3) CMV y baja de stock
-    sale = invoice.sale
-    if sale.total_cost > 0:
-        cmv_account = get_account(company, "CMV")
-        stock_account = get_account(company, "MERCADERIAS")
-
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=cmv_account,
-            debit=sale.total_cost,
-            description="Costo de mercaderías vendidas",
-        )
-
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=stock_account,
-            credit=sale.total_cost,
-            description="Baja de stock por venta",
-        )
 
     return entry

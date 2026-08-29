@@ -2,11 +2,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
+from django.utils import timezone
 
 from fiscal.models.fiscal_invoice import FiscalInvoice
+from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
 from sales.models.sale import Sale
-
-from accounting.services.generate_entry import generate_accounting_entry
 
 from core.utils.company_active import get_active_company
 from core.utils.company_access import user_has_access
@@ -26,35 +26,37 @@ def fiscal_invoice_create(request, sale_id):
 
     sale = get_object_or_404(Sale, id=sale_id, company=company)
 
-    # Evitar duplicación de factura fiscal
-    if hasattr(sale, "fiscal_invoice"):
-        return redirect("sales:sale_detail", pk=sale.id)
-
-    voucher_type = "B"
+    voucher_type = "FA"
     point_of_sale = 1
 
-    voucher_number = FiscalInvoice.next_number(
+    voucher_book = ElectronicVoucherBook.objects.filter(
         company=company,
         point_of_sale=point_of_sale,
-        voucher_type=voucher_type
+        voucher_type=voucher_type,
+        enabled=True,
+    ).first()
+
+    if not voucher_book:
+        return HttpResponseForbidden(
+            "No active electronic voucher book configured for this company."
+        )
+
+    invoice_number = FiscalInvoice.next_number(
+        company=company,
+        point_of_sale=point_of_sale,
+        voucher_type=voucher_type,
     )
 
     invoice = FiscalInvoice.objects.create(
         company=company,
-        customer=sale.customer,
-        sale=sale,
-        voucher_type=voucher_type,
-        point_of_sale=point_of_sale,
-        voucher_number=voucher_number,
+        voucher_book=voucher_book,
+        number=invoice_number,
+        date=timezone.now().date(),
+        customer_name=sale.customer.name,
+        customer_tax_id=getattr(sale.customer, "tax_id", "") or "",
     )
 
-    # Finaliza la factura (totales + CAE)
-    invoice.finalize()
-
-    # Genera asiento contable automático basado en Tax.account_code
-    generate_accounting_entry(invoice, request.user)
-
-    return redirect("sales:sale_detail", pk=sale.id)
+    return redirect("fiscal:fiscal_invoice_detail", pk=invoice.pk)
 
 
 @login_required
@@ -64,9 +66,11 @@ def fiscal_invoice_list(request):
     if not company:
         return HttpResponseForbidden("No active company")
 
-    invoices = FiscalInvoice.objects.filter(company=company)\
-        .select_related("customer", "sale")\
+    invoices = (
+        FiscalInvoice.objects.filter(company=company)
+        .select_related("voucher_book")
         .order_by("-date", "-id")
+    )
 
     return render(request, "fiscal/fiscal_invoice_list.html", {"invoices": invoices})
 

@@ -3,6 +3,7 @@ from company.models import Company
 from products.models import Product
 from sales.models.sale import Sale
 from purchases.models.purchase import Purchase
+from fiscal.models.tax import Tax
 
 
 class Location(models.Model):
@@ -34,7 +35,9 @@ class InventoryMovement(models.Model):
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     item = models.ForeignKey(
-        InventoryItem, on_delete=models.CASCADE, related_name="movements"
+        InventoryItem,
+        on_delete=models.CASCADE,
+        related_name="movements",
     )
 
     movement_type = models.CharField(max_length=3, choices=MOVEMENT_TYPES)
@@ -42,13 +45,12 @@ class InventoryMovement(models.Model):
     note = models.CharField(max_length=200, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    # ✔ AHORA SÍ dentro del modelo
     sale = models.ForeignKey(
         Sale,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="inventory_movements"
+        related_name="inventory_movements",
     )
 
     purchase = models.ForeignKey(
@@ -56,7 +58,17 @@ class InventoryMovement(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="inventory_movements"
+        related_name="inventory_movements",
+    )
+
+    # Impuesto interno asociado (si aplica)
+    internal_tax = models.ForeignKey(
+        Tax,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="inventory_movements",
+        help_text="Impuesto interno aplicado al producto",
     )
 
     def __str__(self):

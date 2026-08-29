@@ -26,15 +26,15 @@ admin.site.register(ElectronicVoucherBook)
 class FiscalInvoiceAdmin(admin.ModelAdmin):
     list_display = (
         "date",
-        "customer",
-        "voucher_type",
-        "point_of_sale",
-        "voucher_number",
-        "total",
+        "company",
+        "voucher_book",
+        "number",
+        "customer_name",
+        "total_amount",
         "cae",
     )
-    search_fields = ("customer__name", "voucher_number", "cae")
-    list_filter = ("voucher_type", "point_of_sale", "date")
+    search_fields = ("customer_name", "number", "cae", "company__name")
+    list_filter = ("company", "voucher_book", "date")
 
 # Fiscal Products
 admin.site.register(FiscalProduct)

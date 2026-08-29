@@ -1,4 +1,3 @@
-# suppliers/models.py
 from django.db import models
 from django.utils import timezone
 from company.models import Company
@@ -20,7 +19,9 @@ class ThirdPartyTaxProfile(models.Model):
     name = models.CharField(max_length=150)
     tax_id = models.CharField(max_length=20, blank=True, null=True)
     iva_condition = models.CharField(
-        max_length=10, choices=IVA_CONDITIONS, default="RI"
+        max_length=10,
+        choices=IVA_CONDITIONS,
+        default="RI",
     )
     iibb_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     is_iibb_exempt = models.BooleanField(default=False)
@@ -40,7 +41,7 @@ class Supplier(models.Model):
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name="suppliers_thirdpartytaxprofiles",
+        related_name="suppliers",
     )
 
     name = models.CharField(max_length=255)
@@ -50,7 +51,9 @@ class Supplier(models.Model):
 
     tax_id = models.CharField(max_length=20, blank=True, null=True)
     iva_condition = models.CharField(
-        max_length=10, choices=IVA_CONDITIONS, default="RI"
+        max_length=10,
+        choices=IVA_CONDITIONS,
+        default="RI",
     )
 
     iibb_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -60,12 +63,14 @@ class Supplier(models.Model):
     is_ganancias_exempt = models.BooleanField(default=False)
 
     tax_profile = models.ForeignKey(
-        ThirdPartyTaxProfile, null=True, blank=True, on_delete=models.SET_NULL
+        ThirdPartyTaxProfile,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
 
     class Meta:
         ordering = ["name"]

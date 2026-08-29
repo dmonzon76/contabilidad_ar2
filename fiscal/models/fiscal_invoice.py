@@ -1,124 +1,206 @@
 from decimal import Decimal
 from django.db import models
-from company.models import Company
-from sales.models.sale import Sale
-from sales.models.customer import Customer
+from django.core.exceptions import ValidationError
 
+from company.models import Company
+from fiscal.models.tax import Tax
+from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
 
 class FiscalInvoice(models.Model):
-    """
-    Factura fiscal argentina vinculada a una venta comercial (Sale).
-    Genera número fiscal, CAE, totales y soporta ítems exentos/no gravados.
-    """
 
-    # Empresa activa (no se pide en formularios)
     company = models.ForeignKey(
         Company,
+        on_delete=models.CASCADE,
+        related_name="fiscal_invoices",
+    )
+
+    voucher_book = models.ForeignKey(
+        ElectronicVoucherBook,
         on_delete=models.PROTECT,
-        related_name="fiscal_invoices"
+        related_name="invoices",
     )
 
-    # Cliente (se toma de la venta)
-    customer = models.ForeignKey(
-        Customer,
-        on_delete=models.PROTECT,
-        related_name="fiscal_invoices"
-    )
-
-    # VENTA vinculada (clave del flujo)
-    sale = models.OneToOneField(
-        Sale,
-        on_delete=models.PROTECT,
-        related_name="fiscal_invoice"
-    )
-
-    # Tipo de comprobante (A, B, C, NC, ND)
-    voucher_type = models.CharField(
-        max_length=5,
-        choices=[
-            ("A", "Factura A"),
-            ("B", "Factura B"),
-            ("C", "Factura C"),
-            ("NC", "Nota de Crédito"),
-            ("ND", "Nota de Débito"),
-        ],
-        default="B"
-    )
-
-    # Punto de venta AFIP
-    point_of_sale = models.IntegerField(default=1)
-
-    # Número fiscal correlativo
-    voucher_number = models.IntegerField()
-
-    # Fecha de emisión
-    date = models.DateField(auto_now_add=True)
-
-    # Totales fiscales
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    vat_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    exempt_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    non_taxed_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-
-    # CAE (simulado por ahora)
+    number = models.IntegerField()
     cae = models.CharField(max_length=20, blank=True, null=True)
     cae_expiration = models.DateField(blank=True, null=True)
 
+    date = models.DateField()
+    customer_name = models.CharField(max_length=255)
+    customer_tax_id = models.CharField(max_length=20, blank=True, null=True)
+
+    net_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    vat_21 = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    vat_105 = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    vat_27 = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    vat_exempt = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    vat_non_taxed = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    perception_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    retention_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    is_closed = models.BooleanField(default=False)
+    cae_due_date = models.DateField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def determine_voucher_type(self):
+    company_cat = self.company.tax_profile.category
+    customer_cat = self.customer.tax_profile.category
+
+    # Empresa Responsable Inscripto
+    if company_cat == "RI":
+
+        # Cliente Responsable Inscripto → Factura A
+        if customer_cat == "RI":
+            return "A"
+
+        # Cliente Monotributo → Factura B
+        if customer_cat == "MONO":
+            return "B"
+
+        # Cliente Consumidor Final
+        if customer_cat == "CF":
+            # AFIP: si supera $100.000 → A
+            if self.total_amount >= 100000:
+                return "A"
+            return "B"
+
+        # Cliente Exento / No alcanzado → B
+        if customer_cat in ["EX", "NA"]:
+            return "B"
+
+        # Cliente extranjero → B
+        if customer_cat == "EXT":
+            return "B"
+
+    # Empresa Monotributo → siempre C
+    if company_cat == "MONO":
+        return "C"
+
+    # Empresa Exenta → Factura E
+    if company_cat == "EX":
+        return "E"
+
+    # Default
+    return "B"
+
+
+    class Meta:
+        ordering = ["-date", "-id"]
+
     def __str__(self):
-        return f"{self.voucher_type}-{self.point_of_sale}-{self.voucher_number}"
+        if self.voucher_book:
+            return f"Factura {self.voucher_book.voucher_type} {self.number}"
+        return f"Factura {self.number}"
 
-    # ---------------------------------------------------------
-    # Cálculo fiscal basado en los ítems de la venta
-    # ---------------------------------------------------------
-    def calculate_totals(self):
-        net = Decimal("0.00")
-        vat = Decimal("0.00")
-        exempt = Decimal("0.00")
-        non_taxed = Decimal("0.00")
-
-        for item in self.sale.items.all():
-            if item.tax_category == "GRAVADO":
-                net += item.subtotal
-                vat += item.subtotal * Decimal("0.21")
-            elif item.tax_category == "EXENTO":
-                exempt += item.subtotal
-            elif item.tax_category == "NO_GRAVADO":
-                non_taxed += item.subtotal
-
-        self.subtotal = net
-        self.vat_amount = vat
-        self.exempt_amount = exempt
-        self.non_taxed_amount = non_taxed
-        self.total = net + vat + exempt + non_taxed
-
-    # ---------------------------------------------------------
-    # Generación de número fiscal correlativo
-    # ---------------------------------------------------------
     @staticmethod
     def next_number(company, point_of_sale, voucher_type):
-        last = FiscalInvoice.objects.filter(
-            company=company,
-            point_of_sale=point_of_sale,
-            voucher_type=voucher_type
-        ).order_by("-voucher_number").first()
+        book = (
+            ElectronicVoucherBook.objects.filter(
+                company=company,
+                point_of_sale=point_of_sale,
+                voucher_type=voucher_type,
+                enabled=True,
+            )
+            .order_by("-current_number")
+            .first()
+        )
 
-        return (last.voucher_number + 1) if last else 1
+        if not book:
+            raise ValueError(
+                "No active electronic voucher book found for this company and type."
+            )
 
-    # ---------------------------------------------------------
-    # Generación de CAE (simulado)
-    # ---------------------------------------------------------
-    def generate_cae(self):
-        import random
-        from datetime import date, timedelta
+        return book.next_number()
 
-        self.cae = str(random.randint(10000000, 99999999))
-        self.cae_expiration = date.today() + timedelta(days=10)
+    def calculate_totals(self):
+        net = Decimal("0.00")
+        tax_total = Decimal("0.00")
 
-    # ---------------------------------------------------------
-    # Guardado completo
-    # ---------------------------------------------------------
+        vat_21 = Decimal("0.00")
+        vat_105 = Decimal("0.00")
+        vat_27 = Decimal("0.00")
+        vat_exempt = Decimal("0.00")
+        vat_non_taxed = Decimal("0.00")
+
+        for line in self.lines.all():
+            line_total = line.line_total
+            net += line_total
+
+            if line.tax is None:
+                continue
+
+            tax_obj = line.tax
+            tax_amount = line.tax_amount
+            tax_total += tax_amount
+
+            if tax_obj.afip_code == 5:
+                vat_21 += tax_amount
+            elif tax_obj.afip_code == 4:
+                vat_105 += tax_amount
+            elif tax_obj.afip_code == 6:
+                vat_27 += tax_amount
+            elif tax_obj.afip_code == 1:
+                vat_exempt += line_total
+            elif tax_obj.afip_code == 2:
+                vat_non_taxed += line_total
+
+        self.net_amount = net
+        self.tax_amount = tax_total
+        self.total_amount = net + tax_total
+
+        self.vat_21 = vat_21
+        self.vat_105 = vat_105
+        self.vat_27 = vat_27
+        self.vat_exempt = vat_exempt
+        self.vat_non_taxed = vat_non_taxed
+
+        self.save(
+            update_fields=[
+                "net_amount",
+                "tax_amount",
+                "total_amount",
+                "vat_21",
+                "vat_105",
+                "vat_27",
+                "vat_exempt",
+                "vat_non_taxed",
+            ]
+        )
+
     def finalize(self):
+        if self.is_closed:
+            raise ValueError("Invoice already finalized")
+
+        if not self.lines.exists():
+            raise ValueError("Cannot finalize invoice without lines")
+
         self.calculate_totals()
-        self.generate_cae()
-        self.save()
+
+        if self.number is None or self.number <= 0:
+            self.number = self.assign_number()
+
+        self.is_closed = True
+        self.save(update_fields=["is_closed", "cae_due_date", "number"])
+        return True
+
+    def clean(self):
+        if self.number <= 0:
+            raise ValidationError("Invoice number must be positive.")
+
+        if self.voucher_book is None:
+            raise ValidationError("Voucher book is required.")
+
+        if self.voucher_book.company != self.company:
+            raise ValidationError("Voucher book belongs to another company.")
+
+        if not self.voucher_book.enabled:
+            raise ValidationError("Voucher book is disabled.")
+
+    def assign_number(self):
+        if self.voucher_book is None:
+            raise ValidationError("Voucher book is required.")
+        self.number = self.voucher_book.next_number()

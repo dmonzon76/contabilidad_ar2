@@ -26,7 +26,7 @@ class PurchaseLineInline(admin.TabularInline):
 class PurchaseTaxInline(admin.TabularInline):
     model = PurchaseTax
     extra = 1
-    fields = ("vat_type", "base_amount", "amount")
+    fields = ("tax", "base_amount", "amount")
 
 
 class PurchasePerceptionInline(admin.TabularInline):

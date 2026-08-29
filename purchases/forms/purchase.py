@@ -66,9 +66,9 @@ PurchaseLineFormSet = inlineformset_factory(
 class PurchaseTaxForm(forms.ModelForm):
     class Meta:
         model = PurchaseTax
-        fields = ["vat_type", "base_amount", "amount"]
+        fields = ["tax", "base_amount", "amount"]
         widgets = {
-            "vat_type": forms.Select(attrs={"class": "form-control"}),
+            "tax": forms.Select(attrs={"class": "form-control"}),
             "base_amount": forms.NumberInput(attrs={"class": "form-control"}),
             "amount": forms.NumberInput(attrs={"class": "form-control"}),
         }
@@ -79,7 +79,7 @@ class PurchaseTaxForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        vat_type = cleaned.get("vat_type")
+        tax = cleaned.get("tax")
 
         if not self.purchase:
             return cleaned
@@ -90,14 +90,14 @@ class PurchaseTaxForm(forms.ModelForm):
         if not profile:
             raise forms.ValidationError("Supplier has no tax profile assigned.")
 
-        if vat_type in ["21", "105", "27"] and profile.vat_exempt:
+        if tax is not None and tax.is_vat and profile.vat_exempt:
             raise forms.ValidationError(
                 "Supplier cannot apply VAT because the profile is marked as VAT exempt."
             )
 
-        if vat_type == "0" and not profile.vat_exempt:
+        if tax is not None and tax.is_exempt and not profile.vat_exempt:
             raise forms.ValidationError(
-                "Supplier is not VAT exempt; cannot use VAT 0%."
+                "Supplier is not VAT exempt; cannot use a 0% tax."
             )
 
         return cleaned
