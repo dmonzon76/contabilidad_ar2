@@ -6,6 +6,7 @@ PLAN_FULL = [
 
     # --- ASSETS ---
     ("1", "Assets", None, "ASSET"),
+
     ("1.1", "Current Assets", "1", "ASSET"),
     ("1.1.1", "Cash", "1.1", "ASSET"),
     ("1.1.2", "Banks", "1.1", "ASSET"),
@@ -15,14 +16,17 @@ PLAN_FULL = [
     ("1.1.6", "Other Receivables", "1.1", "ASSET"),
     ("1.1.7", "Advances to Suppliers", "1.1", "ASSET"),
     ("1.1.8", "Inventory", "1.1", "ASSET"),
+    ("1.1.9", "Prepaid Expenses", "1.1", "ASSET"),
 
     ("1.2", "Non-current Assets", "1", "ASSET"),
     ("1.2.1", "Property, Plant & Equipment", "1.2", "ASSET"),
     ("1.2.2", "Intangible Assets", "1.2", "ASSET"),
     ("1.2.3", "Deferred Tax Assets", "1.2", "ASSET"),
+    ("1.2.4", "Long-term Investments", "1.2", "ASSET"),
 
     # --- LIABILITIES ---
     ("2", "Liabilities", None, "LIABILITY"),
+
     ("2.1", "Current Liabilities", "2", "LIABILITY"),
     ("2.1.1", "Suppliers", "2.1", "LIABILITY"),
     ("2.1.2", "Salaries Payable", "2.1", "LIABILITY"),
@@ -30,9 +34,11 @@ PLAN_FULL = [
     ("2.1.4", "Loans - Short Term", "2.1", "LIABILITY"),
     ("2.1.5", "Credit Cards Payable", "2.1", "LIABILITY"),
     ("2.1.6", "Taxes Payable", "2.1", "LIABILITY"),
+    ("2.1.7", "Accrued Expenses", "2.1", "LIABILITY"),
 
     ("2.2", "Non-current Liabilities", "2", "LIABILITY"),
     ("2.2.1", "Loans - Long Term", "2.2", "LIABILITY"),
+    ("2.2.2", "Deferred Tax Liabilities", "2.2", "LIABILITY"),
 
     # --- EQUITY ---
     ("3", "Equity", None, "EQUITY"),
@@ -40,61 +46,86 @@ PLAN_FULL = [
     ("3.2", "Retained Earnings", "3", "EQUITY"),
     ("3.3", "Legal Reserve", "3", "EQUITY"),
     ("3.4", "Inflation Adjustment", "3", "EQUITY"),
+    ("3.5", "Other Reserves", "3", "EQUITY"),
 
     # --- INCOME ---
     ("4", "Income", None, "INCOME"),
     ("4.1", "Sales", "4", "INCOME"),
-    ("4.2", "Other Income", "4", "INCOME"),
+    ("4.1.1", "Domestic Sales", "4.1", "INCOME"),
+    ("4.1.2", "Export Sales", "4.1", "INCOME"),
+    ("4.2", "Other Operating Income", "4", "INCOME"),
+    ("4.3", "Non-operating Income", "4", "INCOME"),
 
-    # --- EXPENSES ---
-    ("5", "Expenses", None, "EXPENSE"),
-    ("5.1", "Administrative Expenses", "5", "EXPENSE"),
-    ("5.1.1", "Office Supplies", "5.1", "EXPENSE"),
-    ("5.1.2", "Services", "5.1", "EXPENSE"),
-    ("5.1.3", "Rent", "5.1", "EXPENSE"),
-    ("5.1.4", "Professional Fees", "5.1", "EXPENSE"),
-    ("5.2", "Selling Expenses", "5", "EXPENSE"),
-    ("5.3", "Financial Expenses", "5", "EXPENSE"),
+    # --- COST OF SALES ---
+    ("5", "Cost of Sales", None, "EXPENSE"),
+    ("5.1", "Cost of Goods Sold", "5", "EXPENSE"),
+    ("5.1.1", "COGS - Merchandise", "5.1", "EXPENSE"),
+    ("5.1.2", "COGS - Production", "5.1", "EXPENSE"),
+    ("5.2", "Inventory Adjustments", "5", "EXPENSE"),
+
+    # --- OPERATING EXPENSES ---
+    ("6", "Operating Expenses", None, "EXPENSE"),
+
+    ("6.1", "Administrative Expenses", "6", "EXPENSE"),
+    ("6.1.1", "Office Supplies", "6.1", "EXPENSE"),
+    ("6.1.2", "Services", "6.1", "EXPENSE"),
+    ("6.1.3", "Rent", "6.1", "EXPENSE"),
+    ("6.1.4", "Professional Fees", "6.1", "EXPENSE"),
+    ("6.1.5", "Insurance", "6.1", "EXPENSE"),
+    ("6.1.6", "Maintenance", "6.1", "EXPENSE"),
+
+    ("6.2", "Selling Expenses", "6", "EXPENSE"),
+    ("6.2.1", "Advertising", "6.2", "EXPENSE"),
+    ("6.2.2", "Sales Commissions", "6.2", "EXPENSE"),
+    ("6.2.3", "Freight and Delivery", "6.2", "EXPENSE"),
+
+    ("6.3", "Financial Expenses", "6", "EXPENSE"),
+    ("6.3.1", "Interest Expense", "6.3", "EXPENSE"),
+    ("6.3.2", "Bank Charges", "6.3", "EXPENSE"),
+
+    ("6.4", "Depreciation and Amortization", "6", "EXPENSE"),
+    ("6.4.1", "Depreciation - PPE", "6.4", "EXPENSE"),
+    ("6.4.2", "Amortization - Intangibles", "6.4", "EXPENSE"),
 
     # --- AFIP TAXES ---
-    ("6", "AFIP Taxes", None, "LIABILITY"),
+    ("7", "AFIP Taxes", None, "LIABILITY"),
 
     # IVA
-    ("6.1", "IVA", "6", "LIABILITY"),
-    ("6.1.1", "IVA Debit Fiscal", "6.1", "LIABILITY"),
-    ("6.1.2", "IVA Credit Fiscal", "6.1", "ASSET"),
-    ("6.1.3", "IVA Non-taxable", "6.1", "LIABILITY"),
-    ("6.1.4", "IVA Exempt", "6.1", "LIABILITY"),
-    ("6.1.5", "IVA Perceptions", "6.1", "ASSET"),
-    ("6.1.6", "IVA Retentions", "6.1", "LIABILITY"),
+    ("7.1", "IVA", "7", "LIABILITY"),
+    ("7.1.1", "IVA Debit Fiscal", "7.1", "LIABILITY"),
+    ("7.1.2", "IVA Credit Fiscal", "7.1", "ASSET"),
+    ("7.1.3", "IVA Non-taxable", "7.1", "LIABILITY"),
+    ("7.1.4", "IVA Exempt", "7.1", "LIABILITY"),
+    ("7.1.5", "IVA Perceptions", "7.1", "ASSET"),
+    ("7.1.6", "IVA Retentions", "7.1", "LIABILITY"),
 
     # Income Tax
-    ("6.2", "Income Tax", "6", "LIABILITY"),
-    ("6.2.1", "Income Tax Retentions (RG 830)", "6.2", "LIABILITY"),
-    ("6.2.2", "Income Tax Perceptions", "6.2", "ASSET"),
+    ("7.2", "Income Tax", "7", "LIABILITY"),
+    ("7.2.1", "Income Tax Retentions (RG 830)", "7.2", "LIABILITY"),
+    ("7.2.2", "Income Tax Perceptions", "7.2", "ASSET"),
 
     # SUSS
-    ("6.3", "SUSS", "6", "LIABILITY"),
-    ("6.3.1", "SUSS Retentions", "6.3", "LIABILITY"),
+    ("7.3", "SUSS", "7", "LIABILITY"),
+    ("7.3.1", "SUSS Retentions", "7.3", "LIABILITY"),
 
     # Gross Income Tax
-    ("6.4", "Gross Income Tax", "6", "LIABILITY"),
-    ("6.4.1", "IIBB Perceptions", "6.4", "ASSET"),
-    ("6.4.2", "IIBB Retentions", "6.4", "LIABILITY"),
+    ("7.4", "Gross Income Tax", "7", "LIABILITY"),
+    ("7.4.1", "IIBB Perceptions", "7.4", "ASSET"),
+    ("7.4.2", "IIBB Retentions", "7.4", "LIABILITY"),
 
     # PAIS
-    ("6.5", "PAIS Tax", "6", "LIABILITY"),
-    ("6.5.1", "PAIS Tax", "6.5", "LIABILITY"),
-    ("6.5.2", "PAIS Perception", "6.5", "ASSET"),
+    ("7.5", "PAIS Tax", "7", "LIABILITY"),
+    ("7.5.1", "PAIS Tax", "7.5", "LIABILITY"),
+    ("7.5.2", "PAIS Perception", "7.5", "ASSET"),
 
     # RG 4815
-    ("6.6", "Perception RG 4815", "6", "ASSET"),
-    ("6.6.1", "Perception RG 4815", "6.6", "ASSET"),
+    ("7.6", "Perception RG 4815", "7", "ASSET"),
+    ("7.6.1", "Perception RG 4815", "7.6", "ASSET"),
 
     # Bank Tax (IDyC)
-    ("6.7", "Bank Tax (IDyC)", "6", "EXPENSE"),
-    ("6.7.1", "Debits Tax", "6.7", "EXPENSE"),
-    ("6.7.2", "Credits Tax", "6.7", "EXPENSE"),
+    ("7.7", "Bank Tax (IDyC)", "7", "EXPENSE"),
+    ("7.7.1", "Debits Tax", "7.7", "EXPENSE"),
+    ("7.7.2", "Credits Tax", "7.7", "EXPENSE"),
 
     # --- OTHER TAXES ---
     ("8", "Other Taxes", None, "LIABILITY"),
@@ -106,6 +137,7 @@ PLAN_FULL = [
     ("9", "Results", None, "INCOME"),
     ("9.1", "Financial Results", "9", "INCOME"),
     ("9.2", "Inflation Adjustment Results", "9", "INCOME"),
+    ("9.3", "Extraordinary Results", "9", "INCOME"),
 ]
 
 

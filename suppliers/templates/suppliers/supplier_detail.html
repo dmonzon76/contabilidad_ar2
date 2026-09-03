@@ -23,6 +23,8 @@
         <p><strong>Ganancias Exempt:</strong> {{ supplier.is_ganancias_exempt|yesno:"Yes,No" }}</p>
 
         <a href="{% url 'suppliers:supplier_list' %}" class="btn btn-secondary mt-3">Back</a>
+        <a href="{% url 'suppliers:supplier_edit' supplier.pk %}" class="btn btn-primary mt-3">Edit</a>
+        <a href="{% url 'suppliers:supplier_delete' supplier.pk %}" class="btn btn-outline-danger mt-3">Delete</a>
     </div>
 
 </div>

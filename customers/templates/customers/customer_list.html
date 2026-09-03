@@ -1,6 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
 <h2>Customers</h2>
 
-<a href="{% url 'customer_add' %}">Add Customer</a>
+<a href="{% url 'customers:customer_add' %}" class="btn btn-primary mb-3">Add Customer</a>
 
 <table>
     <thead>
@@ -13,10 +17,12 @@
     <tbody>
         {% for c in customers %}
         <tr>
-            <td><a href="{% url 'customer_detail' c.pk %}">{{ c.name }}</a></td>
+            <td><a href="{% url 'customers:customer_detail' c.pk %}">{{ c.name }}</a></td>
             <td>{{ c.email }}</td>
             <td>{{ c.phone }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
+{% endblock %}

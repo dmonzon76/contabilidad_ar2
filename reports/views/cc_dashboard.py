@@ -14,9 +14,9 @@ def cc_dashboard(request):
     # ============================
     cc_customers_total = (
         AccountMovement.objects.filter(
-            company_id=company_id,
-            customer__isnull=False
-        ).aggregate(total=Sum("amount"))["total"] or 0
+            company_id=company_id, customer__isnull=False
+        ).aggregate(total=Sum("amount"))["total"]
+        or 0
     )
 
     # ============================
@@ -24,17 +24,16 @@ def cc_dashboard(request):
     # ============================
     cc_suppliers_total = (
         AccountMovement.objects.filter(
-            company_id=company_id,
-            supplier__isnull=False
-        ).aggregate(total=Sum("amount"))["total"] or 0
+            company_id=company_id, supplier__isnull=False
+        ).aggregate(total=Sum("amount"))["total"]
+        or 0
     )
 
     # ============================
     # MOVIMIENTOS DEL DÍA
     # ============================
     cc_movements_today = AccountMovement.objects.filter(
-        company_id=company_id,
-        date=today
+        company_id=company_id, date=today
     )
 
     cc_movements_today_count = cc_movements_today.count()
@@ -43,8 +42,7 @@ def cc_dashboard(request):
     # MOVIMIENTOS POR TIPO (DEBIT / CREDIT)
     # ============================
     cc_movements_by_type_today = (
-        cc_movements_today
-        .values("movement_type")
+        cc_movements_today.values("movement_type")
         .annotate(total=Sum("amount"))
         .order_by("movement_type")
     )
@@ -53,8 +51,7 @@ def cc_dashboard(request):
     # MOVIMIENTOS POR HORA
     # ============================
     cc_movements_by_hour_today = (
-        cc_movements_today
-        .values("created_at__hour")
+        cc_movements_today.values("created_at__hour")
         .annotate(total=Sum("amount"))
         .order_by("created_at__hour")
     )
@@ -63,10 +60,7 @@ def cc_dashboard(request):
     # TOP DEUDORES (CLIENTES)
     # ============================
     top_customers_debt = (
-        AccountMovement.objects.filter(
-            company_id=company_id,
-            customer__isnull=False
-        )
+        AccountMovement.objects.filter(company_id=company_id, customer__isnull=False)
         .values("customer__name")
         .annotate(total=Sum("amount"))
         .order_by("-total")[:10]
@@ -76,10 +70,7 @@ def cc_dashboard(request):
     # TOP ACREEDORES (PROVEEDORES)
     # ============================
     top_suppliers_credit = (
-        AccountMovement.objects.filter(
-            company_id=company_id,
-            supplier__isnull=False
-        )
+        AccountMovement.objects.filter(company_id=company_id, supplier__isnull=False)
         .values("supplier__name")
         .annotate(total=Sum("amount"))
         .order_by("-total")[:10]
@@ -89,15 +80,9 @@ def cc_dashboard(request):
     # ANTIGÜEDAD DE SALDOS CLIENTES
     # ============================
     customers_aging = (
-        AccountMovement.objects.filter(
-            company_id=company_id,
-            customer__isnull=False
-        )
+        AccountMovement.objects.filter(company_id=company_id, customer__isnull=False)
         .values("customer__name")
-        .annotate(
-            last_movement=Sum("amount"),
-            oldest=Count("id")
-        )
+        .annotate(last_movement=Sum("amount"), oldest=Count("id"))
         .order_by("-last_movement")
     )
 
@@ -105,15 +90,9 @@ def cc_dashboard(request):
     # ANTIGÜEDAD DE SALDOS PROVEEDORES
     # ============================
     suppliers_aging = (
-        AccountMovement.objects.filter(
-            company_id=company_id,
-            supplier__isnull=False
-        )
+        AccountMovement.objects.filter(company_id=company_id, supplier__isnull=False)
         .values("supplier__name")
-        .annotate(
-            last_movement=Sum("amount"),
-            oldest=Count("id")
-        )
+        .annotate(last_movement=Sum("amount"), oldest=Count("id"))
         .order_by("-last_movement")
     )
 
@@ -129,4 +108,4 @@ def cc_dashboard(request):
         "suppliers_aging": suppliers_aging,
     }
 
-    return render(request, "reports/cc_dashboard.html", context)
+    return render(request, "reports/reports/cc_dashboard.html", context)

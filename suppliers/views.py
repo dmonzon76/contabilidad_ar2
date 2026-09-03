@@ -27,17 +27,20 @@ def supplier_detail(request, pk):
 @login_required
 def supplier_add(request):
     """Crear un nuevo proveedor. Usa supplier_form.html con mode='add'."""
+    company = request.active_company
     if request.method == "POST":
-        form = SupplierForm(request.POST)
+        form = SupplierForm(request.POST, company=company)
         if form.is_valid():
             s = form.save(commit=False)
-            s.company_id = request.session.get("active_company_id")
+            s.company = company
             s.save()
             messages.success(request, "Supplier created")
             return redirect("suppliers:supplier_detail", s.pk)
     else:
-        form = SupplierForm()
-    return render(request, "suppliers/supplier_form.html", {"form": form, "mode": "add"})
+        form = SupplierForm(company=company)
+    return render(
+        request, "suppliers/supplier_form.html", {"form": form, "mode": "add"}
+    )
 
 
 @login_required
@@ -45,15 +48,16 @@ def supplier_edit(request, pk):
     """Editar proveedor existente. Usa supplier_form.html con mode='edit'."""
     company_id = request.session.get("active_company_id")
     supplier = get_object_or_404(Supplier, pk=pk, company_id=company_id)
+    company = request.active_company
 
     if request.method == "POST":
-        form = SupplierForm(request.POST, instance=supplier)
+        form = SupplierForm(request.POST, instance=supplier, company=company)
         if form.is_valid():
             form.save()
             messages.success(request, "Supplier updated")
             return redirect("suppliers:supplier_detail", supplier.pk)
     else:
-        form = SupplierForm(instance=supplier)
+        form = SupplierForm(instance=supplier, company=company)
 
     context = {
         "form": form,
@@ -74,7 +78,9 @@ def supplier_delete(request, pk):
         messages.success(request, "Supplier deleted")
         return redirect("suppliers:supplier_list")
 
-    return render(request, "suppliers/supplier_confirm_delete.html", {"supplier": supplier})
+    return render(
+        request, "suppliers/supplier_confirm_delete.html", {"supplier": supplier}
+    )
 
 
 @login_required
@@ -86,7 +92,9 @@ def supplier_autocomplete(request):
     """
     q = request.GET.get("q", "").strip()
     company_id = request.session.get("active_company_id")
-    qs = Supplier.objects.filter(company_id=company_id, name__icontains=q).order_by("name")[:10]
+    qs = Supplier.objects.filter(company_id=company_id, name__icontains=q).order_by(
+        "name"
+    )[:10]
     results = [
         {"id": s.pk, "text": s.name, "tax_id": s.tax_id or "", "email": s.email or ""}
         for s in qs

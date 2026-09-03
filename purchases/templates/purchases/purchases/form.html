@@ -7,7 +7,7 @@
 
 <div class="erp-card p-3">
 
-    <form method="post" hx-include="closest form">
+    <form method="post">
         {% csrf_token %}
 
         <!-- HEADER -->
@@ -18,7 +18,9 @@
                 {{ form.supplier.label_tag }}
                 {{ form.supplier }}
                 <div class="mt-2">
-                    <a href="{% url 'purchases:supplier_create' %}" class="btn btn-sm btn-outline-secondary">New Supplier</a>
+                    <a href="{% url 'purchases:supplier_create' %}" class="btn btn-sm btn-outline-secondary">
+                        New Supplier
+                    </a>
                 </div>
             </div>
             <div class="col-md-4">
@@ -52,41 +54,16 @@
             <tbody>
                 {% for lf in line_formset %}
                 <tr>
+                    {{ lf.id }}
                     <td>{{ lf.description }}</td>
-
-                    <td>
-                        <input
-                            type="number"
-                            name="{{ lf.quantity.name }}"
-                            value="{{ lf.quantity.value }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                    </td>
-
-                    <td>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="{{ lf.unit_price.name }}"
-                            value="{{ lf.unit_price.value }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                    </td>
-
+                    <td>{{ lf.quantity }}</td>
+                    <td>{{ lf.unit_price }}</td>
                     <td>{{ lf.expense_account }}</td>
-
                     <td>
                         {% if lf.instance.pk %}
                             {{ lf.instance.subtotal }}
                         {% endif %}
                     </td>
-
                     <td>{{ lf.DELETE }}</td>
                 </tr>
                 {% endfor %}
@@ -95,65 +72,56 @@
 
         <hr>
 
-        <!-- TAXES -->
         <h4 class="mb-3">Taxes (IVA)</h4>
-        {{ tax_formset.management_form }}
 
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>VAT Type</th>
-                    <th>Base Amount</th>
-                    <th>Amount</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
+{{ tax_formset.management_form }}
 
-            <tbody>
-                {% for tf in tax_formset %}
-                <tr>
-                    <td>
-                        <select
-                            name="{{ tf.vat_type.name }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                            {% for value, label in tf.fields.vat_type.choices %}
-                                <option value="{{ value }}" {% if tf.vat_type.value == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </td>
+{% if tax_formset.non_form_errors %}
+<div class="alert alert-danger">
+    {{ tax_formset.non_form_errors }}
+</div>
+{% endif %}
 
-                    <td>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="{{ tf.base_amount.name }}"
-                            value="{{ tf.base_amount.value }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                    </td>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>VAT Type</th>
+            <th>Base Amount</th>
+            <th>Amount</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
 
-                    <td>
-                        {% if tf.instance.pk %}
-                            {{ tf.instance.amount }}
-                        {% endif %}
-                    </td>
+    <tbody>
+        {% for tf in tax_formset %}
+        <tr>
+            {{ tf.id }}
 
-                    <td>{{ tf.DELETE }}</td>
-                </tr>
+            <td>
+                {{ tf.tax }}
+                {% for error in tf.tax.errors %}
+                    <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </td>
 
-        <hr>
+            <td>
+                {{ tf.base_amount }}
+                {% for error in tf.base_amount.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% if tf.instance.pk %}
+                    {{ tf.instance.amount }}
+                {% endif %}
+            </td>
+
+            <td>{{ tf.DELETE }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
         <!-- PERCEPTIONS -->
         <h4 class="mb-3">Perceptions</h4>
@@ -171,21 +139,9 @@
             <tbody>
                 {% for pf in perception_formset %}
                 <tr>
+                    {{ pf.id }}
                     <td>{{ pf.perception_type }}</td>
-
-                    <td>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="{{ pf.amount.name }}"
-                            value="{{ pf.amount.value }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                    </td>
-
+                    <td>{{ pf.amount }}</td>
                     <td>{{ pf.DELETE }}</td>
                 </tr>
                 {% endfor %}
@@ -210,21 +166,9 @@
             <tbody>
                 {% for rf in retention_formset %}
                 <tr>
+                    {{ rf.id }}
                     <td>{{ rf.retention_type }}</td>
-
-                    <td>
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="{{ rf.amount.name }}"
-                            value="{{ rf.amount.value }}"
-                            class="form-control"
-                            hx-post="{% url 'purchases:purchase_recalculate' %}"
-                            hx-target="#totals"
-                            hx-trigger="change delay:200ms"
-                        >
-                    </td>
-
+                    <td>{{ rf.amount }}</td>
                     <td>{{ rf.DELETE }}</td>
                 </tr>
                 {% endfor %}
@@ -233,9 +177,20 @@
 
         <hr>
 
-        <!-- TOTALS -->
-        <div id="totals">
+        <!-- TOTALS (HTMX-ready) -->
+        <div id="totals"
+             hx-get="{% url 'purchases:purchase_recalculate' %}"
+             hx-trigger="load">
             {% include "purchases/purchases/partials/totals.html" %}
+        </div>
+
+        <div class="mt-3">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-post="{% url 'purchases:purchase_recalculate' %}"
+                    hx-target="#totals">
+                Recalculate totals
+            </button>
         </div>
 
         <hr>

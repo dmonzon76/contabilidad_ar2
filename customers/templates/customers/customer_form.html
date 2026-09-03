@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>{% if customer %}Edit Customer{% else %}Add Customer{% endif %}</h2>
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Name</label>
+            <input id="id_name" class="form-control" type="text" name="name" value="{{ customer.name|default:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            <input id="id_email" class="form-control" type="email" name="email" value="{{ customer.email|default:'' }}">
+        </div>
+        <h4 class="mt-4">Fiscal Information</h4>
+        <div class="mb-3">
+            <label for="id_tax_id" class="form-label">Tax ID / CUIT</label>
+            <input id="id_tax_id" class="form-control" type="text" name="tax_id" value="{{ customer.tax_id|default:'' }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_iva_condition" class="form-label">IVA Condition</label>
+            <select id="id_iva_condition" class="form-select" name="iva_condition">
+                {% for value, label in iva_conditions %}
+                    <option value="{{ value }}" {% if customer.iva_condition == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="id_iibb_rate" class="form-label">IIBB Rate (%)</label>
+            <input id="id_iibb_rate" class="form-control" type="number" step="0.01" min="0" name="iibb_rate" value="{{ customer.iibb_rate|default:'0' }}">
+        </div>
+        <div class="form-check mb-3">
+            <input id="id_is_iibb_exempt" class="form-check-input" type="checkbox" name="is_iibb_exempt" {% if customer.is_iibb_exempt %}checked{% endif %}>
+            <label for="id_is_iibb_exempt" class="form-check-label">IIBB Exempt</label>
+        </div>
+        <div class="mb-3">
+            <label for="id_ganancias_rate" class="form-label">Ganancias Rate (%)</label>
+            <input id="id_ganancias_rate" class="form-control" type="number" step="0.01" min="0" name="ganancias_rate" value="{{ customer.ganancias_rate|default:'0' }}">
+        </div>
+        <div class="form-check mb-3">
+            <input id="id_is_ganancias_exempt" class="form-check-input" type="checkbox" name="is_ganancias_exempt" {% if customer.is_ganancias_exempt %}checked{% endif %}>
+            <label for="id_is_ganancias_exempt" class="form-check-label">Ganancias Exempt</label>
+        </div>
+        <div class="mb-3">
+            <label for="id_phone" class="form-label">Phone</label>
+            <input id="id_phone" class="form-control" type="text" name="phone" value="{{ customer.phone|default:'' }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_address" class="form-label">Address</label>
+            <input id="id_address" class="form-control" type="text" name="address" value="{{ customer.address|default:'' }}">
+        </div>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

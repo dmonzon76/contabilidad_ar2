@@ -1,5 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
 <h2>{{ customer.name }}</h2>
 
 <p><strong>Email:</strong> {{ customer.email }}</p>
 <p><strong>Phone:</strong> {{ customer.phone }}</p>
 <p><strong>Address:</strong> {{ customer.address }}</p>
+<p><strong>Tax ID / CUIT:</strong> {{ customer.tax_id }}</p>
+<p><strong>IVA Condition:</strong> {{ customer.get_iva_condition_display }}</p>
+<p><strong>IIBB Rate:</strong> {{ customer.iibb_rate }}%</p>
+<p><strong>IIBB Exempt:</strong> {{ customer.is_iibb_exempt|yesno:"Yes,No" }}</p>
+<p><strong>Ganancias Rate:</strong> {{ customer.ganancias_rate }}%</p>
+<p><strong>Ganancias Exempt:</strong> {{ customer.is_ganancias_exempt|yesno:"Yes,No" }}</p>
+
+<a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-primary">Edit</a>
+<a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">Back</a>
+<a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-outline-danger">Delete</a>
+</div>
+{% endblock %}

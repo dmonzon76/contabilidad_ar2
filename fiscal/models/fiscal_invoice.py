@@ -6,6 +6,7 @@ from company.models import Company
 from fiscal.models.tax import Tax
 from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
 
+
 class FiscalInvoice(models.Model):
 
     company = models.ForeignKey(
@@ -45,17 +46,17 @@ class FiscalInvoice(models.Model):
     cae_due_date = models.DateField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def determine_voucher_type(self):
-    company_cat = self.company.tax_profile.category
-    customer_cat = self.customer.tax_profile.category
+        company_cat = self.company.tax_profile.category
+        customer_cat = self.customer.tax_profile.category
 
-    # Empresa Responsable Inscripto
-    if company_cat == "RI":
+        # Empresa Responsable Inscripto
+        if company_cat == "RI":
 
-        # Cliente Responsable Inscripto → Factura A
-        if customer_cat == "RI":
-            return "A"
+            # Cliente Responsable Inscripto → Factura A
+            if customer_cat == "RI":
+                return "A"
 
         # Cliente Monotributo → Factura B
         if customer_cat == "MONO":
@@ -76,17 +77,16 @@ class FiscalInvoice(models.Model):
         if customer_cat == "EXT":
             return "B"
 
-    # Empresa Monotributo → siempre C
-    if company_cat == "MONO":
-        return "C"
+        # Empresa Monotributo → siempre C
+        if company_cat == "MONO":
+            return "C"
 
-    # Empresa Exenta → Factura E
-    if company_cat == "EX":
-        return "E"
+        # Empresa Exenta → Factura E
+        if company_cat == "EX":
+            return "E"
 
-    # Default
-    return "B"
-
+        # Default
+        return "B"
 
     class Meta:
         ordering = ["-date", "-id"]
