@@ -6,6 +6,7 @@ from suppliers.models import Supplier
 from accounting.models import Account
 from fiscal.models.tax import Tax
 
+
 class Purchase(models.Model):
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
@@ -37,19 +38,29 @@ class Purchase(models.Model):
     # Cálculo automático de totales e impuestos
     # ----------------------------------------------------
     def calculate_totals(self):
+        money = Decimal("0.01")
+
         # 1) Subtotales de líneas
         self.net_amount = sum(
-            (line.quantity * line.unit_price) for line in self.lines.all()
-        )
+            (line.quantity * line.unit_price for line in self.lines.all()),
+            Decimal("0"),
+        ).quantize(money)
 
         # 2) IVA / Impuestos automáticos desde Tax
         for tax_line in self.taxes.all():
-            tax_obj = tax_line.tax  # FK a fiscal.models.tax.Tax
+            tax_obj = tax_line.tax
+            if tax_obj is None:
+                tax_line.amount = Decimal("0")
+                tax_line.save(update_fields=["amount"])
+                continue
 
-            # rate = porcentaje (ej: 21.00)
-            # amount = base * (rate / 100)
-            tax_line.amount = tax_line.base_amount * (tax_obj.rate / Decimal("100"))
-            tax_line.save()
+            if tax_line.base_amount <= 0:
+                tax_line.base_amount = self.net_amount
+
+            tax_line.amount = (
+                tax_line.base_amount * tax_obj.rate / Decimal("100")
+            ).quantize(money)
+            tax_line.save(update_fields=["base_amount", "amount"])
 
         # 3) Percepciones automáticas basadas en perfil fiscal del supplier
         profile = self.supplier.tax_profile
@@ -60,22 +71,21 @@ class Purchase(models.Model):
                 p.save()
                 continue
 
-            # IIBB
             if p.perception_type == "IIBB":
-                if profile.iibb_rate and not profile.is_iibb_exempt:
-                    p.amount = self.net_amount * (profile.iibb_rate / Decimal("100"))
+                iibb_rate = Decimal(str(profile.iibb_rate or "0"))
+                if iibb_rate and not profile.is_iibb_exempt:
+                    p.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(
+                        money
+                    )
                 else:
                     p.amount = Decimal("0")
 
-            # IVA percepción
             elif p.perception_type == "IVA":
                 if profile.iva_condition == "RI":
-                    # Si querés, esto también puede venir de Tax
-                    p.amount = self.net_amount * Decimal("0.03")
+                    p.amount = (self.net_amount * Decimal("0.03")).quantize(money)
                 else:
                     p.amount = Decimal("0")
 
-            # Municipal
             elif p.perception_type == "MUNI":
                 p.amount = Decimal("0")
 
@@ -88,43 +98,58 @@ class Purchase(models.Model):
                 r.save()
                 continue
 
-            # Ganancias
             if r.retention_type == "GAN":
-                if profile.ganancias_rate and not profile.is_ganancias_exempt:
-                    r.amount = self.net_amount * (
-                        profile.ganancias_rate / Decimal("100")
-                    )
+                ganancias_rate = Decimal(str(profile.ganancias_rate or "0"))
+                if ganancias_rate and not profile.is_ganancias_exempt:
+                    r.amount = (
+                        self.net_amount * ganancias_rate / Decimal("100")
+                    ).quantize(money)
                 else:
                     r.amount = Decimal("0")
 
-            # IVA retención
             elif r.retention_type == "IVA":
                 iva_total = sum(t.amount for t in self.taxes.all())
                 r.amount = (
-                    iva_total * Decimal("0.50")
+                    (iva_total * Decimal("0.50")).quantize(money)
                     if profile.iva_condition == "RI"
                     else Decimal("0")
                 )
 
-            # SUSS
             elif r.retention_type == "SUSS":
                 r.amount = Decimal("0")
 
             r.save()
 
         # 5) Totales finales
-        self.tax_amount = sum(t.amount for t in self.taxes.all())
-        self.perception_amount = sum(p.amount for p in self.perceptions.all())
-        self.retention_amount = sum(r.amount for r in self.retentions.all())
+        self.tax_amount = sum(
+            (t.amount for t in self.taxes.all()), Decimal("0")
+        ).quantize(money)
+        self.perception_amount = sum(
+            (p.amount for p in self.perceptions.all()), Decimal("0")
+        ).quantize(money)
+        self.retention_amount = sum(
+            (r.amount for r in self.retentions.all()), Decimal("0")
+        ).quantize(money)
 
         self.total_amount = (
             self.net_amount
             + self.tax_amount
             + self.perception_amount
             - self.retention_amount
-        )
+        ).quantize(money)
 
         self.save()
+
+    # ----------------------------------------------------
+    # Integración contable automática
+    # ----------------------------------------------------
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            from accounting.services.accounting_service import AccountingService
+            AccountingService.post_purchase(self)
 
 
 # ============================================================
@@ -161,7 +186,6 @@ class PurchaseLine(models.Model):
 # ============================================================
 # IMPUESTOS (IVA / Internos / Otros)
 # ============================================================
-
 
 class PurchaseTax(models.Model):
     purchase = models.ForeignKey(

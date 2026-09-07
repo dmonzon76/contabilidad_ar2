@@ -9,6 +9,7 @@ def get_default_location(company):
 # ENTRADAS DE STOCK (COMPRAS)
 # ============================================================
 
+
 def update_inventory_from_purchase(purchase):
     company = purchase.company
     location = get_default_location(company)
@@ -17,10 +18,13 @@ def update_inventory_from_purchase(purchase):
         return
 
     for line in purchase.lines.all():
+        product = getattr(line, "product", None)
+        if product is None:
+            continue
 
         item, created = InventoryItem.objects.get_or_create(
             company=company,
-            product=line.product,
+            product=product,
             location=location,
             defaults={"quantity": 0, "min_stock": 0},
         )
@@ -41,6 +45,7 @@ def update_inventory_from_purchase(purchase):
 # ============================================================
 # SALIDAS DE STOCK (VENTAS)
 # ============================================================
+
 
 def update_inventory_from_sale(sale):
     company = sale.company
@@ -80,13 +85,12 @@ def update_inventory_from_sale(sale):
 # REVERSIÓN DE VENTAS
 # ============================================================
 
+
 def revert_inventory_from_sale(sale):
     company = sale.company
 
     movements = InventoryMovement.objects.filter(
-        company=company,
-        sale=sale,
-        movement_type="OUT"
+        company=company, sale=sale, movement_type="OUT"
     )
 
     for mv in movements:
@@ -101,13 +105,12 @@ def revert_inventory_from_sale(sale):
 # REVERSIÓN DE COMPRAS
 # ============================================================
 
+
 def revert_inventory_from_purchase(purchase):
     company = purchase.company
 
     movements = InventoryMovement.objects.filter(
-        company=company,
-        purchase=purchase,
-        movement_type="IN"
+        company=company, purchase=purchase, movement_type="IN"
     )
 
     for mv in movements:

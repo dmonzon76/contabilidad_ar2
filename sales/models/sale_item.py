@@ -1,8 +1,10 @@
 from decimal import Decimal
 from django.db import models
+
 from .sale import Sale
 from products.models import Product
 from fiscal.models.tax import Tax
+from inventory.models import InventoryItem, InventoryMovement, Location
 
 
 class SaleItem(models.Model):
@@ -27,11 +29,9 @@ class SaleItem(models.Model):
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    # Costo para CMV
     unit_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cost_subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    # Impuesto asociado (IVA, exento, no gravado, percepción, interno, etc.)
     tax = models.ForeignKey(
         Tax,
         on_delete=models.PROTECT,
@@ -40,12 +40,18 @@ class SaleItem(models.Model):
         related_name="sale_items",
     )
 
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.description} ({self.quantity} × {self.unit_price})"
+
     def save(self, *args, **kwargs):
         # Subtotal comercial
         self.subtotal = self.quantity * self.unit_price
 
-        # Costo desde inventario
         if self.product:
+            # Costo actual desde inventario / producto
             try:
                 cost = self.product.get_current_cost()
             except AttributeError:
@@ -54,17 +60,42 @@ class SaleItem(models.Model):
             self.unit_cost = cost
             self.cost_subtotal = self.quantity * self.unit_cost
 
+            # Movimiento de stock solo si NO es servicio
+            if self.product.has_stock:
+                # Ubicación por defecto: primer depósito de la compañía
+                location = (
+                    Location.objects.filter(company=self.sale.company)
+                    .order_by("id")
+                    .first()
+                )
+                if location is None:
+                    raise ValueError(
+                        f"No hay Location definida para la compañía {self.sale.company}."
+                    )
+
+                # Obtener / crear el item de inventario
+                item, _ = InventoryItem.objects.get_or_create(
+                    company=self.sale.company,
+                    product=self.product,
+                    location=location,
+                    defaults={"quantity": Decimal("0.00")},
+                )
+
+                # Registrar movimiento de stock OUT
+                InventoryMovement.objects.create(
+                    company=self.sale.company,
+                    item=item,
+                    movement_type="OUT",
+                    quantity=self.quantity,
+                    unit_cost=self.unit_cost,
+                    sale=self.sale,
+                    note=f"Sale {self.sale.number}",
+                )
+
         super().save(*args, **kwargs)
 
     @property
     def tax_amount(self):
-        """
-        Calcula el impuesto del ítem usando Tax.rate
-        """
         if not self.tax:
             return Decimal("0.00")
-
         return self.subtotal * (self.tax.rate / Decimal("100"))
-
-    def __str__(self):
-        return f"{self.description} ({self.quantity} × {self.unit_price})"

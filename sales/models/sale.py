@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+
 from company.models import Company
 from sales.models.customer import Customer
 
@@ -27,20 +28,21 @@ class Sale(models.Model):
 
     total_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    def save(self, *args, **kwargs):
-        if not self.number:
-            last = Sale.objects.filter(company=self.company).order_by("-id").first()
-            if last and last.number.isdigit():
-                next_number = int(last.number) + 1
-            else:
-                next_number = 1
-            self.number = str(next_number).zfill(6)
+    created_by = models.ForeignKey(
+        "auth.User",
+        on_delete=models.PROTECT,
+        related_name="sales_created",
+        null=True,
+        blank=True,
+    )
 
-        super().save(*args, **kwargs)
+    class Meta:
+        ordering = ["-date", "-id"]
+
+    def __str__(self):
+        return f"Sale {self.number} — {self.customer.name}"
 
     def recalc_totals(self):
-        from sales.models.sale_item import SaleItem
-
         net = Decimal("0.00")
         iva = Decimal("0.00")
         cost = Decimal("0.00")
@@ -58,7 +60,24 @@ class Sale(models.Model):
         self.total_amount = net + iva
         self.total_cost = cost
 
-        self.save()
+        super(Sale, self).save(update_fields=["net_amount", "iva_amount", "total_amount", "total_cost"])
 
-    def __str__(self):
-        return f"Sale {self.number} — {self.customer.name}"
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        if is_new and not self.number:
+            last = Sale.objects.filter(company=self.company).order_by("-id").first()
+            if last and last.number.isdigit():
+                next_number = int(last.number) + 1
+            else:
+                next_number = 1
+            self.number = str(next_number).zfill(6)
+
+        super().save(*args, **kwargs)
+
+        if is_new:
+            # Import local para evitar circular import
+            from accounting.services.accounting_service import AccountingService
+
+            self.recalc_totals()
+            AccountingService.post_sale(self)

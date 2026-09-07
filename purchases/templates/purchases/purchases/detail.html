@@ -40,7 +40,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h6 class="text-muted text-uppercase mb-2">VAT Amount</h6>
-                    <h3 class="mb-0">${{ purchase.vat_amount }}</h3>
+                    <h3 class="mb-0">${{ purchase.tax_amount }}</h3>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
                 <tbody>
                     {% for line in purchase.lines.all %}
                     <tr>
-                        <td>{{ line.product.name }}</td>
+                        <td>{{ line.product.name|default:"-" }}</td>
                         <td>{{ line.description }}</td>
                         <td class="text-end">{{ line.quantity }}</td>
                         <td class="text-end">${{ line.unit_price }}</td>

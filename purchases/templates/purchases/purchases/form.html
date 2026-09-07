@@ -76,6 +76,10 @@
 
 {{ tax_formset.management_form }}
 
+    {% if tax_formset.errors %}
+    <div class="alert alert-danger">{{ tax_formset.errors }}</div>
+    {% endif %}
+
 {% if tax_formset.non_form_errors %}
 <div class="alert alert-danger">
     {{ tax_formset.non_form_errors }}
@@ -94,7 +98,7 @@
 
     <tbody>
         {% for tf in tax_formset %}
-        <tr>
+        <tr class="tax-row">
             {{ tf.id }}
 
             <td>
@@ -112,9 +116,7 @@
             </td>
 
             <td>
-                {% if tf.instance.pk %}
-                    {{ tf.instance.amount }}
-                {% endif %}
+                <span class="tax-amount">{{ tf.instance.amount|default:"0.00" }}</span>
             </td>
 
             <td>{{ tf.DELETE }}</td>
@@ -126,6 +128,10 @@
         <!-- PERCEPTIONS -->
         <h4 class="mb-3">Perceptions</h4>
         {{ perception_formset.management_form }}
+
+        {% if perception_formset.errors %}
+        <div class="alert alert-danger">{{ perception_formset.errors }}</div>
+        {% endif %}
 
         <table class="table table-sm">
             <thead>
@@ -141,7 +147,7 @@
                 <tr>
                     {{ pf.id }}
                     <td>{{ pf.perception_type }}</td>
-                    <td>{{ pf.amount }}</td>
+                    <td><span class="perception-amount">{{ pf.instance.amount|default:"0.00" }}</span></td>
                     <td>{{ pf.DELETE }}</td>
                 </tr>
                 {% endfor %}
@@ -153,6 +159,10 @@
         <!-- RETENTIONS -->
         <h4 class="mb-3">Retentions</h4>
         {{ retention_formset.management_form }}
+
+        {% if retention_formset.errors %}
+        <div class="alert alert-danger">{{ retention_formset.errors }}</div>
+        {% endif %}
 
         <table class="table table-sm">
             <thead>
@@ -168,7 +178,7 @@
                 <tr>
                     {{ rf.id }}
                     <td>{{ rf.retention_type }}</td>
-                    <td>{{ rf.amount }}</td>
+                    <td><span class="retention-amount">{{ rf.instance.amount|default:"0.00" }}</span></td>
                     <td>{{ rf.DELETE }}</td>
                 </tr>
                 {% endfor %}
@@ -177,19 +187,17 @@
 
         <hr>
 
-        <!-- TOTALS (HTMX-ready) -->
+        <!-- TOTALS -->
         <div id="totals"
-             hx-get="{% url 'purchases:purchase_recalculate' %}"
-             hx-trigger="load">
+             >
             {% include "purchases/purchases/partials/totals.html" %}
         </div>
 
         <div class="mt-3">
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
-                    hx-post="{% url 'purchases:purchase_recalculate' %}"
-                    hx-target="#totals">
-                Recalculate totals
+                    onclick="updateTaxAmounts()">
+                Recalculate IVA
             </button>
         </div>
 
@@ -199,5 +207,26 @@
         <a href="{% url 'purchases:purchase_list' %}" class="btn btn-secondary">Cancel</a>
 
     </form>
+    <script>
+        function updateTaxAmounts() {
+            document.querySelectorAll(".tax-row").forEach(function (row) {
+                const tax = row.querySelector("select[name$='-tax']");
+                const base = row.querySelector("input[name$='-base_amount']");
+                const amount = row.querySelector(".tax-amount");
+                if (!tax || !base || !amount) return;
+
+                const rate = parseFloat(tax.options[tax.selectedIndex]?.dataset.rate || "0");
+                const baseValue = parseFloat((base.value || "0").replace(",", "."));
+                amount.textContent = (baseValue * rate / 100).toFixed(2);
+            });
+        }
+
+        document.addEventListener("input", function (event) {
+            if (event.target.matches(".tax-row input, .tax-row select")) {
+                updateTaxAmounts();
+            }
+        });
+        document.addEventListener("DOMContentLoaded", updateTaxAmounts);
+    </script>
 </div>
 {% endblock %}

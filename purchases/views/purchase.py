@@ -91,19 +91,33 @@ class PurchaseCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        purchase = self.object or Purchase()
+        purchase = self.object or Purchase(
+            company_id=self.request.session.get("active_company_id")
+        )
         context.update(self._get_formsets(purchase))
         return context
 
     def _get_formsets(self, purchase):
         data = self.request.POST if self.request.method == "POST" else None
+        company_id = self.request.session.get("active_company_id")
+
         return {
             "line_formset": PurchaseLineFormSet(data=data, instance=purchase),
-            "tax_formset": PurchaseTaxFormSet(data=data, instance=purchase),
-            "perception_formset": PurchasePerceptionFormSet(
-                data=data, instance=purchase
+            "tax_formset": PurchaseTaxFormSet(
+                data=data,
+                instance=purchase,
+                form_kwargs={"company_id": company_id},
             ),
-            "retention_formset": PurchaseRetentionFormSet(data=data, instance=purchase),
+            "perception_formset": PurchasePerceptionFormSet(
+                data=data,
+                instance=purchase,
+                form_kwargs={"company_id": company_id},
+            ),
+            "retention_formset": PurchaseRetentionFormSet(
+                data=data,
+                instance=purchase,
+                form_kwargs={"company_id": company_id},
+            ),
         }
 
     def post(self, request, *args, **kwargs):
@@ -112,8 +126,8 @@ class PurchaseCreateView(CreateView):
         if form.is_valid():
             purchase = form.save(commit=False)
             purchase.company_id = request.session.get("active_company_id")
-            formsets = self._get_formsets(purchase)
             purchase.supplier = form.cleaned_data["supplier"]
+            formsets = self._get_formsets(purchase)
             if all(formset.is_valid() for formset in formsets.values()):
                 with transaction.atomic():
                     purchase.save()

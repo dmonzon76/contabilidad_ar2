@@ -1,11 +1,24 @@
 from django.utils import timezone
 from accounting.models import JournalEntry, JournalEntryLine, Account
 from accounting.models.account_movement import AccountMovement
+from accounting.models.period import Period
 
+
+def get_period_for_purchase(purchase):
+    """
+    Devuelve el período contable correspondiente a la fecha de la compra.
+    """
+    return Period.objects.get(
+        fiscal_year__company=purchase.company,
+        start_date__lte=purchase.date,
+        end_date__gte=purchase.date,
+        status="OPEN",
+    )
 
 # ============================================================
 # UTILIDAD
 # ============================================================
+
 
 def get_account(company, code):
     return Account.objects.get(company=company, code=code)
@@ -14,6 +27,7 @@ def get_account(company, code):
 # ============================================================
 # ASIENTOS AUTOMÁTICOS DE COMPRAS
 # ============================================================
+
 
 def create_purchase_journal_entry(purchase):
     company = purchase.company
@@ -28,14 +42,17 @@ def create_purchase_journal_entry(purchase):
     acc_iva_credit = get_account(company, "7.2")
     acc_prov = get_account(company, "2.1.01")
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_inventory,
-                                    debit=purchase.net_amount, credit=0)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_inventory, debit=purchase.net_amount, credit=0
+    )
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_iva_credit,
-                                    debit=purchase.vat_amount, credit=0)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_iva_credit, debit=purchase.tax_amount, credit=0
+    )
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_prov,
-                                    debit=0, credit=purchase.total_amount)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_prov, debit=0, credit=purchase.total_amount
+    )
 
     return entry
 
@@ -43,13 +60,14 @@ def create_purchase_journal_entry(purchase):
 def delete_journal_entries_for_purchase(purchase):
     JournalEntry.objects.filter(
         company=purchase.company,
-        description__icontains=f"Compra {purchase.invoice_number}"
+        description__icontains=f"Compra {purchase.invoice_number}",
     ).delete()
 
 
 # ============================================================
 # ASIENTOS AUTOMÁTICOS DE VENTAS
 # ============================================================
+
 
 def create_sale_journal_entry(sale):
     company = sale.company
@@ -64,28 +82,31 @@ def create_sale_journal_entry(sale):
     acc_sales = get_account(company, "4.1.01")
     acc_iva_debit = get_account(company, "7.1")
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_clients,
-                                    debit=sale.total_amount, credit=0)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_clients, debit=sale.total_amount, credit=0
+    )
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_sales,
-                                    debit=0, credit=sale.net_amount)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_sales, debit=0, credit=sale.net_amount
+    )
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_iva_debit,
-                                    debit=0, credit=sale.vat_amount)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_iva_debit, debit=0, credit=sale.vat_amount
+    )
 
     return entry
 
 
 def delete_journal_entries_for_sale(sale):
     JournalEntry.objects.filter(
-        company=sale.company,
-        description__icontains=f"Venta {sale.number}"
+        company=sale.company, description__icontains=f"Venta {sale.number}"
     ).delete()
 
 
 # ============================================================
 # CMV
 # ============================================================
+
 
 def create_cmv_journal_entry(sale):
     company = sale.company
@@ -99,25 +120,27 @@ def create_cmv_journal_entry(sale):
     acc_cmv = get_account(company, "5.1.01")
     acc_inventory = get_account(company, "1.1.09")
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_cmv,
-                                    debit=sale.cost_total, credit=0)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_cmv, debit=sale.cost_total, credit=0
+    )
 
-    JournalEntryLine.objects.create(entry=entry, account=acc_inventory,
-                                    debit=0, credit=sale.cost_total)
+    JournalEntryLine.objects.create(
+        entry=entry, account=acc_inventory, debit=0, credit=sale.cost_total
+    )
 
     return entry
 
 
 def delete_cmv_journal_entry(sale):
     JournalEntry.objects.filter(
-        company=sale.company,
-        description__icontains=f"CMV Venta {sale.number}"
+        company=sale.company, description__icontains=f"CMV Venta {sale.number}"
     ).delete()
 
 
 # ============================================================
 # CUENTA CORRIENTE CLIENTES
 # ============================================================
+
 
 def create_customer_cc_from_sale(sale):
     AccountMovement.objects.create(
@@ -131,15 +154,13 @@ def create_customer_cc_from_sale(sale):
 
 
 def delete_customer_cc_from_sale(sale):
-    AccountMovement.objects.filter(
-        company=sale.company,
-        sale=sale
-    ).delete()
+    AccountMovement.objects.filter(company=sale.company, sale=sale).delete()
 
 
 # ============================================================
 # CUENTA CORRIENTE PROVEEDORES
 # ============================================================
+
 
 def create_supplier_cc_from_purchase(purchase):
     AccountMovement.objects.create(
@@ -153,7 +174,4 @@ def create_supplier_cc_from_purchase(purchase):
 
 
 def delete_supplier_cc_from_purchase(purchase):
-    AccountMovement.objects.filter(
-        company=purchase.company,
-        purchase=purchase
-    ).delete()
+    AccountMovement.objects.filter(company=purchase.company, purchase=purchase).delete()

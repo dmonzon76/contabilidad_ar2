@@ -1,4 +1,6 @@
+from decimal import Decimal
 from django.db import models
+
 from company.models import Company
 from products.models import Product
 from sales.models.sale import Sale
@@ -26,6 +28,22 @@ class InventoryItem(models.Model):
     def __str__(self):
         return f"{self.product.name} @ {self.location.code} — {self.quantity}"
 
+    def get_current_cost(self):
+        """
+        Devuelve el costo promedio ponderado del producto en esta ubicación.
+        Si no hay movimientos, devuelve 0.
+        """
+        last_in = (
+            InventoryMovement.objects.filter(
+                item=self, movement_type="IN"
+            ).order_by("-date").first()
+        )
+
+        if last_in:
+            return last_in.unit_cost
+
+        return Decimal("0.00")
+
 
 class InventoryMovement(models.Model):
     MOVEMENT_TYPES = (
@@ -34,6 +52,7 @@ class InventoryMovement(models.Model):
     )
 
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
+
     item = models.ForeignKey(
         InventoryItem,
         on_delete=models.CASCADE,
@@ -42,6 +61,10 @@ class InventoryMovement(models.Model):
 
     movement_type = models.CharField(max_length=3, choices=MOVEMENT_TYPES)
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
+
+    unit_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
     note = models.CharField(max_length=200, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
@@ -61,7 +84,6 @@ class InventoryMovement(models.Model):
         related_name="inventory_movements",
     )
 
-    # Impuesto interno asociado (si aplica)
     internal_tax = models.ForeignKey(
         Tax,
         on_delete=models.PROTECT,
@@ -73,3 +95,17 @@ class InventoryMovement(models.Model):
 
     def __str__(self):
         return f"{self.get_movement_type_display()} {self.quantity} — {self.item.product.name}"
+
+    def save(self, *args, **kwargs):
+        # Costo total
+        self.total_cost = (self.unit_cost * self.quantity).quantize(Decimal("0.01"))
+
+        super().save(*args, **kwargs)
+
+        # Actualizar stock
+        if self.movement_type == "IN":
+            self.item.quantity += self.quantity
+        elif self.movement_type == "OUT":
+            self.item.quantity -= self.quantity
+
+        self.item.save(update_fields=["quantity"])
