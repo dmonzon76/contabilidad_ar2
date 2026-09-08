@@ -22,6 +22,9 @@ from accounting.integration import (
     delete_customer_cc_from_sale
 )
 
+# VALIDACIÓN CONTABLE
+from accounting.utils.period_validation import get_open_period_for_date, NoOpenPeriodError
+
 
 # ============================================================
 # LISTA DE VENTAS
@@ -53,7 +56,18 @@ class SaleCreateView(CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.company_id = self.request.session.get("active_company_id")
+        sale = form.save(commit=False)
+        sale.company_id = self.request.session.get("active_company_id")
+
+        # VALIDACIÓN CONTABLE
+        try:
+            period = get_open_period_for_date(sale.date)
+            sale.period = period
+        except NoOpenPeriodError as e:
+            form.add_error(None, str(e))
+            return self.form_invalid(form)
+
+        sale.save()
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -85,6 +99,18 @@ def sale_item_add(request, sale_id):
         id=sale_id,
         company_id=request.session.get("active_company_id"),
     )
+
+    # VALIDACIÓN CONTABLE
+    try:
+        period = get_open_period_for_date(sale.date)
+        sale.period = period
+        sale.save(update_fields=["period"])
+    except NoOpenPeriodError as e:
+        return render(
+            request,
+            "sales/sale_item_add.html",
+            {"form": SaleItemForm(), "sale": sale, "error": str(e)},
+        )
 
     if request.method == "POST":
         form = SaleItemForm(request.POST)
@@ -125,6 +151,16 @@ def sale_delete(request, pk):
         pk=pk,
         company_id=request.session.get("active_company_id"),
     )
+
+    # VALIDACIÓN CONTABLE
+    try:
+        get_open_period_for_date(sale.date)
+    except NoOpenPeriodError as e:
+        return render(
+            request,
+            "sales/sale_detail.html",
+            {"sale": sale, "error": str(e)},
+        )
 
     delete_journal_entries_for_sale(sale)
     delete_cmv_journal_entry(sale)

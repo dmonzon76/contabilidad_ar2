@@ -25,19 +25,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     # ERP Apps
-    "core",
-    "company",
-    "accounting",
-    "sales",
-    "purchases",
-    "inventory",
-    "reports",
-    "fiscal",
-    "customers",
-    "suppliers",
-    "products",
+    "core.apps.CoreConfig",
+    "company.apps.CompanyConfig",
+    "accounting.apps.AccountingConfig",
+    "sales.apps.SalesConfig",
+    "purchases.apps.PurchasesConfig",
+    "inventory.apps.InventoryConfig",
+    "reports.apps.ReportsConfig",
+    "fiscal.apps.FiscalConfig",
+    "customers.apps.CustomersConfig",
+    "suppliers.apps.SuppliersConfig",
+    "products.apps.ProductsConfig",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

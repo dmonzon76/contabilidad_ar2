@@ -8,6 +8,10 @@ from accounting.models.period import Period
 from core.utils.company_access import user_has_access
 
 
+# ============================================================
+# ACCOUNTS
+# ============================================================
+
 @login_required
 def account_list(request):
     company = request.active_company
@@ -125,14 +129,20 @@ def account_add_child(request, parent_id):
     })
 
 
+# ============================================================
+# PERIODS (ANUALES)
+# ============================================================
+
 @login_required
 def period_list(request):
     company = request.active_company
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    periods = Period.objects.filter(company=company).select_related("fiscal_year").order_by(
-        "fiscal_year__year", "month"
+    periods = Period.objects.filter(
+        fiscal_year__company=company
+    ).select_related("fiscal_year").order_by(
+        "fiscal_year__start_date"
     )
 
     return render(request, "accounting/period_list.html", {
@@ -147,7 +157,7 @@ def period_open(request, period_id):
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    period = get_object_or_404(Period, id=period_id, company=company)
+    period = get_object_or_404(Period, id=period_id, fiscal_year__company=company)
     period.status = "OPEN"
     period.save()
     return redirect("accounting:period_list")
@@ -159,7 +169,7 @@ def period_close(request, period_id):
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    period = get_object_or_404(Period, id=period_id, company=company)
+    period = get_object_or_404(Period, id=period_id, fiscal_year__company=company)
     period.status = "CLOSED"
     period.save()
     return redirect("accounting:period_list")
@@ -171,7 +181,7 @@ def period_lock(request, period_id):
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    period = get_object_or_404(Period, id=period_id, company=company)
+    period = get_object_or_404(Period, id=period_id, fiscal_year__company=company)
     period.status = "LOCKED"
     period.save()
     return redirect("accounting:period_list")

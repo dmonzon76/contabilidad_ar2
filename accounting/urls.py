@@ -28,10 +28,29 @@ from accounting.views.trial_balance import trial_balance_view
 # Balance Sheet
 from accounting.views.balance_sheet import balance_sheet_view
 
+# Dashboard + Fiscal Years
+from accounting.views.dashboard import (
+    accounting_dashboard,
+    fiscal_year_list,
+    fiscal_year_open,
+    fiscal_year_close,
+)
+
+# NEW: Create Fiscal Year
+from accounting.views.fiscal_year_create import fiscal_year_create
 
 app_name = "accounting"
 
 urlpatterns = [
+    # Dashboard
+    path("dashboard/", accounting_dashboard, name="dashboard"),
+
+    # Fiscal Years
+    path("fiscal-years/", fiscal_year_list, name="fiscal_year_list"),
+    path("fiscal-years/new/", fiscal_year_create, name="fiscal_year_create"),  # ← NUEVA RUTA
+    path("fiscal-years/<int:fiscal_year_id>/open/", fiscal_year_open, name="fiscal_year_open"),
+    path("fiscal-years/<int:fiscal_year_id>/close/", fiscal_year_close, name="fiscal_year_close"),
+
     # Accounts
     path("accounts/", account_list, name="account_list"),
     path("accounts/new/", account_create, name="account_create"),

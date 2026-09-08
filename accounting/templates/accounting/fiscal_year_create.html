@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create Fiscal Year{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Create Fiscal Year</h1>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        <div class="mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Create Fiscal Year</button>
+    <a class="btn btn-secondary" href="{% url 'accounting:fiscal_year_list' %}">Cancel</a>
+</form>
+{% endblock %}

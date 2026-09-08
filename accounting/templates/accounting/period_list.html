@@ -21,7 +21,7 @@
             {% for p in periods %}
             <tr>
                 <td>{{ p.fiscal_year.year }}</td>
-                <td>{{ p.month|date:"F" }}</td>
+                <td>{{ p.month }}</td>
                 <td>{{ p.start_date }}</td>
                 <td>{{ p.end_date }}</td>
 
@@ -36,9 +36,9 @@
                 </td>
 
                 <td>
-                    <a href="{% url 'period_open' p.id %}" class="btn btn-sm btn-outline-success">Open</a>
-                    <a href="{% url 'period_close' p.id %}" class="btn btn-sm btn-outline-danger">Close</a>
-                    <a href="{% url 'period_lock' p.id %}" class="btn btn-sm btn-outline-secondary">Lock</a>
+                    <a href="{% url 'accounting:period_open' p.id %}" class="btn btn-sm btn-outline-success">Open</a>
+                    <a href="{% url 'accounting:period_close' p.id %}" class="btn btn-sm btn-outline-danger">Close</a>
+                    <a href="{% url 'accounting:period_lock' p.id %}" class="btn btn-sm btn-outline-secondary">Lock</a>
                 </td>
             </tr>
             {% endfor %}

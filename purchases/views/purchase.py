@@ -24,10 +24,13 @@ from accounting.integration import (
     delete_supplier_cc_from_purchase,
 )
 
+# VALIDACIÓN CONTABLE
+from accounting.utils.period_validation import get_open_period_for_date, NoOpenPeriodError
+
+
 # ============================================================
 # LISTA DE COMPRAS
 # ============================================================
-
 
 class PurchaseListView(ListView):
     model = Purchase
@@ -41,9 +44,8 @@ class PurchaseListView(ListView):
 
 
 # ============================================================
-# DETALLE DE COMPRA (ALIMENTA purchase_detail.html)
+# DETALLE DE COMPRA
 # ============================================================
-
 
 class PurchaseDetailView(DetailView):
     model = Purchase
@@ -59,25 +61,45 @@ class PurchaseDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         purchase = context["purchase"]
 
-        # Líneas de compra
         context["lines"] = purchase.lines.all()
-
-        # Movimientos de inventario asociados
         context["inventory_movements"] = purchase.inventory_movements.all()
-
-        # Asientos contables asociados
         context["journal_entries"] = purchase.journal_entries.all()
-
-        # Movimientos de cuenta corriente proveedor
         context["cc_movements"] = purchase.accountmovement_set.all()
 
         return context
 
 
 # ============================================================
-# CREAR COMPRA
+# CREAR COMPRA (FUNCIÓN)
 # ============================================================
 
+def purchase_create(request):
+    if request.method == "POST":
+        form = PurchaseForm(request.POST)
+
+        if form.is_valid():
+            purchase = form.save(commit=False)
+
+            # VALIDACIÓN CONTABLE
+            try:
+                period = get_open_period_for_date(purchase.date)
+                purchase.period = period
+            except NoOpenPeriodError as e:
+                form.add_error(None, str(e))
+                return render(request, "purchases/purchase_form.html", {"form": form})
+
+            purchase.save()
+            return redirect("purchases:purchase_list")
+
+    else:
+        form = PurchaseForm()
+
+    return render(request, "purchases/purchase_form.html", {"form": form})
+
+
+# ============================================================
+# CREAR COMPRA (CLASS-BASED VIEW)
+# ============================================================
 
 class PurchaseCreateView(CreateView):
     model = Purchase
@@ -123,11 +145,24 @@ class PurchaseCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         self.object = None
         form = self.get_form()
+
         if form.is_valid():
             purchase = form.save(commit=False)
             purchase.company_id = request.session.get("active_company_id")
             purchase.supplier = form.cleaned_data["supplier"]
+
+            # VALIDACIÓN CONTABLE
+            try:
+                period = get_open_period_for_date(purchase.date)
+                purchase.period = period
+            except NoOpenPeriodError as e:
+                form.add_error(None, str(e))
+                return self.render_to_response(
+                    self.get_context_data(form=form, **self._get_formsets(purchase))
+                )
+
             formsets = self._get_formsets(purchase)
+
             if all(formset.is_valid() for formset in formsets.values()):
                 with transaction.atomic():
                     purchase.save()
@@ -135,11 +170,15 @@ class PurchaseCreateView(CreateView):
                         formset.instance = purchase
                         formset.save()
                     purchase.calculate_totals()
+
                 self.object = purchase
+
                 update_inventory_from_purchase(purchase)
                 create_purchase_journal_entry(purchase)
                 create_supplier_cc_from_purchase(purchase)
+
                 return redirect("purchases:purchase_list")
+
         return self.render_to_response(
             self.get_context_data(form=form, **self._get_formsets(form.instance))
         )
@@ -148,7 +187,6 @@ class PurchaseCreateView(CreateView):
 # ============================================================
 # EDITAR COMPRA
 # ============================================================
-
 
 class PurchaseUpdateView(UpdateView):
     model = Purchase
@@ -170,20 +208,31 @@ class PurchaseUpdateView(UpdateView):
         return {
             "line_formset": PurchaseLineFormSet(data=data, instance=purchase),
             "tax_formset": PurchaseTaxFormSet(data=data, instance=purchase),
-            "perception_formset": PurchasePerceptionFormSet(
-                data=data, instance=purchase
-            ),
+            "perception_formset": PurchasePerceptionFormSet(data=data, instance=purchase),
             "retention_formset": PurchaseRetentionFormSet(data=data, instance=purchase),
         }
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
+
         if form.is_valid():
             purchase = form.save(commit=False)
             purchase.company_id = request.session.get("active_company_id")
-            formsets = self._get_formsets(purchase)
             purchase.supplier = form.cleaned_data["supplier"]
+
+            # VALIDACIÓN CONTABLE
+            try:
+                period = get_open_period_for_date(purchase.date)
+                purchase.period = period
+            except NoOpenPeriodError as e:
+                form.add_error(None, str(e))
+                return self.render_to_response(
+                    self.get_context_data(form=form, **self._get_formsets(purchase))
+                )
+
+            formsets = self._get_formsets(purchase)
+
             if all(formset.is_valid() for formset in formsets.values()):
                 with transaction.atomic():
                     purchase.save()
@@ -191,8 +240,10 @@ class PurchaseUpdateView(UpdateView):
                         formset.instance = purchase
                         formset.save()
                     purchase.calculate_totals()
+
                 self.object = purchase
                 return redirect(self.get_success_url())
+
         return self.render_to_response(
             self.get_context_data(form=form, **self._get_formsets(purchase))
         )
@@ -202,9 +253,8 @@ class PurchaseUpdateView(UpdateView):
 
 
 # ============================================================
-# ELIMINAR COMPRA (REVERSIÓN COMPLETA)
+# ELIMINAR COMPRA
 # ============================================================
-
 
 class PurchaseDeleteView(DetailView):
     model = Purchase
@@ -213,13 +263,8 @@ class PurchaseDeleteView(DetailView):
     def post(self, request, *args, **kwargs):
         purchase = self.get_object()
 
-        # Reversión contable
         delete_journal_entries_for_purchase(purchase)
-
-        # Reversión cuenta corriente proveedor
         delete_supplier_cc_from_purchase(purchase)
-
-        # Reversión inventario
         revert_inventory_from_purchase(purchase)
 
         purchase.delete()
@@ -228,10 +273,8 @@ class PurchaseDeleteView(DetailView):
 
 
 # ============================================================
-# RECALCULAR COMPRA (si lo usás)
+# RECALCULAR COMPRA
 # ============================================================
 
-
 def purchase_recalculate(request):
-    # Si tenés lógica de recálculo, va aquí
     return redirect("purchases:purchase_list")

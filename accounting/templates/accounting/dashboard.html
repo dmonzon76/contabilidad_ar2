@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Accounting Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Accounting Dashboard</h1>
+
+<div class="row">
+
+    <!-- Fiscal Year -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                Current Fiscal Year
+            </div>
+            <div class="card-body">
+                {% if current_fiscal_year %}
+                    <p><strong>Year:</strong> {{ current_fiscal_year.year }}</p>
+                    <p><strong>Start:</strong> {{ current_fiscal_year.start_date }}</p>
+                    <p><strong>End:</strong> {{ current_fiscal_year.end_date }}</p>
+                    <p><strong>Status:</strong> {{ current_fiscal_year.status }}</p>
+
+                    <a href="{% url 'accounting:fiscal_year_list' %}" class="btn btn-outline-primary btn-sm">
+                        Manage Fiscal Years
+                    </a>
+                {% else %}
+                    <p>No fiscal year is currently open.</p>
+                    <a href="{% url 'accounting:fiscal_year_list' %}" class="btn btn-primary btn-sm">
+                        Create Fiscal Year
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Period -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                Current Period
+            </div>
+            <div class="card-body">
+                {% if current_period %}
+                    <p><strong>Fiscal Year:</strong> {{ current_period.fiscal_year.name }}</p>
+                    <p><strong>Start:</strong> {{ current_period.start_date }}</p>
+                    <p><strong>End:</strong> {{ current_period.end_date }}</p>
+                    <p><strong>Status:</strong> {{ current_period.status }}</p>
+
+                    <a href="{% url 'accounting:period_list' %}" class="btn btn-outline-secondary btn-sm">
+                        Manage Periods
+                    </a>
+                {% else %}
+                    <p>No period is currently open.</p>
+                    <a href="{% url 'accounting:period_list' %}" class="btn btn-secondary btn-sm">
+                        Create Period
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                Accounting Data
+            </div>
+            <div class="card-body">
+                <p><strong>Journal Entries:</strong> {{ journal_entries_count }}</p>
+                <p><strong>Accounts:</strong> {{ accounts_count }}</p>
+
+                <a href="{% url 'accounting:journal_list' %}" class="btn btn-outline-dark btn-sm">
+                    Journal Entries
+                </a>
+                <a href="{% url 'accounting:account_list' %}" class="btn btn-outline-dark btn-sm">
+                    Chart of Accounts
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
