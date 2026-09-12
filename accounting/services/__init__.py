@@ -1,2 +1,2 @@
 from .accounting_service import AccountingService
-from .generate_entry import generate_entry
+from .generate_entry import generate_accounting_entry as generate_entry

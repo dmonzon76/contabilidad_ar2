@@ -37,7 +37,7 @@ class AccountingService:
             period=period,
             date=sale.date,
             description=f"Factura fiscal {sale.number}",
-            created_by=sale.created_by,
+            created_by=getattr(sale, "created_by", None),
         )
 
         # Cliente (DEBE)
@@ -101,7 +101,7 @@ class AccountingService:
             period=period,
             date=purchase.date,
             description=f"Compra {purchase.invoice_number}",
-            created_by=purchase.created_by,
+            created_by=getattr(purchase, "created_by", None),
         )
 
         account_supplier = Account.objects.get(company=company, code="PROVEEDORES")

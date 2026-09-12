@@ -44,5 +44,13 @@ class CompanyProfile(models.Model):
     uses_perceptions = models.BooleanField(default=False)
     uses_retentions = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['company'],
+                name='unique_tax_profile_per_company',
+            ),
+        ]
+
     def __str__(self):
         return f"Tax Profile for {self.company.name}"

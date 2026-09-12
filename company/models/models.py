@@ -14,7 +14,7 @@ class Company(models.Model):
 
     name = models.CharField(max_length=200)
     legal_name = models.CharField(max_length=200, blank=True)
-    tax_id = models.CharField(max_length=20, unique=True)  # CUIT
+    tax_id = models.CharField(max_length=20, unique=True)
 
     afip_category = models.CharField(
         max_length=10,
@@ -39,15 +39,10 @@ class Company(models.Model):
     def __str__(self):
         return f"{self.name} ({self.tax_id})"
 
-    # ============================================================
-    # PURCHASES SUMMARY (Dashboard)
-    # ============================================================
-
     @property
     def purchases_totals(self):
         from purchases.models.purchase import Purchase
         purchases = Purchase.objects.filter(company=self)
-
         return {
             "net": sum(p.net_amount for p in purchases),
             "iva": sum(p.tax_amount for p in purchases),
@@ -58,10 +53,6 @@ class Company(models.Model):
     def last_purchase(self):
         from purchases.models.purchase import Purchase
         return Purchase.objects.filter(company=self).order_by("-date", "-id").first()
-
-    # ============================================================
-    # SALES SUMMARY (Dashboard)
-    # ============================================================
 
     @property
     def sales_totals(self):
@@ -155,6 +146,9 @@ class CompanyUser(models.Model):
     can_edit_documents = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
+
+    # NUEVO — requerido por middleware y tests
+    is_default = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("user", "company")

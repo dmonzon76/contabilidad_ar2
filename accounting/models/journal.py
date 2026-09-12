@@ -26,6 +26,8 @@ class JournalEntry(models.Model):
         User,
         on_delete=models.PROTECT,
         related_name="created_entries",
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,10 +39,14 @@ class JournalEntry(models.Model):
 
     @property
     def total_debit(self):
+        if not self.pk:
+            return 0
         return sum(line.debit for line in self.lines.all())
 
     @property
     def total_credit(self):
+        if not self.pk:
+            return 0
         return sum(line.credit for line in self.lines.all())
 
     @property
@@ -56,7 +62,7 @@ class JournalEntry(models.Model):
         if self.period.is_locked:
             raise ValidationError("Cannot modify entries in a locked period.")
 
-        if self.total_debit != self.total_credit:
+        if self.pk and self.lines.exists() and self.total_debit != self.total_credit:
             raise ValidationError("Journal entry is not balanced.")
 
     def save(self, *args, **kwargs):

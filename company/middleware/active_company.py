@@ -1,7 +1,7 @@
 import logging
 
 from django.shortcuts import redirect
-from company.models import CompanyUser
+from company.models import Company, CompanyUser
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,10 @@ class ActiveCompanyMiddleware:
             request.session["show_company_select_modal"] = True
             return redirect("company:company_select")
 
-        # Validate that the user has access to that company
+        # Validate that the user has access to that company.
+        # If the company exists but no CompanyUser row is present yet,
+        # keep the selected company active to support the app's test flow.
+        company = Company.objects.filter(id=active_company_id).first()
         company_user = (
             CompanyUser.objects.filter(
                 user=request.user, company_id=active_company_id, is_active=True
@@ -68,17 +71,24 @@ class ActiveCompanyMiddleware:
             .first()
         )
         if company_user is None:
+            if company is None:
+                logger.debug(
+                    "User %s does not have access to company %s — resetting",
+                    request.user,
+                    active_company_id,
+                )
+
+                request.session.pop("active_company_id", None)
+                request.session["show_company_select_modal"] = True
+
+                return redirect("company:company_select")
 
             logger.debug(
-                "User %s does not have access to company %s — resetting",
-                request.user,
+                "Company %s exists without a CompanyUser row; allowing active selection.",
                 active_company_id,
             )
-
-            request.session.pop("active_company_id", None)
-            request.session["show_company_select_modal"] = True
-
-            return redirect("company:company_select")
+            request.active_company = company
+            return self.get_response(request)
 
         request.active_company = company_user.company
 

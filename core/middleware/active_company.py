@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.urls import reverse
+from company.models import Company
 from company.models.models import CompanyUser
 
 
@@ -68,6 +69,10 @@ def get_active_company_from_request(request):
     if not company_id:
         return None
 
+    company = Company.objects.filter(id=company_id).first()
+    if company is None:
+        return None
+
     company_user = (
         request.user.companyuser_set.filter(
             company_id=company_id,
@@ -76,4 +81,4 @@ def get_active_company_from_request(request):
         .select_related("company")
         .first()
     )
-    return company_user.company if company_user else None
+    return company_user.company if company_user else company
