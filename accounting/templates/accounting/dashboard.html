@@ -1,82 +1,94 @@
 {% extends "base.html" %}
-{% block title %}Accounting Dashboard{% endblock %}
+
+{% block title %}Accounting Center{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Accounting Dashboard</h1>
+<section class="dashboard-container" aria-labelledby="accounting-dashboard-title">
+	<header class="dashboard-header">
+		<div>
+			<p class="text-uppercase text-muted small fw-semibold mb-2">Accounting workspace</p>
+			<h1 id="accounting-dashboard-title" class="app-title mb-2">Accounting Center</h1>
+			<p class="app-subtitle mb-0">Manage your accounting operations, configuration and reports.</p>
+		</div>
+		<a class="nav-button" href="{% url 'accounting:journal_create' %}">
+			<i class="bi bi-plus-lg me-2" aria-hidden="true"></i>New journal entry
+		</a>
+	</header>
 
-<div class="row">
+	<div class="kpi-row" aria-label="Accounting indicators">
+		<article class="kpi-card">
+			<div class="kpi-icon"><i class="bi bi-calendar3 kpi-svg" aria-hidden="true"></i></div>
+			<div class="kpi-label">Fiscal year</div>
+			{% if current_fiscal_year %}
+				<div class="kpi-value">{{ current_fiscal_year.year }}</div>
+				<div class="kpi-footer"><span class="badge text-bg-success">{{ current_fiscal_year.status|title }}</span></div>
+			{% else %}
+				<div class="kpi-value">—</div>
+				<div class="kpi-footer">No active fiscal year</div>
+			{% endif %}
+		</article>
 
-    <!-- Fiscal Year -->
-    <div class="col-md-4">
-        <div class="card mb-3 shadow-sm">
-            <div class="card-header bg-primary text-white">
-                Current Fiscal Year
-            </div>
-            <div class="card-body">
-                {% if current_fiscal_year %}
-                    <p><strong>Year:</strong> {{ current_fiscal_year.year }}</p>
-                    <p><strong>Start:</strong> {{ current_fiscal_year.start_date }}</p>
-                    <p><strong>End:</strong> {{ current_fiscal_year.end_date }}</p>
-                    <p><strong>Status:</strong> {{ current_fiscal_year.status }}</p>
+		<article class="kpi-card">
+			<div class="kpi-icon"><i class="bi bi-calendar-check kpi-svg" aria-hidden="true"></i></div>
+			<div class="kpi-label">Current period</div>
+			{% if current_period %}
+				<div class="kpi-value">{{ current_period.start_date|date:"M Y" }}</div>
+				<div class="kpi-footer"><span class="badge text-bg-success">{{ current_period.status|title }}</span></div>
+			{% else %}
+				<div class="kpi-value">—</div>
+				<div class="kpi-footer">No active period</div>
+			{% endif %}
+		</article>
 
-                    <a href="{% url 'accounting:fiscal_year_list' %}" class="btn btn-outline-primary btn-sm">
-                        Manage Fiscal Years
-                    </a>
-                {% else %}
-                    <p>No fiscal year is currently open.</p>
-                    <a href="{% url 'accounting:fiscal_year_list' %}" class="btn btn-primary btn-sm">
-                        Create Fiscal Year
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+		<article class="kpi-card">
+			<div class="kpi-icon"><i class="bi bi-journal-text kpi-svg" aria-hidden="true"></i></div>
+			<div class="kpi-label">Journal entries</div>
+			<div class="kpi-value">{{ journal_entries_count|default:0 }}</div>
+			<div class="kpi-footer">Recorded in this company</div>
+		</article>
 
-    <!-- Period -->
-    <div class="col-md-4">
-        <div class="card mb-3 shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                Current Period
-            </div>
-            <div class="card-body">
-                {% if current_period %}
-                    <p><strong>Fiscal Year:</strong> {{ current_period.fiscal_year.name }}</p>
-                    <p><strong>Start:</strong> {{ current_period.start_date }}</p>
-                    <p><strong>End:</strong> {{ current_period.end_date }}</p>
-                    <p><strong>Status:</strong> {{ current_period.status }}</p>
+		<article class="kpi-card">
+			<div class="kpi-icon"><i class="bi bi-diagram-3 kpi-svg" aria-hidden="true"></i></div>
+			<div class="kpi-label">Accounts</div>
+			<div class="kpi-value">{{ accounts_count|default:0 }}</div>
+			<div class="kpi-footer">In the chart of accounts</div>
+		</article>
+	</div>
 
-                    <a href="{% url 'accounting:period_list' %}" class="btn btn-outline-secondary btn-sm">
-                        Manage Periods
-                    </a>
-                {% else %}
-                    <p>No period is currently open.</p>
-                    <a href="{% url 'accounting:period_list' %}" class="btn btn-secondary btn-sm">
-                        Create Period
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+	<div class="charts-row">
+		<article class="chart-card">
+			<div class="chart-header">
+				<div>
+					<p class="text-uppercase text-muted small fw-semibold mb-1">Control panel</p>
+					<h2 class="chart-title mb-0">Daily operations</h2>
+				</div>
+				<i class="bi bi-lightning-charge fs-4 text-warning" aria-hidden="true"></i>
+			</div>
+			<div class="d-grid gap-2 mt-3">
+				<a class="btn btn-primary text-start" href="{% url 'accounting:journal_create' %}"><i class="bi bi-plus-circle me-2" aria-hidden="true"></i>New journal entry</a>
+				<a class="btn btn-outline-primary text-start" href="{% url 'accounting:journal_list' %}"><i class="bi bi-list-ul me-2" aria-hidden="true"></i>View journal entries</a>
+				<a class="btn btn-outline-primary text-start" href="{% url 'accounting:account_create' %}"><i class="bi bi-person-plus me-2" aria-hidden="true"></i>New account</a>
+				<a class="btn btn-outline-primary text-start" href="{% url 'accounting:account_list' %}"><i class="bi bi-diagram-3 me-2" aria-hidden="true"></i>Chart of accounts</a>
+			</div>
+		</article>
 
-    <!-- Stats -->
-    <div class="col-md-4">
-        <div class="card mb-3 shadow-sm">
-            <div class="card-header bg-dark text-white">
-                Accounting Data
-            </div>
-            <div class="card-body">
-                <p><strong>Journal Entries:</strong> {{ journal_entries_count }}</p>
-                <p><strong>Accounts:</strong> {{ accounts_count }}</p>
-
-                <a href="{% url 'accounting:journal_list' %}" class="btn btn-outline-dark btn-sm">
-                    Journal Entries
-                </a>
-                <a href="{% url 'accounting:account_list' %}" class="btn btn-outline-dark btn-sm">
-                    Chart of Accounts
-                </a>
-            </div>
-        </div>
-    </div>
-
-</div>
+		<article class="chart-card">
+			<div class="chart-header">
+				<div>
+					<p class="text-uppercase text-muted small fw-semibold mb-1">Review and reporting</p>
+					<h2 class="chart-title mb-0">Accounting structure</h2>
+				</div>
+				<i class="bi bi-bar-chart-line fs-4 text-primary" aria-hidden="true"></i>
+			</div>
+			<div class="list-group list-group-flush mt-3">
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:fiscal_year_list' %}"><i class="bi bi-calendar3 me-2 text-primary" aria-hidden="true"></i>Fiscal years</a>
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:fiscal_year_create' %}"><i class="bi bi-calendar-plus me-2 text-primary" aria-hidden="true"></i>New fiscal year</a>
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:period_list' %}"><i class="bi bi-calendar-check me-2 text-primary" aria-hidden="true"></i>Period management</a>
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:trial_balance' %}"><i class="bi bi-table me-2 text-primary" aria-hidden="true"></i>Trial balance</a>
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:balance_sheet' %}"><i class="bi bi-file-earmark-bar-graph me-2 text-primary" aria-hidden="true"></i>Balance sheet</a>
+				<a class="list-group-item list-group-item-action px-0" href="{% url 'accounting:account_list' %}"><i class="bi bi-journal-bookmark me-2 text-primary" aria-hidden="true"></i>General ledger by account</a>
+			</div>
+		</article>
+	</div>
+</section>
 {% endblock %}

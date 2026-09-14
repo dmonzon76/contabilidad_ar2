@@ -11,10 +11,13 @@ from .views.customers import (
     customer_tax_edit,
     customer_edit,
 )
+from .views.dashboard import sales_dashboard
 
 app_name = "sales"
 
 urlpatterns = [
+    # Dashboard
+    path("dashboard/", sales_dashboard, name="dashboard"),
     # Sales
     path("", SaleListView.as_view(), name="sale_list"),
     path("new/", SaleCreateView.as_view(), name="sale_create"),

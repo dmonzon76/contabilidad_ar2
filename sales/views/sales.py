@@ -8,10 +8,7 @@ from sales.models.sale_item import SaleItem
 from sales.forms.sale import SaleForm
 from sales.forms.sale_item import SaleItemForm
 
-from inventory.integration import (
-    update_inventory_from_sale,
-    revert_inventory_from_sale
-)
+from inventory.integration import update_inventory_from_sale, revert_inventory_from_sale
 
 from accounting.integration import (
     create_sale_journal_entry,
@@ -19,16 +16,19 @@ from accounting.integration import (
     delete_journal_entries_for_sale,
     delete_cmv_journal_entry,
     create_customer_cc_from_sale,
-    delete_customer_cc_from_sale
+    delete_customer_cc_from_sale,
 )
 
 # VALIDACIÓN CONTABLE
-from accounting.utils.period_validation import get_open_period_for_date, NoOpenPeriodError
-
+from accounting.utils.period_validation import (
+    get_open_period_for_date,
+    NoOpenPeriodError,
+)
 
 # ============================================================
 # LISTA DE VENTAS
 # ============================================================
+
 
 class SaleListView(ListView):
     model = Sale
@@ -45,6 +45,7 @@ class SaleListView(ListView):
 # CREACIÓN DE VENTA
 # ============================================================
 
+
 class SaleCreateView(CreateView):
     model = Sale
     form_class = SaleForm
@@ -52,12 +53,12 @@ class SaleCreateView(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["company_id"] = self.request.session.get("active_company_id")
+        kwargs["company_id"] = self.request.active_company.id
         return kwargs
 
     def form_valid(self, form):
         sale = form.save(commit=False)
-        sale.company_id = self.request.session.get("active_company_id")
+        sale.company = self.request.active_company
 
         # VALIDACIÓN CONTABLE
         try:
@@ -78,6 +79,7 @@ class SaleCreateView(CreateView):
 # DETALLE DE VENTA
 # ============================================================
 
+
 class SaleDetailView(DetailView):
     model = Sale
     template_name = "sales/sale_detail.html"
@@ -92,6 +94,7 @@ class SaleDetailView(DetailView):
 # ============================================================
 # AGREGAR ÍTEM A LA VENTA
 # ============================================================
+
 
 def sale_item_add(request, sale_id):
     sale = get_object_or_404(
@@ -144,6 +147,7 @@ def sale_item_add(request, sale_id):
 # ============================================================
 # ELIMINAR VENTA
 # ============================================================
+
 
 def sale_delete(request, pk):
     sale = get_object_or_404(

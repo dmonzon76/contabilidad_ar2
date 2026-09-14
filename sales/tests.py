@@ -50,6 +50,14 @@ class SalesCompanyIsolationTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_sales_dashboard_only_counts_active_company_data(self):
+        response = self.client.get(reverse("sales:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["sales_count"], 0)
+        self.assertEqual(response.context["customers_count"], 0)
+        self.assertContains(response, "Sales Center")
+
     def test_sale_form_only_lists_customers_from_active_company(self):
         response = self.client.get(reverse("sales:sale_create"))
 
@@ -57,6 +65,20 @@ class SalesCompanyIsolationTests(TestCase):
         self.assertQuerySetEqual(
             response.context["form"].fields["customer"].queryset,
             [],
+        )
+
+    def test_sale_form_lists_active_customers_from_active_company(self):
+        customer = Customer.objects.create(
+            company=self.allowed_company,
+            name="Allowed customer",
+        )
+
+        response = self.client.get(reverse("sales:sale_create"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerySetEqual(
+            response.context["form"].fields["customer"].queryset,
+            [customer],
         )
 
     def test_sale_number_is_generated_and_not_user_editable(self):

@@ -10,5 +10,18 @@
 
         <button class="btn btn-success">Create Sale</button>
     </form>
+    <a href="{% url 'sales:customer_create' %}" class="btn btn-outline-primary mb-3">
+        New Customer
+    </a>
+
+    <a href="{% url 'sales:customer_list' %}" class="btn btn-outline-secondary mb-3 ms-2">
+        Manage Customers
+    </a>
+
+    {% if not form.customer.field.queryset.exists %}
+    <div class="alert alert-info" role="status">
+        No active customers are available. Create a customer before recording a sale.
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -62,6 +62,14 @@ class PurchaseCompanyIsolationTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_purchases_dashboard_only_counts_active_company_data(self):
+        response = self.client.get(reverse("purchases:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["purchases_count"], 0)
+        self.assertEqual(response.context["suppliers_count"], 0)
+        self.assertContains(response, "Purchases Center")
+
     def test_purchase_form_only_lists_suppliers_from_active_company(self):
         response = self.client.get(reverse("purchases:purchase_create"))
 
