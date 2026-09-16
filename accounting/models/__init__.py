@@ -5,4 +5,4 @@ from .account_movement import AccountMovement
 from .journal import JournalEntry, JournalEntryLine
 from .period import FiscalYear, Period
 
-
+from .accounting_settings import AccountingSettings

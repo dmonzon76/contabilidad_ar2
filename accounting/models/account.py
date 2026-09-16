@@ -20,7 +20,7 @@ class Account(models.Model):
         related_name="accounts",
     )
 
-    code = models.CharField(max_length=20)
+    code = models.CharField(max_length=40)
     name = models.CharField(max_length=200)
 
     parent = models.ForeignKey(
@@ -52,15 +52,20 @@ class Account(models.Model):
         return total or 0
 
     def clean(self):
+        if not self.company_id:
+            return
+
         parts = self.code.split(".")
+
         for p in parts:
             if not p.isdigit():
                 raise ValidationError("Each code segment must be numeric.")
 
         if len(parts) > 1:
             parent_code = ".".join(parts[:-1])
+
             if not Account.objects.filter(
-                company=self.company,
+                company_id=self.company_id,
                 code=parent_code,
             ).exists():
                 raise ValidationError(f"Parent code {parent_code} does not exist.")

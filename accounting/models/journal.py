@@ -10,6 +10,13 @@ User = get_user_model()
 
 
 class JournalEntry(models.Model):
+    purchase = models.ForeignKey(
+        "purchases.Purchase",
+        on_delete=models.SET_NULL,
+        related_name="journal_entries",
+        null=True,
+        blank=True,
+    )
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,

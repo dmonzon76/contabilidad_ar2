@@ -1,13 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-
+from django.db import transaction
 from accounting.models import (
     JournalEntry,
     JournalEntryLine,
     Account,
     Period,
 )
-
 
 class AccountingService:
 
@@ -25,13 +24,15 @@ class AccountingService:
             raise ValidationError("No open accounting period for this date.")
 
     @staticmethod
+    @transaction.atomic
     def post_sale(sale):
-        # IMPORT LOCAL (evita circular import)
-        # from sales.models.sale import Sale   ← NO NECESARIO
-
         company = sale.company
         period = AccountingService.get_period(company, sale.date)
 
+        # 1. Identificar si es venta de servicios o mercaderías
+        is_service = getattr(sale, 'is_service', False) or getattr(sale, 'sale_type', '') == 'SERVICE'
+
+        # 2. Creación de la cabecera del asiento
         entry = JournalEntry.objects.create(
             company=company,
             period=period,
@@ -40,117 +41,87 @@ class AccountingService:
             created_by=getattr(sale, "created_by", None),
         )
 
-        # Cliente (DEBE)
+        # 3. DEBE: Cliente / Deudores por Ventas (Total del comprobante)
         account_client = Account.objects.get(company=company, code="CLIENTES")
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_client,
             debit=sale.total_amount,
+            credit=0,
             description=f"Cliente {sale.customer.name}",
         )
 
-        # Ventas (HABER)
-        account_sales = Account.objects.get(company=company, code="VENTAS")
+        # 4. HABER: Cuenta de Ventas (Neto Gravado)
+        sales_code = "VENTAS_SERVICIOS" if is_service else "VENTAS"
+        try:
+            account_sales = Account.objects.get(company=company, code=sales_code)
+        except Account.DoesNotExist:
+            account_sales = Account.objects.get(company=company, code="VENTAS")
+
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_sales,
+            debit=0,
             credit=sale.net_amount,
-            description="Ventas netas",
+            description="Venta de servicios" if is_service else "Ventas netas de mercaderías",
         )
 
-        # IVA Débito Fiscal (HABER)
-        account_iva = Account.objects.get(company=company, code="IVA_DEBITO")
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_iva,
-            credit=sale.iva_amount,
-            description="IVA débito fiscal",
-        )
+        # 5. HABER: IVA Débito Fiscal
+        iva_amount = getattr(sale, 'iva_amount', 0) or getattr(sale, 'vat_amount', 0)
+        if iva_amount > 0:
+            account_iva = Account.objects.get(company=company, code="IVA_DEBITO")
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_iva,
+                debit=0,
+                credit=iva_amount,
+                description="IVA débito fiscal",
+            )
 
-        # CMV + Inventario (solo si hay mercadería)
-        if sale.total_cost > 0:
+        # 6. HABER: Percepción de Ingresos Brutos (Pasivo a depositar)
+        iibb_amount = getattr(sale, 'iibb_perception_amount', 0)
+        if iibb_amount > 0:
+            account_iibb = Account.objects.get(company=company, code="PERCEPCION_IIBB_A_DEPOSITAR")
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_iibb,
+                debit=0,
+                credit=iibb_amount,
+                description="Percepción IIBB practicada",
+            )
+
+        # 7. HABER: Percepción de IVA (Pasivo a depositar)
+        vat_perc_amount = getattr(sale, 'vat_perception_amount', 0)
+        if vat_perc_amount > 0:
+            account_vat_perc = Account.objects.get(company=company, code="PERCEPCION_IVA_A_DEPOSITAR")
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_vat_perc,
+                debit=0,
+                credit=vat_perc_amount,
+                description="Percepción IVA practicada",
+            )
+
+        # 8. DEBE/HABER: CMV + Inventario (Solo si es bienes de cambio y tiene costo > 0)
+        total_cost = getattr(sale, 'total_cost', 0)
+        if not is_service and total_cost > 0:
             account_cmv = Account.objects.get(company=company, code="CMV")
             account_inventory = Account.objects.get(company=company, code="INVENTARIO")
 
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=account_cmv,
-                debit=sale.total_cost,
+                debit=total_cost,
+                credit=0,
                 description="Costo de mercadería vendida",
             )
 
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=account_inventory,
-                credit=sale.total_cost,
+                debit=0,
+                credit=total_cost,
                 description="Salida de inventario",
             )
 
         return entry
-
-    @staticmethod
-    def post_purchase(purchase):
-        # IMPORT LOCAL (evita circular import)
-        # from purchases.models.purchase import Purchase   ← NO NECESARIO
-
-        company = purchase.company
-        period = AccountingService.get_period(company, purchase.date)
-
-        entry = JournalEntry.objects.create(
-            company=company,
-            period=period,
-            date=purchase.date,
-            description=f"Compra {purchase.invoice_number}",
-            created_by=getattr(purchase, "created_by", None),
-        )
-
-        account_supplier = Account.objects.get(company=company, code="PROVEEDORES")
-        account_expense = Account.objects.get(company=company, code="GASTOS")
-        account_iva = Account.objects.get(company=company, code="IVA_CREDITO")
-
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_expense,
-            debit=purchase.net_amount,
-            description="Gasto por compra",
-        )
-
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_iva,
-            debit=purchase.tax_amount,
-            description="IVA crédito fiscal",
-        )
-
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_supplier,
-            credit=purchase.total_amount,
-            description=f"Proveedor {purchase.supplier.name}",
-        )
-
-        return entry
-
-    @staticmethod
-    def reverse_entry(entry):
-        company = entry.company
-        period = AccountingService.get_period(company, timezone.now().date())
-
-        reverse = JournalEntry.objects.create(
-            company=company,
-            period=period,
-            date=timezone.now().date(),
-            description=f"Reverso de asiento #{entry.id}",
-            created_by=entry.created_by,
-        )
-
-        for line in entry.lines.all():
-            JournalEntryLine.objects.create(
-                entry=reverse,
-                account=line.account,
-                debit=line.credit,
-                credit=line.debit,
-                description=f"Reverso de línea {line.id}",
-            )
-
-        return reverse
