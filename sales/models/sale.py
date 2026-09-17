@@ -60,7 +60,9 @@ class Sale(models.Model):
         self.total_amount = net + iva
         self.total_cost = cost
 
-        super(Sale, self).save(update_fields=["net_amount", "iva_amount", "total_amount", "total_cost"])
+        super(Sale, self).save(
+            update_fields=["net_amount", "iva_amount", "total_amount", "total_cost"]
+        )
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -76,8 +78,7 @@ class Sale(models.Model):
         super().save(*args, **kwargs)
 
         if is_new:
-            # Import local para evitar circular import
-            from accounting.services.accounting_service import AccountingService
-
             self.recalc_totals()
+            from accounting.services import AccountingService
+
             AccountingService.post_sale(self)

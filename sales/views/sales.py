@@ -1,6 +1,8 @@
 from django.views.generic import ListView, CreateView, DetailView
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.contrib import messages
 
 from sales.models.sale import Sale
 from sales.models.sale_item import SaleItem
@@ -10,14 +12,7 @@ from sales.forms.sale_item import SaleItemForm
 
 from inventory.integration import update_inventory_from_sale, revert_inventory_from_sale
 
-from accounting.integration import (
-    create_sale_journal_entry,
-    create_cmv_journal_entry,
-    delete_journal_entries_for_sale,
-    delete_cmv_journal_entry,
-    create_customer_cc_from_sale,
-    delete_customer_cc_from_sale,
-)
+from accounting.services import AccountingService
 
 # VALIDACIÓN CONTABLE
 from accounting.utils.period_validation import (
@@ -57,22 +52,31 @@ class SaleCreateView(CreateView):
         return kwargs
 
     def form_valid(self, form):
+        company = self.request.active_company
+        created_accounts = AccountingService.ensure_required_accounts(company)
+
+        if created_accounts:
+            messages.warning(
+                self.request,
+                "Se creó el plan de cuentas base para la empresa antes de registrar la venta.",
+            )
+
         sale = form.save(commit=False)
-        sale.company = self.request.active_company
-
-        # VALIDACIÓN CONTABLE
-        try:
-            period = get_open_period_for_date(sale.date)
-            sale.period = period
-        except NoOpenPeriodError as e:
-            form.add_error(None, str(e))
-            return self.form_invalid(form)
-
+        sale.company = company
         sale.save()
-        return super().form_valid(form)
+
+        self.object = sale
+
+        return redirect(
+            "sales:sale_detail",
+            pk=sale.pk,
+        )
 
     def get_success_url(self):
-        return reverse_lazy("sales:sale_list")
+        return reverse_lazy(
+            "sales:sale_detail",
+            kwargs={"pk": self.object.pk},
+        )
 
 
 # ============================================================
@@ -105,10 +109,12 @@ def sale_item_add(request, sale_id):
 
     # VALIDACIÓN CONTABLE
     try:
-        period = get_open_period_for_date(sale.date)
-        sale.period = period
-        sale.save(update_fields=["period"])
+        get_open_period_for_date(sale.date)
     except NoOpenPeriodError as e:
+        messages.error(
+            request,
+            f"No se puede agregar items: {str(e)}",
+        )
         return render(
             request,
             "sales/sale_item_add.html",
@@ -125,16 +131,11 @@ def sale_item_add(request, sale_id):
             sale.recalc_totals()
 
             # Reversión previa
-            delete_journal_entries_for_sale(sale)
-            delete_cmv_journal_entry(sale)
-            delete_customer_cc_from_sale(sale)
             revert_inventory_from_sale(sale)
 
             # Integraciones nuevas
             update_inventory_from_sale(sale)
-            create_sale_journal_entry(sale)
-            create_cmv_journal_entry(sale)
-            create_customer_cc_from_sale(sale)
+            AccountingService.post_sale(sale)
 
             return redirect("sales:sale_detail", pk=sale.id)
 
@@ -160,6 +161,10 @@ def sale_delete(request, pk):
     try:
         get_open_period_for_date(sale.date)
     except NoOpenPeriodError as e:
+        messages.error(
+            request,
+            f"No se puede eliminar la venta: {str(e)}",
+        )
         return render(
             request,
             "sales/sale_detail.html",

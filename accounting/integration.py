@@ -2,6 +2,7 @@ from django.utils import timezone
 from accounting.models import JournalEntry, JournalEntryLine, Account
 from accounting.models.account_movement import AccountMovement
 from accounting.models.period import Period
+from accounting.services import AccountingService
 
 
 def get_period_for_purchase(purchase):
@@ -14,6 +15,7 @@ def get_period_for_purchase(purchase):
         end_date__gte=purchase.date,
         status="OPEN",
     )
+
 
 # ============================================================
 # UTILIDAD
@@ -30,31 +32,8 @@ def get_account(company, code):
 
 
 def create_purchase_journal_entry(purchase):
-    company = purchase.company
-
-    entry = JournalEntry.objects.create(
-        company=company,
-        date=timezone.now(),
-        description=f"Compra {purchase.invoice_number}",
-    )
-
-    acc_inventory = get_account(company, "1.1.09")
-    acc_iva_credit = get_account(company, "7.2")
-    acc_prov = get_account(company, "2.1.01")
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_inventory, debit=purchase.net_amount, credit=0
-    )
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_iva_credit, debit=purchase.tax_amount, credit=0
-    )
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_prov, debit=0, credit=purchase.total_amount
-    )
-
-    return entry
+    """Backward-compatible wrapper around the centralized accounting service."""
+    return AccountingService.post_purchase(purchase)
 
 
 def delete_journal_entries_for_purchase(purchase):
@@ -70,31 +49,8 @@ def delete_journal_entries_for_purchase(purchase):
 
 
 def create_sale_journal_entry(sale):
-    company = sale.company
-
-    entry = JournalEntry.objects.create(
-        company=company,
-        date=timezone.now(),
-        description=f"Venta {sale.number}",
-    )
-
-    acc_clients = get_account(company, "1.1.04")
-    acc_sales = get_account(company, "4.1.01")
-    acc_iva_debit = get_account(company, "7.1")
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_clients, debit=sale.total_amount, credit=0
-    )
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_sales, debit=0, credit=sale.net_amount
-    )
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_iva_debit, debit=0, credit=sale.vat_amount
-    )
-
-    return entry
+    """Backward-compatible wrapper around the centralized accounting service."""
+    return AccountingService.post_sale(sale)
 
 
 def delete_journal_entries_for_sale(sale):
@@ -109,26 +65,8 @@ def delete_journal_entries_for_sale(sale):
 
 
 def create_cmv_journal_entry(sale):
-    company = sale.company
-
-    entry = JournalEntry.objects.create(
-        company=company,
-        date=timezone.now(),
-        description=f"CMV Venta {sale.number}",
-    )
-
-    acc_cmv = get_account(company, "5.1.01")
-    acc_inventory = get_account(company, "1.1.09")
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_cmv, debit=sale.cost_total, credit=0
-    )
-
-    JournalEntryLine.objects.create(
-        entry=entry, account=acc_inventory, debit=0, credit=sale.cost_total
-    )
-
-    return entry
+    """Backward-compatible wrapper. CMV is included inside the main sale entry."""
+    return AccountingService.post_sale(sale)
 
 
 def delete_cmv_journal_entry(sale):

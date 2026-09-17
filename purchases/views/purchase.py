@@ -17,20 +17,18 @@ from inventory.integration import (
     revert_inventory_from_purchase,
 )
 
-from accounting.integration import (
-    create_purchase_journal_entry,
-    delete_journal_entries_for_purchase,
-    create_supplier_cc_from_purchase,
-    delete_supplier_cc_from_purchase,
-)
+from accounting.services import AccountingService
 
 # VALIDACIÓN CONTABLE
-from accounting.utils.period_validation import get_open_period_for_date, NoOpenPeriodError
-
+from accounting.utils.period_validation import (
+    get_open_period_for_date,
+    NoOpenPeriodError,
+)
 
 # ============================================================
 # LISTA DE COMPRAS
 # ============================================================
+
 
 class PurchaseListView(ListView):
     model = Purchase
@@ -46,6 +44,7 @@ class PurchaseListView(ListView):
 # ============================================================
 # DETALLE DE COMPRA
 # ============================================================
+
 
 class PurchaseDetailView(DetailView):
     model = Purchase
@@ -72,6 +71,7 @@ class PurchaseDetailView(DetailView):
 # ============================================================
 # CREAR COMPRA (FUNCIÓN)
 # ============================================================
+
 
 def purchase_create(request):
     if request.method == "POST":
@@ -100,6 +100,7 @@ def purchase_create(request):
 # ============================================================
 # CREAR COMPRA (CLASS-BASED VIEW)
 # ============================================================
+
 
 class PurchaseCreateView(CreateView):
     model = Purchase
@@ -174,8 +175,7 @@ class PurchaseCreateView(CreateView):
                 self.object = purchase
 
                 update_inventory_from_purchase(purchase)
-                create_purchase_journal_entry(purchase)
-                create_supplier_cc_from_purchase(purchase)
+                AccountingService.post_purchase(purchase)
 
                 return redirect("purchases:purchase_list")
 
@@ -187,6 +187,7 @@ class PurchaseCreateView(CreateView):
 # ============================================================
 # EDITAR COMPRA
 # ============================================================
+
 
 class PurchaseUpdateView(UpdateView):
     model = Purchase
@@ -208,7 +209,9 @@ class PurchaseUpdateView(UpdateView):
         return {
             "line_formset": PurchaseLineFormSet(data=data, instance=purchase),
             "tax_formset": PurchaseTaxFormSet(data=data, instance=purchase),
-            "perception_formset": PurchasePerceptionFormSet(data=data, instance=purchase),
+            "perception_formset": PurchasePerceptionFormSet(
+                data=data, instance=purchase
+            ),
             "retention_formset": PurchaseRetentionFormSet(data=data, instance=purchase),
         }
 
@@ -256,6 +259,7 @@ class PurchaseUpdateView(UpdateView):
 # ELIMINAR COMPRA
 # ============================================================
 
+
 class PurchaseDeleteView(DetailView):
     model = Purchase
     template_name = "purchases/purchases/delete.html"
@@ -275,6 +279,7 @@ class PurchaseDeleteView(DetailView):
 # ============================================================
 # RECALCULAR COMPRA
 # ============================================================
+
 
 def purchase_recalculate(request):
     return redirect("purchases:purchase_list")

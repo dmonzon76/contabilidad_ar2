@@ -151,3 +151,69 @@ class AccountingServiceTestCase(TestCase):
 
         self.assertFalse(entry.lines.filter(account__code="CMV").exists())
         self.assertFalse(entry.lines.filter(account__code="INVENTARIO").exists())
+
+    def test_post_sale_creates_missing_accounts_for_company(self):
+        """Si la compañía no tiene cuentas contables, el servicio debe crearlas automáticamente."""
+        company = Company.objects.create(
+            name="Empresa sin cuentas", tax_id="30000000002"
+        )
+        company.accounts.all().delete()
+
+        customer_mock = MagicMock()
+        customer_mock.name = "Cliente nuevo"
+
+        sale_mock = MagicMock()
+        sale_mock.company = company
+        sale_mock.date = date(2026, 7, 1)
+        sale_mock.number = "0001-00000103"
+        sale_mock.customer = customer_mock
+        sale_mock.total_amount = Decimal("121000.00")
+        sale_mock.net_amount = Decimal("100000.00")
+        sale_mock.iva_amount = Decimal("21000.00")
+        sale_mock.iibb_perception_amount = Decimal("0.00")
+        sale_mock.vat_perception_amount = Decimal("0.00")
+        sale_mock.total_cost = Decimal("60000.00")
+        sale_mock.is_service = False
+        sale_mock.created_by = None
+
+        entry = AccountingService.post_sale(sale_mock)
+
+        self.assertTrue(
+            Account.objects.filter(company=company, code="CLIENTES").exists()
+        )
+        self.assertTrue(Account.objects.filter(company=company, code="VENTAS").exists())
+        self.assertTrue(
+            Account.objects.filter(company=company, code="IVA_DEBITO").exists()
+        )
+        self.assertTrue(entry.pk)
+
+    def test_post_sale_is_idempotent_for_same_sale(self):
+        """No debe crear un segundo asiento para la misma venta al llamarse dos veces."""
+        customer_mock = MagicMock()
+        customer_mock.name = "Cliente Idempotente"
+
+        sale_mock = MagicMock()
+        sale_mock.company = self.company
+        sale_mock.date = date(2026, 6, 10)
+        sale_mock.number = "0001-00000102"
+        sale_mock.customer = customer_mock
+        sale_mock.total_amount = Decimal("121000.00")
+        sale_mock.net_amount = Decimal("100000.00")
+        sale_mock.iva_amount = Decimal("21000.00")
+        sale_mock.iibb_perception_amount = Decimal("0.00")
+        sale_mock.vat_perception_amount = Decimal("0.00")
+        sale_mock.total_cost = Decimal("60000.00")
+        sale_mock.is_service = False
+        sale_mock.created_by = None
+
+        first = AccountingService.post_sale(sale_mock)
+        second = AccountingService.post_sale(sale_mock)
+
+        self.assertEqual(
+            JournalEntry.objects.filter(
+                company=self.company,
+                description=f"Venta {sale_mock.number}",
+            ).count(),
+            1,
+        )
+        self.assertEqual(first.pk, second.pk)

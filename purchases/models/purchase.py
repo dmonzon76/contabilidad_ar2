@@ -148,13 +148,15 @@ class Purchase(models.Model):
         super().save(*args, **kwargs)
 
         if is_new:
-            from accounting.services.accounting_service import AccountingService
+            from accounting.services import AccountingService
+
             AccountingService.post_purchase(self)
 
 
 # ============================================================
 # LÍNEAS DE COMPRA
 # ============================================================
+
 
 class PurchaseLine(models.Model):
     purchase = models.ForeignKey(
@@ -187,6 +189,7 @@ class PurchaseLine(models.Model):
 # IMPUESTOS (IVA / Internos / Otros)
 # ============================================================
 
+
 class PurchaseTax(models.Model):
     purchase = models.ForeignKey(
         Purchase,
@@ -216,6 +219,7 @@ class PurchaseTax(models.Model):
 # PERCEPCIONES
 # ============================================================
 
+
 class PurchasePerception(models.Model):
     PERCEPTION_CHOICES = (
         ("IIBB", "IIBB"),
@@ -241,6 +245,7 @@ class PurchasePerception(models.Model):
 # ============================================================
 # RETENCIONES
 # ============================================================
+
 
 class PurchaseRetention(models.Model):
     RETENTION_CHOICES = (

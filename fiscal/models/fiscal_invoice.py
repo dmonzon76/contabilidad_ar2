@@ -155,64 +155,9 @@ class FiscalInvoice(models.Model):
         return True
 
     def post_to_accounting(self):
-        from accounting.models import Account, JournalEntry, JournalEntryLine
-        from accounting.models.period import FiscalYear, Period
+        from accounting.services import AccountingService
 
-        entry_date = self.date or timezone.localdate()
-        fiscal_year, _ = FiscalYear.objects.get_or_create(
-            company=self.company,
-            year=entry_date.year,
-            defaults={
-                "start_date": entry_date.replace(month=1, day=1),
-                "end_date": entry_date.replace(month=12, day=31),
-            },
-        )
-        period, _ = Period.objects.get_or_create(
-            fiscal_year=fiscal_year,
-            month=entry_date.month,
-            defaults={
-                "start_date": entry_date.replace(day=1),
-                "end_date": entry_date,
-            },
-        )
-
-        accounts = {}
-        for code, name, account_type in (
-            ("1", "Caja", "ASSET"),
-            ("4", "Ventas", "INCOME"),
-            ("2", "Impuestos", "LIABILITY"),
-        ):
-            accounts[code], _ = Account.objects.get_or_create(
-                company=self.company,
-                code=code,
-                defaults={"name": name, "account_type": account_type},
-            )
-
-        entry = JournalEntry.objects.create(
-            company=self.company,
-            period=period,
-            date=entry_date,
-            description=f"Fiscal invoice {self.number}",
-        )
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=accounts["1"],
-            debit=self.total_amount,
-            description="Cobro de factura fiscal",
-        )
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=accounts["4"],
-            credit=self.net_amount,
-            description="Venta de factura fiscal",
-        )
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=accounts["2"],
-            credit=self.tax_amount,
-            description="Impuestos de factura fiscal",
-        )
-        return entry
+        return AccountingService.post_fiscal_invoice(self)
 
     # ---------------- VALIDACIONES ----------------
     def clean(self):
