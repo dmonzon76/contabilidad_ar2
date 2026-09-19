@@ -12,13 +12,21 @@ class Product(models.Model):
         ("SERVICE", "Service"),
     )
 
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="products",
+    )
+
     name = models.CharField(max_length=150)
-    sku = models.CharField(max_length=50, unique=True)
+
+    sku = models.CharField(
+        max_length=50,
+        db_index=True,
+    )
 
     description = models.CharField(max_length=300, blank=True, null=True)
     detail = models.TextField(blank=True, null=True)
-
     type = models.CharField(max_length=10, choices=PRODUCT_TYPES, default="PRODUCT")
 
     income_account = models.ForeignKey(
@@ -40,6 +48,12 @@ class Product(models.Model):
 
     class Meta:
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "sku"],
+                name="unique_product_sku_per_company",
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.sku})"

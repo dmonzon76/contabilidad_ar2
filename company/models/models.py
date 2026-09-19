@@ -29,9 +29,7 @@ class Company(models.Model):
 
     start_date = models.DateField(null=True, blank=True)
     accounting_start_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text="Date when accounting starts in this system"
+        null=True, blank=True, help_text="Date when accounting starts in this system"
     )
 
     is_active = models.BooleanField(default=True)
@@ -42,6 +40,7 @@ class Company(models.Model):
     @property
     def purchases_totals(self):
         from purchases.models.purchase import Purchase
+
         purchases = Purchase.objects.filter(company=self)
         return {
             "net": sum(p.net_amount for p in purchases),
@@ -52,12 +51,14 @@ class Company(models.Model):
     @property
     def last_purchase(self):
         from purchases.models.purchase import Purchase
+
         return Purchase.objects.filter(company=self).order_by("-date", "-id").first()
 
     @property
     def sales_totals(self):
         try:
             from sales.models.sale import Sale
+
             sales = Sale.objects.filter(company=self)
             return {
                 "net": sum(s.net_amount for s in sales),
@@ -71,24 +72,13 @@ class Company(models.Model):
     def last_sale(self):
         try:
             from sales.models.sale import Sale
+
             return Sale.objects.filter(company=self).order_by("-date", "-id").first()
         except:
             return None
 
 
 class CompanyProfile(models.Model):
-    GANANCIAS_STATUS_CHOICES = [
-        ("INSCRIPTO", "Inscripto"),
-        ("EXENTO", "Exento"),
-        ("NO_CORRESPONDE", "No corresponde (Monotributista)"),
-    ]
-
-    IIBB_STATUS_CHOICES = [
-        ("INSCRIPTO", "Inscripto"),
-        ("EXENTO", "Exento"),
-        ("NO_CORRESPONDE", "No corresponde"),
-    ]
-
     company = models.OneToOneField(
         Company,
         on_delete=models.CASCADE,
@@ -103,21 +93,25 @@ class CompanyProfile(models.Model):
 
     iibb_status = models.CharField(
         max_length=20,
-        choices=IIBB_STATUS_CHOICES,
-        default="NO_CORRESPONDE",
+        choices=[
+            ("LOCAL", "Local"),
+            ("MULTILATERAL", "Multilateral"),
+            ("EXEMPT", "Exempt"),
+        ],
+        default="LOCAL",
     )
-
     ganancias_status = models.CharField(
         max_length=20,
-        choices=GANANCIAS_STATUS_CHOICES,
-        default="NO_CORRESPONDE",
+        choices=[
+            ("INSCRIPTO", "Inscripto"),
+            ("NO_INSCRIPTO", "No Inscripto"),
+            ("EXENTO", "Exento"),
+        ],
+        default="INSCRIPTO",
     )
 
     uses_perceptions = models.BooleanField(default=False)
     uses_retentions = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Tax profile for {self.company.name}"
 
 
 class CompanyUser(models.Model):

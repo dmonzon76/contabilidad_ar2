@@ -47,8 +47,8 @@ class CompanyProfile(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['company'],
-                name='unique_tax_profile_per_company',
+                fields=["company"],
+                name="fiscal_unique_tax_profile_per_company",
             ),
         ]
 

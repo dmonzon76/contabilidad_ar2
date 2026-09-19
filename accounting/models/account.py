@@ -31,13 +31,22 @@ class Account(models.Model):
         related_name="children",
     )
 
-    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
+    account_type = models.CharField(
+        max_length=20,
+        choices=ACCOUNT_TYPES
+    )
 
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ("company", "code")
         ordering = ["code"]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "code"],
+                name="unique_account_code_per_company",
+            )
+        ]
 
     def __str__(self):
         return f"{self.code} - {self.name}"
@@ -46,9 +55,12 @@ class Account(models.Model):
     def balance(self):
         from accounting.models import JournalEntryLine
 
-        total = JournalEntryLine.objects.filter(account=self).aggregate(
+        total = JournalEntryLine.objects.filter(
+            account=self
+        ).aggregate(
             s=Sum("debit") - Sum("credit")
         )["s"]
+
         return total or 0
 
     def clean(self):
@@ -59,28 +71,42 @@ class Account(models.Model):
 
         for p in parts:
             if not p.isdigit():
-                raise ValidationError("Each code segment must be numeric.")
+                raise ValidationError(
+                    "Each code segment must be numeric."
+                )
 
         if len(parts) > 1:
+
             parent_code = ".".join(parts[:-1])
 
             if not Account.objects.filter(
                 company_id=self.company_id,
                 code=parent_code,
             ).exists():
-                raise ValidationError(f"Parent code {parent_code} does not exist.")
+
+                raise ValidationError(
+                    f"Parent code {parent_code} does not exist."
+                )
 
     def total_debit(self, company=None):
         qs = self.journal_lines.all()
+
         if company:
             qs = qs.filter(entry__company=company)
-        return qs.aggregate(total=Sum("debit"))["total"] or 0
+
+        return qs.aggregate(
+            total=Sum("debit")
+        )["total"] or 0
 
     def total_credit(self, company=None):
         qs = self.journal_lines.all()
+
         if company:
             qs = qs.filter(entry__company=company)
-        return qs.aggregate(total=Sum("credit"))["total"] or 0
+
+        return qs.aggregate(
+            total=Sum("credit")
+        )["total"] or 0
 
     def balance_for_company(self, company=None):
         return self.total_debit(company) - self.total_credit(company)
