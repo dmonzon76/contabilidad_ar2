@@ -26,6 +26,8 @@ class AccountingService:
             ("IVA_CREDITO", "IVA Crédito Fiscal", "LIABILITY"),
             ("PERCEPCION_IIBB_A_DEPOSITAR", "Percepción IIBB a depositar", "LIABILITY"),
             ("PERCEPCION_IVA_A_DEPOSITAR", "Percepción IVA a depositar", "LIABILITY"),
+            ("PERCEPCION_IIBB_SUFRIDA", "Percepción IIBB sufrida", "ASSET"),
+            ("RETENCIONES_A_PAGAR", "Retenciones a pagar", "LIABILITY"),
         ]
 
         created = []
@@ -68,15 +70,27 @@ class AccountingService:
             raise ValidationError("No open accounting period for this date.")
 
     @staticmethod
-    def _existing_entry(company, description):
-        return (
-            JournalEntry.objects.filter(
-                company=company,
-                description=description,
-            )
-            .order_by("-id")
-            .first()
+    def _existing_entry(
+        company,
+        description,
+        *,
+        date=None,
+        purchase=None,
+        source_key=None,
+    ):
+        qs = JournalEntry.objects.filter(
+            company=company,
+            description=description,
         )
+        if source_key:
+            source_entry = JournalEntry.objects.filter(source_key=source_key).first()
+            if source_entry:
+                return source_entry
+        if purchase is not None:
+            qs = qs.filter(purchase=purchase)
+        if date is not None:
+            qs = qs.filter(date=date)
+        return qs.order_by("-id").first()
 
     @staticmethod
     @transaction.atomic
@@ -85,7 +99,13 @@ class AccountingService:
         period = AccountingService.get_period(company, purchase.date)
         description = f"Compra {purchase.invoice_number}"
 
-        existing = AccountingService._existing_entry(company, description)
+        existing = AccountingService._existing_entry(
+            company,
+            description,
+            date=purchase.date,
+            purchase=purchase,
+            source_key=f"purchase:{purchase.pk}",
+        )
         if existing:
             return existing
 
@@ -95,6 +115,8 @@ class AccountingService:
             date=purchase.date,
             description=description,
             created_by=getattr(purchase, "created_by", None),
+            purchase=purchase,
+            source_key=f"purchase:{purchase.pk}",
         )
 
         account_inventory = AccountingService.get_or_create_account(
@@ -132,6 +154,22 @@ class AccountingService:
             description="IVA crédito fiscal",
         )
 
+        perception_amount = getattr(purchase, "perception_amount", 0)
+        if perception_amount > 0:
+            account_perception = AccountingService.get_or_create_account(
+                company,
+                "PERCEPCION_IIBB_SUFRIDA",
+                "Percepción IIBB sufrida",
+                "ASSET",
+            )
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_perception,
+                debit=perception_amount,
+                credit=0,
+                description="Percepción sufrida",
+            )
+
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_prov,
@@ -139,6 +177,22 @@ class AccountingService:
             credit=purchase.total_amount,
             description="Proveedor",
         )
+
+        retention_amount = getattr(purchase, "retention_amount", 0)
+        if retention_amount > 0:
+            account_retention = AccountingService.get_or_create_account(
+                company,
+                "RETENCIONES_A_PAGAR",
+                "Retenciones a pagar",
+                "LIABILITY",
+            )
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_retention,
+                debit=0,
+                credit=retention_amount,
+                description="Retención practicada",
+            )
 
         return entry
 
@@ -150,7 +204,12 @@ class AccountingService:
         period = AccountingService.get_period(company, entry_date)
         description = f"Factura fiscal {invoice.number}"
 
-        existing = AccountingService._existing_entry(company, description)
+        existing = AccountingService._existing_entry(
+            company,
+            description,
+            date=entry_date,
+            source_key=f"fiscal_invoice:{invoice.pk}",
+        )
         if existing:
             return existing
 
@@ -212,7 +271,12 @@ class AccountingService:
         period = AccountingService.get_period(company, sale.date)
         description = f"Venta {sale.number}"
 
-        existing = AccountingService._existing_entry(company, description)
+        existing = AccountingService._existing_entry(
+            company,
+            description,
+            date=sale.date,
+            source_key=f"sale:{sale.pk}",
+        )
         if existing:
             return existing
 
@@ -229,6 +293,7 @@ class AccountingService:
             date=sale.date,
             description=description,
             created_by=getattr(sale, "created_by", None),
+            source_key=f"sale:{sale.pk}",
         )
 
         # 3. DEBE: Cliente / Deudores por Ventas (Total del comprobante)

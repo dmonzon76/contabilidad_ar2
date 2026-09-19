@@ -5,8 +5,10 @@ from django.utils import timezone
 from inventory.models import InventoryItem, InventoryMovement
 from purchases.models.purchase import PurchaseLine
 from sales.models.sale_item import SaleItem
+from core.decorators import company_required
 
 
+@company_required
 def inventory_dashboard(request):
     company_id = request.session.get("active_company_id")
     today = timezone.now().date()

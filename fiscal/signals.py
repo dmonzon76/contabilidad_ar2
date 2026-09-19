@@ -3,21 +3,10 @@ from datetime import date
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from accounting.models import Account, FiscalYear, Period
+from accounting.models import FiscalYear, Period
+from accounting.services import AccountingService
 from company.models import Company
 from fiscal.models.company_profile import CompanyProfile
-
-DEFAULT_ACCOUNT_CODES = [
-    ("CAJA", "Caja", "ASSET"),
-    ("CLIENTES", "Clientes", "ASSET"),
-    ("VENTAS", "Ventas", "INCOME"),
-    ("IVA_DEBITO", "IVA Débito Fiscal", "LIABILITY"),
-    ("CMV", "Costo Mercadería Vendida", "EXPENSE"),
-    ("INVENTARIO", "Inventario", "ASSET"),
-    ("PROVEEDORES", "Proveedores", "LIABILITY"),
-    ("GASTOS", "Gastos", "EXPENSE"),
-    ("IVA_CREDITO", "IVA Crédito Fiscal", "LIABILITY"),
-]
 
 
 @receiver(post_save, sender=Company)
@@ -29,16 +18,7 @@ def create_tax_profile_for_company(sender, instance, created, **kwargs):
     """
     if created:
         CompanyProfile.objects.get_or_create(company=instance)
-
-        for code, name, account_type in DEFAULT_ACCOUNT_CODES:
-            Account.objects.get_or_create(
-                company=instance,
-                code=code,
-                defaults={
-                    "name": name,
-                    "account_type": account_type,
-                },
-            )
+        AccountingService.ensure_required_accounts(instance)
 
         year = date.today().year
         fiscal_year, _ = FiscalYear.objects.get_or_create(

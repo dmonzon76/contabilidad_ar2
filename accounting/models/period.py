@@ -44,7 +44,7 @@ class Period(models.Model):
 
     @property
     def is_closed(self):
-        return self.status in {"CLOSED", "LOCKED"}
+        return self.status == "CLOSED"
 
     @property
     def is_locked(self):

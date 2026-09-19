@@ -17,6 +17,12 @@ class JournalEntry(models.Model):
         null=True,
         blank=True,
     )
+    source_key = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        unique=True,
+    )
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
@@ -40,6 +46,12 @@ class JournalEntry(models.Model):
 
     class Meta:
         ordering = ["date", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["company", "purchase"],
+                name="unique_purchase_journal_entry",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.date} - {self.description}"

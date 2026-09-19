@@ -2,10 +2,13 @@ from decimal import Decimal
 from datetime import date
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from unittest.mock import MagicMock
 
 # 1. Modelo Company desde la app 'company'
 from company.models import Company
+from purchases.models import Purchase
+from suppliers.models import Supplier
 
 # 2. Modelos propios de la app 'accounting'
 from accounting.models import (
@@ -217,3 +220,30 @@ class AccountingServiceTestCase(TestCase):
             1,
         )
         self.assertEqual(first.pk, second.pk)
+
+    def test_purchase_journal_entry_is_unique_per_purchase(self):
+        supplier = Supplier.objects.create(
+            company=self.company,
+            name="Proveedor Idempotente",
+        )
+        purchase = Purchase.objects.create(
+            company=self.company,
+            supplier=supplier,
+            date=date(2026, 1, 15),
+            invoice_number="A-0001-00000001",
+            net_amount=Decimal("100.00"),
+            tax_amount=Decimal("21.00"),
+            total_amount=Decimal("121.00"),
+        )
+        first = purchase.journal_entries.get()
+
+        with self.assertRaises(IntegrityError):
+            JournalEntry.objects.create(
+                company=self.company,
+                purchase=purchase,
+                period=self.period,
+                date=purchase.date,
+                description=f"Compra {purchase.invoice_number}",
+            )
+
+        self.assertEqual(first.purchase_id, purchase.pk)

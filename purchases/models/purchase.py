@@ -62,8 +62,8 @@ class Purchase(models.Model):
             ).quantize(money)
             tax_line.save(update_fields=["base_amount", "amount"])
 
-        # 3) Percepciones automáticas basadas en perfil fiscal del supplier
-        profile = self.supplier.tax_profile
+        # 3) Percepciones automáticas basadas en perfil fiscal del proveedor
+        profile = getattr(self.supplier, "tax_profile", None)
 
         for p in self.perceptions.all():
             if not profile:
@@ -72,8 +72,8 @@ class Purchase(models.Model):
                 continue
 
             if p.perception_type == "IIBB":
-                iibb_rate = Decimal(str(profile.iibb_rate or "0"))
-                if iibb_rate and not profile.is_iibb_exempt:
+                iibb_rate = Decimal(str(getattr(profile, "iibb_rate", 0) or "0"))
+                if iibb_rate > 0 and not getattr(profile, "is_iibb_exempt", False):
                     p.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(
                         money
                     )
@@ -81,7 +81,8 @@ class Purchase(models.Model):
                     p.amount = Decimal("0")
 
             elif p.perception_type == "IVA":
-                if profile.iva_condition == "RI":
+                iva_condition = getattr(profile, "iva_condition", "")
+                if iva_condition == "RI":
                     p.amount = (self.net_amount * Decimal("0.03")).quantize(money)
                 else:
                     p.amount = Decimal("0")
@@ -99,8 +100,12 @@ class Purchase(models.Model):
                 continue
 
             if r.retention_type == "GAN":
-                ganancias_rate = Decimal(str(profile.ganancias_rate or "0"))
-                if ganancias_rate and not profile.is_ganancias_exempt:
+                ganancias_rate = Decimal(
+                    str(getattr(profile, "ganancias_rate", 0) or "0")
+                )
+                if ganancias_rate > 0 and not getattr(
+                    profile, "is_ganancias_exempt", False
+                ):
                     r.amount = (
                         self.net_amount * ganancias_rate / Decimal("100")
                     ).quantize(money)
@@ -111,7 +116,7 @@ class Purchase(models.Model):
                 iva_total = sum(t.amount for t in self.taxes.all())
                 r.amount = (
                     (iva_total * Decimal("0.50")).quantize(money)
-                    if profile.iva_condition == "RI"
+                    if getattr(profile, "iva_condition", "") == "RI"
                     else Decimal("0")
                 )
 

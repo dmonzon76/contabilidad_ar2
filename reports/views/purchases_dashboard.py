@@ -6,8 +6,10 @@ from purchases.models.purchase import Purchase
 from purchases.models.purchase import PurchaseLine
 from inventory.models import InventoryMovement
 from accounting.models.account_movement import AccountMovement
+from core.decorators import company_required
 
 
+@company_required
 def purchases_dashboard(request):
     company_id = request.session.get("active_company_id")
     today = timezone.now().date()

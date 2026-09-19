@@ -77,6 +77,7 @@ class SaleCreateView(CreateView):
             "sales:sale_detail",
             kwargs={"pk": self.object.pk},
         )
+    
 
 
 # ============================================================

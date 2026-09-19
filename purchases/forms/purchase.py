@@ -35,6 +35,12 @@ class TaxSelect(forms.Select):
 
 class PurchaseForm(forms.ModelForm):
     def __init__(self, *args, company_id=None, **kwargs):
+        instance = kwargs.get("instance")
+        self.purchase = (
+            instance.purchase
+            if instance and hasattr(instance, "purchase") and instance.purchase
+            else None
+        )
         super().__init__(*args, **kwargs)
         if company_id is not None:
             self.fields["supplier"].queryset = self.fields["supplier"].queryset.filter(
@@ -57,47 +63,46 @@ class PurchaseTaxForm(forms.ModelForm):
         model = PurchaseTax
         fields = ["tax", "base_amount"]
         widgets = {
-            "tax": forms.Select(attrs={"class": "form-control"}),
+            "tax": TaxSelect(attrs={"class": "form-control"}),
             "base_amount": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
     def __init__(self, *args, company_id=None, **kwargs):
-        self.purchase = kwargs.get("instance")
         super().__init__(*args, **kwargs)
 
+        # Filtrar solo impuestos de IVA, Exento o No Gravado que estén activos
         self.fields["tax"].queryset = self.fields["tax"].queryset.filter(
             Q(is_vat=True) | Q(is_exempt=True) | Q(is_non_taxed=True),
             enabled=True,
         )
-        tax_widget = TaxSelect(attrs={"class": "form-control"})
-        tax_widget.tax_rates = {
+
+        # Asignar tax_rates al widget ya instanciado por Django (sin re-instanciarlo)
+        self.fields["tax"].widget.tax_rates = {
             str(tax.pk): str(tax.rate) for tax in self.fields["tax"].queryset
         }
-        self.fields["tax"].widget = tax_widget
 
     def clean(self):
         cleaned = super().clean()
         tax = cleaned.get("tax")
-
-        if not self.purchase:
+        purchase = getattr(self, "purchase", None) or getattr(
+            self.instance, "purchase", None
+        )
+        if not purchase or not getattr(purchase, "supplier", None):
             return cleaned
 
-        supplier = self.purchase.supplier
-        profile = supplier.tax_profile
+        profile = getattr(purchase.supplier, "tax_profile", None)
+        if not profile or tax is None:
+            return cleaned
 
-        if not profile:
-            raise forms.ValidationError("Supplier has no tax profile assigned.")
-
-        if tax is not None and tax.is_vat and profile.iva_condition == "EX":
+        iva_condition = getattr(profile, "iva_condition", "")
+        if tax.is_vat and iva_condition == "EX":
             raise forms.ValidationError(
-                "Supplier cannot apply VAT because the profile is marked as VAT exempt."
+                "El proveedor está exento de IVA y no puede aplicar alícuotas de IVA."
             )
-
-        if tax is not None and tax.is_exempt and profile.iva_condition != "EX":
+        if tax.is_exempt and iva_condition != "EX":
             raise forms.ValidationError(
-                "Supplier is not VAT exempt; cannot use a 0% tax."
+                "El proveedor no está exento de IVA; no puede aplicar alícuota Exenta."
             )
-
         return cleaned
 
 
@@ -166,28 +171,35 @@ class PurchasePerceptionForm(forms.ModelForm):
             "perception_type": forms.Select(attrs={"class": "form-control"}),
         }
 
-    def __init__(self, *args, company_id=None, **kwargs):
-        self.purchase = kwargs.get("instance")
+    def __init__(self, *args, company_id=None, parent_purchase=None, **kwargs):
+        instance = kwargs.get("instance")
+        self.purchase = parent_purchase or (
+            instance.purchase
+            if instance and hasattr(instance, "purchase") and instance.purchase
+            else None
+        )
         super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
         perception_type = cleaned.get("perception_type")
 
-        if not self.purchase:
+        if not self.purchase or not getattr(self.purchase, "supplier", None):
             return cleaned
 
         supplier = self.purchase.supplier
-        profile = supplier.tax_profile
+        profile = getattr(supplier, "tax_profile", None)
 
         if not profile:
-            raise forms.ValidationError("Supplier has no tax profile assigned.")
+            return cleaned
 
-        if perception_type == "IIBB" and profile.is_iibb_exempt:
-            raise forms.ValidationError("Supplier is not registered for IIBB.")
+        if perception_type == "IIBB" and getattr(profile, "is_iibb_exempt", False):
+            raise forms.ValidationError("El proveedor está exento de IIBB.")
 
-        if perception_type == "IVA" and profile.iva_condition == "EX":
-            raise forms.ValidationError("Supplier cannot apply IVA perceptions.")
+        if perception_type == "IVA" and getattr(profile, "iva_condition", "") == "EX":
+            raise forms.ValidationError(
+                "El proveedor exento de IVA no aplica percepciones de IVA."
+            )
 
         return cleaned
 
@@ -214,29 +226,34 @@ class PurchaseRetentionForm(forms.ModelForm):
             "retention_type": forms.Select(attrs={"class": "form-control"}),
         }
 
-    def __init__(self, *args, company_id=None, **kwargs):
-        self.purchase = kwargs.get("instance")
+    def __init__(self, *args, company_id=None, parent_purchase=None, **kwargs):
+        instance = kwargs.get("instance")
+        self.purchase = parent_purchase or (
+            instance.purchase
+            if instance and hasattr(instance, "purchase") and instance.purchase
+            else None
+        )
         super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned = super().clean()
         retention_type = cleaned.get("retention_type")
 
-        if not self.purchase:
+        if not self.purchase or not getattr(self.purchase, "supplier", None):
             return cleaned
 
         supplier = self.purchase.supplier
-        profile = supplier.tax_profile
+        profile = getattr(supplier, "tax_profile", None)
 
         if not profile:
-            raise forms.ValidationError("Supplier has no tax profile assigned.")
+            return cleaned
 
-        if retention_type == "GAN" and profile.is_ganancias_exempt:
+        if retention_type == "GAN" and getattr(profile, "is_ganancias_exempt", False):
             raise forms.ValidationError(
                 "Supplier is not subject to Ganancias retention."
             )
 
-        if retention_type == "IVA" and profile.iva_condition == "EX":
+        if retention_type == "IVA" and getattr(profile, "iva_condition", "") == "EX":
             raise forms.ValidationError("Supplier is not subject to IVA retention.")
 
         return cleaned

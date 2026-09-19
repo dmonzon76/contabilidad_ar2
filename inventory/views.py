@@ -1,6 +1,7 @@
 from datetime import date
 from django.db.models import Sum, F
 from django.shortcuts import render, get_object_or_404, redirect
+from core.decorators import company_required
 
 from .forms import InventoryItemForm, InventoryMovementForm, LocationForm
 from .models import InventoryItem, InventoryMovement, Location
@@ -10,12 +11,14 @@ from .models import InventoryItem, InventoryMovement, Location
 # Locations
 # ============================
 
+@company_required
 def location_list(request):
     company = request.active_company
     locations = Location.objects.filter(company=company).order_by("code")
     return render(request, "inventory/location_list.html", {"locations": locations})
 
 
+@company_required
 def location_create(request):
     company = request.active_company
 
@@ -32,8 +35,9 @@ def location_create(request):
     return render(request, "inventory/location_form.html", {"form": form})
 
 
+@company_required
 def location_edit(request, pk):
-    location = get_object_or_404(Location, pk=pk)
+    location = get_object_or_404(Location, pk=pk, company=request.active_company)
 
     if request.method == "POST":
         form = LocationForm(request.POST, instance=location)
@@ -46,8 +50,9 @@ def location_edit(request, pk):
     return render(request, "inventory/location_form.html", {"form": form})
 
 
+@company_required
 def location_delete(request, pk):
-    location = get_object_or_404(Location, pk=pk)
+    location = get_object_or_404(Location, pk=pk, company=request.active_company)
 
     if request.method == "POST":
         location.delete()
@@ -60,18 +65,23 @@ def location_delete(request, pk):
 # Inventory Items
 # ============================
 
+@company_required
 def inventory_list(request):
     company = request.active_company
     items = InventoryItem.objects.filter(company=company).select_related("product", "location")
     return render(request, "inventory/inventory_list.html", {"items": items})
 
 
+@company_required
 def inventory_detail(request, pk):
-    item = get_object_or_404(InventoryItem, pk=pk)
+    item = get_object_or_404(
+        InventoryItem, pk=pk, company=request.active_company
+    )
     movements = item.movements.order_by("-date")
     return render(request, "inventory/inventory_detail.html", {"item": item, "movements": movements})
 
 
+@company_required
 def inventory_add(request):
     company = request.active_company
 
@@ -88,8 +98,11 @@ def inventory_add(request):
     return render(request, "inventory/inventory_item_form.html", {"form": form})
 
 
+@company_required
 def inventory_edit(request, pk):
-    item = get_object_or_404(InventoryItem, pk=pk)
+    item = get_object_or_404(
+        InventoryItem, pk=pk, company=request.active_company
+    )
 
     if request.method == "POST":
         form = InventoryItemForm(request.POST, instance=item)
@@ -102,8 +115,11 @@ def inventory_edit(request, pk):
     return render(request, "inventory/inventory_item_form.html", {"form": form})
 
 
+@company_required
 def inventory_delete(request, pk):
-    item = get_object_or_404(InventoryItem, pk=pk)
+    item = get_object_or_404(
+        InventoryItem, pk=pk, company=request.active_company
+    )
 
     if request.method == "POST":
         item.delete()
@@ -116,8 +132,11 @@ def inventory_delete(request, pk):
 # Movements
 # ============================
 
+@company_required
 def movement_add(request, item_id):
-    item = get_object_or_404(InventoryItem, pk=item_id)
+    item = get_object_or_404(
+        InventoryItem, pk=item_id, company=request.active_company
+    )
 
     if request.method == "POST":
         form = InventoryMovementForm(request.POST)
@@ -141,8 +160,11 @@ def movement_add(request, item_id):
     return render(request, "inventory/movement_add.html", {"item": item, "form": form})
 
 
+@company_required
 def movement_edit(request, pk):
-    movement = get_object_or_404(InventoryMovement, pk=pk)
+    movement = get_object_or_404(
+        InventoryMovement, pk=pk, company=request.active_company
+    )
     item = movement.item
 
     if request.method == "POST":
@@ -175,8 +197,11 @@ def movement_edit(request, pk):
     return render(request, "inventory/movement_edit.html", {"form": form})
 
 
+@company_required
 def movement_delete(request, pk):
-    movement = get_object_or_404(InventoryMovement, pk=pk)
+    movement = get_object_or_404(
+        InventoryMovement, pk=pk, company=request.active_company
+    )
     item = movement.item
 
     if request.method == "POST":
@@ -192,6 +217,7 @@ def movement_delete(request, pk):
 
     return render(request, "inventory/movement_delete.html", {"movement": movement})
 
+@company_required
 def movement_list(request):
     company = request.active_company
     movements = InventoryMovement.objects.filter(company=company).order_by("-date")
@@ -201,6 +227,7 @@ def movement_list(request):
 # Dashboard
 # ============================
 
+@company_required
 def inventory_dashboard(request):
     company = request.active_company
     today = date.today()

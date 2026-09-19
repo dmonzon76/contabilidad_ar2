@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.db.models import Sum, Count
 from django.utils import timezone
+from core.decorators import company_required
 
 from accounting.models import JournalEntry, JournalEntryLine, Account
 from sales.models.sale import Sale
 from purchases.models.purchase import Purchase
 
 
+@company_required
 def accounting_dashboard(request):
     company_id = request.session.get("active_company_id")
     today = timezone.now().date()

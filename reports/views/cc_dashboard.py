@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.db.models import Sum, Count
+from core.decorators import company_required
 from django.utils import timezone
 
 from accounting.models.account_movement import AccountMovement
 
 
+@company_required
 def cc_dashboard(request):
     company_id = request.session.get("active_company_id")
     today = timezone.now().date()
