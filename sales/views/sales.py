@@ -3,7 +3,9 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 
+from sales.models import sale
 from sales.models.sale import Sale
 from sales.models.sale_item import SaleItem
 
@@ -77,7 +79,6 @@ class SaleCreateView(CreateView):
             "sales:sale_detail",
             kwargs={"pk": self.object.pk},
         )
-    
 
 
 # ============================================================
@@ -102,48 +103,97 @@ class SaleDetailView(DetailView):
 
 
 def sale_item_add(request, sale_id):
+
     sale = get_object_or_404(
         Sale,
         id=sale_id,
         company_id=request.session.get("active_company_id"),
     )
 
-    # VALIDACIÓN CONTABLE
     try:
         get_open_period_for_date(sale.date)
+
     except NoOpenPeriodError as e:
+
         messages.error(
             request,
-            f"No se puede agregar items: {str(e)}",
+            f"No se puede agregar items: {e}",
         )
+
         return render(
             request,
             "sales/sale_item_add.html",
-            {"form": SaleItemForm(), "sale": sale, "error": str(e)},
+            {
+                "sale": sale,
+                "error": str(e),
+            },
         )
 
     if request.method == "POST":
-        form = SaleItemForm(request.POST)
+
+        form = SaleItemForm(
+            request.POST,
+            company=sale.company,
+        )
+
         if form.is_valid():
+
             item = form.save(commit=False)
+
             item.sale = sale
+
             item.save()
 
             sale.recalc_totals()
 
-            # Reversión previa
-            revert_inventory_from_sale(sale)
+            return redirect(
+                "sales:sale_detail",
+                pk=sale.id,
+            )
 
-            # Integraciones nuevas
-            update_inventory_from_sale(sale)
-            AccountingService.post_sale(sale)
-
-            return redirect("sales:sale_detail", pk=sale.id)
+        print(form.errors)
 
     else:
-        form = SaleItemForm()
 
-    return render(request, "sales/sale_item_add.html", {"form": form, "sale": sale})
+        form = SaleItemForm(
+            company=sale.company,
+        )
+
+    return render(
+        request,
+        "sales/sale_item_add.html",
+        {
+            "form": form,
+            "sale": sale,
+        },
+    )
+
+
+@require_POST
+def issue_sale(request, pk):
+    sale = get_object_or_404(
+        Sale,
+        pk=pk,
+        company_id=request.session.get("active_company_id"),
+    )
+
+    if sale.status != "DRAFT":
+        messages.warning(request, "Sale already issued.")
+        return redirect("sales:sale_detail", pk=sale.pk)
+
+    if not sale.items.exists():
+        messages.error(request, "Cannot issue a sale without items.")
+        return redirect("sales:sale_detail", pk=sale.pk)
+
+    sale.recalc_totals()
+    update_inventory_from_sale(sale)
+    AccountingService.post_sale(sale)
+
+    sale.status = "ISSUED"
+    sale.save(update_fields=["status"])
+
+    messages.success(request, f"Sale {sale.number} issued successfully.")
+    return redirect("sales:sale_detail", pk=sale.pk)
 
 
 # ============================================================
@@ -171,11 +221,6 @@ def sale_delete(request, pk):
             "sales/sale_detail.html",
             {"sale": sale, "error": str(e)},
         )
-
-    delete_journal_entries_for_sale(sale)
-    delete_cmv_journal_entry(sale)
-    delete_customer_cc_from_sale(sale)
-    revert_inventory_from_sale(sale)
 
     sale.delete()
 

@@ -1,9 +1,9 @@
 from django import forms
-from sales.models.customer import Customer
 
+from customers.models import Customer
 class CustomerForm(forms.ModelForm):
     class Meta:
-        model = Customer
+        model = Customer     
         fields = [
             "name",
             "tax_id",

@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.db import models
+from django.shortcuts import render
 from company.models import Company
 
 IVA_CONDITIONS = [
@@ -20,13 +23,49 @@ class Customer(models.Model):
         choices=IVA_CONDITIONS,
         default="CF",
     )
-    iibb_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    iibb_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("0")
+    )
     is_iibb_exempt = models.BooleanField(default=False)
-    ganancias_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    ganancias_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("0")
+    )
     is_ganancias_exempt = models.BooleanField(default=False)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     address = models.CharField(max_length=200, blank=True, null=True)
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    province = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        default="Argentina",
+    )
+
+    customer_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("individual", "Individual"),
+            ("company", "Company"),
+        ],
+        default="company",
+    )
+
+    notes = models.TextField(
+        blank=True,
+        null=True,
+    )
 
     is_active = models.BooleanField(default=True)
 

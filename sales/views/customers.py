@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from core.middleware.active_company import get_active_company_from_request
-from sales.models.customer import Customer
 from sales.forms.customer import CustomerForm
 
 from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile

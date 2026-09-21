@@ -1,8 +1,10 @@
 from django.urls import path
+
 from .views.sales import (
     SaleListView,
     SaleCreateView,
     SaleDetailView,
+    issue_sale,
     sale_item_add,
 )
 from .views.customers import (
@@ -30,4 +32,5 @@ urlpatterns = [
         "customers/<int:customer_id>/tax/", customer_tax_edit, name="customer_tax_edit"
     ),
     path("customers/<int:customer_id>/edit/", customer_edit, name="customer_edit"),
+    path("<int:pk>/issue/", issue_sale, name="issue_sale"),
 ]

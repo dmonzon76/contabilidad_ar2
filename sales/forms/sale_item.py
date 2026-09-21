@@ -1,24 +1,50 @@
 from django import forms
+
 from sales.models.sale_item import SaleItem
+from products.models import Product
+from fiscal.models.tax import Tax
 
 
 class SaleItemForm(forms.ModelForm):
+
+    def __init__(self, *args, company=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if company:
+            self.fields["product"].queryset = (
+                Product.objects.filter(
+                    company=company,
+                )
+                .order_by("name")
+            )
+
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
+
         if quantity <= 0:
-            raise forms.ValidationError("Quantity must be greater than zero.")
+            raise forms.ValidationError(
+                "Quantity must be greater than zero."
+            )
+
         return quantity
 
     def clean_unit_price(self):
         unit_price = self.cleaned_data["unit_price"]
+
         if unit_price < 0:
-            raise forms.ValidationError("Unit price cannot be negative.")
+            raise forms.ValidationError(
+                "Unit price cannot be negative."
+            )
+
         return unit_price
 
     class Meta:
         model = SaleItem
+
         fields = [
+            "product",
             "description",
             "quantity",
             "unit_price",
+            "tax",
         ]

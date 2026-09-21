@@ -1,5 +1,7 @@
 from decimal import Decimal
-from django.db import models
+
+from django.db import models, transaction
+from django.core.exceptions import ValidationError
 
 from company.models import Company
 from products.models import Product
@@ -22,21 +24,31 @@ class InventoryItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
 
-    quantity = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    min_stock = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    min_stock = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
 
     def __str__(self):
         return f"{self.product.name} @ {self.location.code} — {self.quantity}"
 
     def get_current_cost(self):
         """
-        Devuelve el costo promedio ponderado del producto en esta ubicación.
-        Si no hay movimientos, devuelve 0.
+        Devuelve el costo promedio ponderado del producto
+        en esta ubicación.
         """
+
         last_in = (
-            InventoryMovement.objects.filter(
-                item=self, movement_type="IN"
-            ).order_by("-date").first()
+            InventoryMovement.objects.filter(item=self, movement_type="IN")
+            .order_by("-date")
+            .first()
         )
 
         if last_in:
@@ -46,12 +58,16 @@ class InventoryItem(models.Model):
 
 
 class InventoryMovement(models.Model):
+
     MOVEMENT_TYPES = (
         ("IN", "Stock In"),
         ("OUT", "Stock Out"),
     )
 
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+    )
 
     item = models.ForeignKey(
         InventoryItem,
@@ -59,13 +75,34 @@ class InventoryMovement(models.Model):
         related_name="movements",
     )
 
-    movement_type = models.CharField(max_length=3, choices=MOVEMENT_TYPES)
-    quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    movement_type = models.CharField(
+        max_length=3,
+        choices=MOVEMENT_TYPES,
+    )
 
-    unit_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
 
-    note = models.CharField(max_length=200, blank=True, null=True)
+    unit_cost = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    total_cost = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    note = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+    )
+
     date = models.DateTimeField(auto_now_add=True)
 
     sale = models.ForeignKey(
@@ -94,18 +131,36 @@ class InventoryMovement(models.Model):
     )
 
     def __str__(self):
-        return f"{self.get_movement_type_display()} {self.quantity} — {self.item.product.name}"
+        return (
+            f"{self.get_movement_type_display()} "
+            f"{self.quantity} — "
+            f"{self.item.product.name}"
+        )
 
     def save(self, *args, **kwargs):
-        # Costo total
+        is_new = self.pk is None
+
         self.total_cost = (self.unit_cost * self.quantity).quantize(Decimal("0.01"))
 
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
 
-        # Actualizar stock
-        if self.movement_type == "IN":
-            self.item.quantity += self.quantity
-        elif self.movement_type == "OUT":
-            self.item.quantity -= self.quantity
+            # Avoid applying the same stock movement again when editing.
+            if not is_new:
+                return
 
-        self.item.save(update_fields=["quantity"])
+            item = InventoryItem.objects.select_for_update().get(pk=self.item.pk)
+
+            if self.movement_type == "IN":
+                item.quantity += self.quantity
+            elif self.movement_type == "OUT":
+                if item.quantity < self.quantity:
+                    raise ValidationError(
+                        f"Insufficient stock for "
+                        f"{item.product.name}. "
+                        f"Available: {item.quantity}"
+                    )
+
+                item.quantity -= self.quantity
+
+            item.save(update_fields=["quantity"])
