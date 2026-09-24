@@ -36,38 +36,131 @@
         <hr>
 
         <!-- LINES -->
-        <h4 class="mb-3">Lines</h4>
-        {{ line_formset.management_form }}
+       <!-- LINES -->
+<h4 class="mb-3">Lines</h4>
 
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Account</th>
-                    <th>Subtotal</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
+{{ line_formset.management_form }}
 
-            <tbody>
-                {% for lf in line_formset %}
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>VAT</th>
+            <th>Account</th>
+            <th>Subtotal</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+
+    <tbody id="lines-body">
+        {% for lf in line_formset %}
+        <tr class="line-row">
+            {{ lf.id }}
+
+            <td>
+                {{ lf.description }}
+            </td>
+
+            <td>
+                {{ lf.quantity }}
+            </td>
+
+            <td>
+                {{ lf.unit_price }}
+            </td>
+
+            <td>
+                {{ lf.tax }}
+            </td>
+
+            <td>
+                {{ lf.expense_account }}
+            </td>
+
+            <td>
+                {% if lf.instance.pk %}
+                    {{ lf.instance.subtotal }}
+                {% endif %}
+            </td>
+
+            <td>
+                {{ lf.DELETE }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="mt-2 mb-3">
+    <button
+        type="button"
+        id="add-line"
+        class="btn btn-outline-primary btn-sm">
+        + Add Line
+    </button>
+</div>
+
+<template id="empty-line-form">
+    <tr class="line-row">
+
+        {{ line_formset.empty_form.id }}
+
+        <td>
+            {{ line_formset.empty_form.description }}
+        </td>
+
+        <td>
+            {{ line_formset.empty_form.quantity }}
+        </td>
+
+        <td>
+            {{ line_formset.empty_form.unit_price }}
+        </td>
+
+        <td>
+            {{ line_formset.empty_form.tax }}
+        </td>
+
+        <td>
+            {{ line_formset.empty_form.expense_account }}
+        </td>
+
+        <td></td>
+
+        <td>
+            {{ line_formset.empty_form.DELETE }}
+        </td>
+
+    </tr>
+</template>
+
+<hr>
+                <template id="empty-line-form">
+
                 <tr>
-                    {{ lf.id }}
-                    <td>{{ lf.description }}</td>
-                    <td>{{ lf.quantity }}</td>
-                    <td>{{ lf.unit_price }}</td>
-                    <td>{{ lf.expense_account }}</td>
-                    <td>
-                        {% if lf.instance.pk %}
-                            {{ lf.instance.subtotal }}
-                        {% endif %}
-                    </td>
-                    <td>{{ lf.DELETE }}</td>
+                    <td>__DESCRIPTION__</td>
+                    <td>__QUANTITY__</td>
+                    <td>__UNIT_PRICE__</td>
+                    <td>__ACCOUNT__</td>
+                    <td></td>
+                    <td>__DELETE__</td>
                 </tr>
-                {% endfor %}
+
+                </template>
+   
+
+
             </tbody>
+
+            <button
+            type="button"
+            id="add-line"
+            class="btn btn-outline-primary btn-sm"
+        >
+            + Add Line
+        </button>
         </table>
 
         <hr>
@@ -208,25 +301,44 @@
 
     </form>
     <script>
-        function updateTaxAmounts() {
-            document.querySelectorAll(".tax-row").forEach(function (row) {
-                const tax = row.querySelector("select[name$='-tax']");
-                const base = row.querySelector("input[name$='-base_amount']");
-                const amount = row.querySelector(".tax-amount");
-                if (!tax || !base || !amount) return;
 
-                const rate = parseFloat(tax.options[tax.selectedIndex]?.dataset.rate || "0");
-                const baseValue = parseFloat((base.value || "0").replace(",", "."));
-                amount.textContent = (baseValue * rate / 100).toFixed(2);
-            });
-        }
+document.addEventListener("DOMContentLoaded", function () {
 
-        document.addEventListener("input", function (event) {
-            if (event.target.matches(".tax-row input, .tax-row select")) {
-                updateTaxAmounts();
-            }
-        });
-        document.addEventListener("DOMContentLoaded", updateTaxAmounts);
-    </script>
+    const addButton = document.getElementById("add-line");
+    const tbody = document.getElementById("lines-body");
+    const template = document.getElementById("empty-line-form");
+
+    if (!addButton || !tbody || !template) {
+        return;
+    }
+
+    addButton.addEventListener("click", function () {
+
+        const totalForms = document.getElementById(
+            "id_lines-TOTAL_FORMS"
+        );
+
+        const formIndex = parseInt(totalForms.value);
+
+        let html = template.innerHTML;
+
+        html = html.replace(
+            /__prefix__/g,
+            formIndex
+        );
+
+        const tempContainer = document.createElement("tbody");
+        tempContainer.innerHTML = html;
+
+        const newRow = tempContainer.firstElementChild;
+
+        tbody.appendChild(newRow);
+
+        totalForms.value = formIndex + 1;
+
+    });
+
+});
+</script>
 </div>
 {% endblock %}

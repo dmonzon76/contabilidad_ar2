@@ -1,36 +1,27 @@
 import logging
-
 from django.shortcuts import redirect
-from company.models import Company, CompanyUser
+from company.models import CompanyUser
 
 logger = logging.getLogger(__name__)
 
 
 class ActiveCompanyMiddleware:
     """
-    Ensures the user has an active company selected.
+    Garantiza que el usuario autenticado tenga una empresa activa seleccionada
+    y valida estrictamente que pertenezca a ella mediante CompanyUser.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-
-        # Log info
-        logger.debug(
-            "ActiveCompanyMiddleware start: path=%s user=%s authenticated=%s",
-            request.path,
-            getattr(request, "user", None),
-            getattr(request.user, "is_authenticated", False),
-        )
-
-        # If user is not logged in → allow everything
-        if not request.user.is_authenticated:
+        # 1. Si el usuario no está autenticado → permitir flujo (login/logout)
+        if not getattr(request, "user", None) or not request.user.is_authenticated:
             return self.get_response(request)
 
-        # Paths that must NOT be blocked
+        # 2. Rutas exentas que no requieren empresa activa
         EXEMPT_PREFIXES = (
-            "/admin",  # admin root + all subpaths
+            "/admin",
             "/accounts/login/",
             "/accounts/logout/",
             "/static/",
@@ -39,58 +30,40 @@ class ActiveCompanyMiddleware:
             "/company/new/",
         )
 
-        # Allow admin, login, logout, static, media, selector
         if request.path.startswith(EXEMPT_PREFIXES):
-            logger.debug("Request path is exempt: %s", request.path)
             return self.get_response(request)
 
-        # Check active company
+        # 3. Obtener el ID de empresa activa de la sesión
         active_company_id = request.session.get("active_company_id")
 
-        # ⭐ FIX: allow admin even if no company is selected
         if not active_company_id:
-
-            # If user is accessing admin → allow without company
-            if request.path.startswith("/admin/"):
-                logger.debug("Admin access without company allowed.")
-                return self.get_response(request)
-
             logger.debug("No active company — redirecting to company selector")
             request.session["show_company_select_modal"] = True
             return redirect("company:company_select")
 
-        # Validate that the user has access to that company.
-        # If the company exists but no CompanyUser row is present yet,
-        # keep the selected company active to support the app's test flow.
-        company = Company.objects.filter(id=active_company_id).first()
+        # 4. Validar pertenencia activa en CompanyUser (Aislamiento Multiempresa)
         company_user = (
             CompanyUser.objects.filter(
-                user=request.user, company_id=active_company_id, is_active=True
+                user=request.user,
+                company_id=active_company_id,
+                is_active=True
             )
             .select_related("company")
             .first()
         )
+
+        # Si NO existe la relación CompanyUser → Denegar acceso y redirigir
         if company_user is None:
-            if company is None:
-                logger.debug(
-                    "User %s does not have access to company %s — resetting",
-                    request.user,
-                    active_company_id,
-                )
-
-                request.session.pop("active_company_id", None)
-                request.session["show_company_select_modal"] = True
-
-                return redirect("company:company_select")
-
-            logger.debug(
-                "Company %s exists without a CompanyUser row; allowing active selection.",
+            logger.warning(
+                "Usuario %s intentó acceder a empresa %s sin relación CompanyUser — reseteando.",
+                request.user,
                 active_company_id,
             )
-            request.active_company = company
-            return self.get_response(request)
+            request.session.pop("active_company_id", None)
+            request.session["show_company_select_modal"] = True
+            return redirect("company:company_select")
 
+        # 5. Asignar la empresa validada al request
         request.active_company = company_user.company
 
-        # All good → continue
         return self.get_response(request)

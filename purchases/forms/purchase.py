@@ -1,140 +1,177 @@
 from django import forms
 from django.forms import inlineformset_factory
-from django.db.models import Q
 
-from purchases.models.purchase import (
+from purchases.models import (
     Purchase,
     PurchaseLine,
+    PurchaseTax,
     PurchasePerception,
     PurchaseRetention,
-    PurchaseTax,
 )
-
-
-class TaxSelect(forms.Select):
-    def __init__(self, *args, **kwargs):
-        self.tax_rates = {}
-        super().__init__(*args, **kwargs)
-
-    def create_option(
-        self, name, value, label, selected, index, subindex=None, attrs=None
-    ):
-        option = super().create_option(
-            name, value, label, selected, index, subindex=subindex, attrs=attrs
-        )
-        tax_id = str(value.value if hasattr(value, "value") else value)
-        if tax_id in self.tax_rates:
-            option["attrs"]["data-rate"] = self.tax_rates[tax_id]
-        return option
-
-
-# ============================================================
-# PURCHASE HEADER FORM
-# ============================================================
+from suppliers.models import Supplier
+from fiscal.models import Tax
+from accounting.models import Account
 
 
 class PurchaseForm(forms.ModelForm):
-    def __init__(self, *args, company_id=None, **kwargs):
-        instance = kwargs.get("instance")
-        self.purchase = (
-            instance.purchase
-            if instance and hasattr(instance, "purchase") and instance.purchase
-            else None
-        )
-        super().__init__(*args, **kwargs)
-        if company_id is not None:
-            self.fields["supplier"].queryset = self.fields["supplier"].queryset.filter(
-                company_id=company_id,
-                is_active=True,
-            )
+    """
+    Formulario para la cabecera del comprobante de compra.
+    """
 
     class Meta:
         model = Purchase
         fields = ["supplier", "date", "invoice_number"]
+        labels = {
+            "supplier": "Proveedor",
+            "date": "Fecha de Comprobante",
+            "invoice_number": "Número de Factura / Comprobante",
+        }
         widgets = {
-            "supplier": forms.Select(attrs={"class": "form-control"}),
+            "supplier": forms.Select(attrs={"class": "form-select"}),
             "date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "invoice_number": forms.TextInput(attrs={"class": "form-control"}),
+            "invoice_number": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "0001-00000001",
+                }
+            ),
         }
 
-
-class PurchaseTaxForm(forms.ModelForm):
-    class Meta:
-        model = PurchaseTax
-        fields = ["tax", "base_amount"]
-        widgets = {
-            "tax": TaxSelect(attrs={"class": "form-control"}),
-            "base_amount": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, company_id=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        company = kwargs.pop("company", None)
+        company_id = kwargs.pop("company_id", None)
         super().__init__(*args, **kwargs)
 
-        # Filtrar solo impuestos de IVA, Exento o No Gravado que estén activos
-        self.fields["tax"].queryset = self.fields["tax"].queryset.filter(
-            Q(is_vat=True) | Q(is_exempt=True) | Q(is_non_taxed=True),
-            enabled=True,
-        )
-
-        # Asignar tax_rates al widget ya instanciado por Django (sin re-instanciarlo)
-        self.fields["tax"].widget.tax_rates = {
-            str(tax.pk): str(tax.rate) for tax in self.fields["tax"].queryset
-        }
-
-    def clean(self):
-        cleaned = super().clean()
-        tax = cleaned.get("tax")
-        purchase = getattr(self, "purchase", None) or getattr(
-            self.instance, "purchase", None
-        )
-        if not purchase or not getattr(purchase, "supplier", None):
-            return cleaned
-
-        profile = getattr(purchase.supplier, "tax_profile", None)
-        if not profile or tax is None:
-            return cleaned
-
-        iva_condition = getattr(profile, "iva_condition", "")
-        if tax.is_vat and iva_condition == "EX":
-            raise forms.ValidationError(
-                "El proveedor está exento de IVA y no puede aplicar alícuotas de IVA."
+        # Filtrar proveedores activos de la empresa actual
+        if company:
+            self.fields["supplier"].queryset = Supplier.objects.filter(
+                company=company,
+                is_active=True,
             )
-        if tax.is_exempt and iva_condition != "EX":
-            raise forms.ValidationError(
-                "El proveedor no está exento de IVA; no puede aplicar alícuota Exenta."
+        elif company_id is not None:
+            self.fields["supplier"].queryset = Supplier.objects.filter(
+                company_id=company_id,
+                is_active=True,
             )
-        return cleaned
-
-
-# ============================================================
-# PURCHASE LINES
-# ============================================================
 
 
 class PurchaseLineForm(forms.ModelForm):
-    def clean_quantity(self):
-        quantity = self.cleaned_data["quantity"]
-        if quantity <= 0:
-            raise forms.ValidationError("Quantity must be greater than zero.")
-        return quantity
-
-    def clean_unit_price(self):
-        unit_price = self.cleaned_data["unit_price"]
-        if unit_price < 0:
-            raise forms.ValidationError("Unit price cannot be negative.")
-        return unit_price
+    """
+    Formulario para cada renglón o concepto individual de la compra.
+    Permite asignar diferentes alícuotas de IVA y cuentas de gasto por línea.
+    """
 
     class Meta:
         model = PurchaseLine
-        fields = ["description", "quantity", "unit_price", "expense_account"]
+        fields = [
+            "description",
+            "quantity",
+            "unit_price",
+            "tax",
+            "expense_account",
+        ]
+        labels = {
+            "description": "Concepto / Descripción",
+            "quantity": "Cantidad",
+            "unit_price": "Precio Unitario (Neto)",
+            "tax": "Alícuota IVA",
+            "expense_account": "Cuenta de Gasto",
+        }
         widgets = {
-            "description": forms.TextInput(attrs={"class": "form-control"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control"}),
-            "unit_price": forms.NumberInput(attrs={"class": "form-control"}),
-            "expense_account": forms.Select(attrs={"class": "form-control"}),
+            "description": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Ej. Consultoría / Producto / Capacitación",
+                }
+            ),
+            "quantity": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.01",
+                    "value": "1.00",
+                }
+            ),
+            "unit_price": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.00",
+                    "placeholder": "0.00",
+                }
+            ),
+            "tax": forms.Select(attrs={"class": "form-select"}),
+            "expense_account": forms.Select(attrs={"class": "form-select"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        company = kwargs.pop("company", None)
+        super().__init__(*args, **kwargs)
+
+        if company:
+            self.fields["tax"].queryset = Tax.objects.filter(
+                company=company,
+                is_active=True,
+            )
+            self.fields["expense_account"].queryset = Account.objects.filter(
+                company=company,
+                is_active=True,
+            )
+
+
+class PurchasePerceptionForm(forms.ModelForm):
+    """
+    Formulario para la carga de Percepciones Impositivas (IIBB, IVA, Municipal).
+    """
+
+    class Meta:
+        model = PurchasePerception
+        fields = ["perception_type", "amount"]
+        labels = {
+            "perception_type": "Tipo de Percepción",
+            "amount": "Monto Percepción",
+        }
+        widgets = {
+            "perception_type": forms.Select(attrs={"class": "form-select"}),
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.00",
+                    "placeholder": "0.00",
+                }
+            ),
         }
 
 
+class PurchaseRetentionForm(forms.ModelForm):
+    """
+    Formulario para la carga de Retenciones Impositivas (Ganancias, IVA, SUSS).
+    """
+
+    class Meta:
+        model = PurchaseRetention
+        fields = ["retention_type", "amount"]
+        labels = {
+            "retention_type": "Tipo de Retención",
+            "amount": "Monto Retención",
+        }
+        widgets = {
+            "retention_type": forms.Select(attrs={"class": "form-select"}),
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.00",
+                    "placeholder": "0.00",
+                }
+            ),
+        }
+
+
+# --- FORMSETS INLINE ---
+
+# Formset de líneas/conceptos de la compra
 PurchaseLineFormSet = inlineformset_factory(
     Purchase,
     PurchaseLine,
@@ -144,125 +181,44 @@ PurchaseLineFormSet = inlineformset_factory(
 )
 
 
-# ============================================================
-# PURCHASE TAXES (IVA)
-# ============================================================
+class PurchaseTaxForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseTax
+        fields = ["tax", "base_amount"]
+
+    def __init__(self, *args, **kwargs):
+        company_id = kwargs.pop("company_id", None)
+        super().__init__(*args, **kwargs)
+
+        if company_id is not None:
+            self.fields["tax"].queryset = Tax.objects.filter(
+                company_id=company_id,
+                is_active=True,
+            )
 
 
 PurchaseTaxFormSet = inlineformset_factory(
     Purchase,
     PurchaseTax,
     form=PurchaseTaxForm,
-    extra=1,
+    extra=0,
     can_delete=True,
 )
 
-
-# ============================================================
-# PURCHASE PERCEPTIONS
-# ============================================================
-
-
-class PurchasePerceptionForm(forms.ModelForm):
-    class Meta:
-        model = PurchasePerception
-        fields = ["perception_type"]
-        widgets = {
-            "perception_type": forms.Select(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, company_id=None, parent_purchase=None, **kwargs):
-        instance = kwargs.get("instance")
-        self.purchase = parent_purchase or (
-            instance.purchase
-            if instance and hasattr(instance, "purchase") and instance.purchase
-            else None
-        )
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        cleaned = super().clean()
-        perception_type = cleaned.get("perception_type")
-
-        if not self.purchase or not getattr(self.purchase, "supplier", None):
-            return cleaned
-
-        supplier = self.purchase.supplier
-        profile = getattr(supplier, "tax_profile", None)
-
-        if not profile:
-            return cleaned
-
-        if perception_type == "IIBB" and getattr(profile, "is_iibb_exempt", False):
-            raise forms.ValidationError("El proveedor está exento de IIBB.")
-
-        if perception_type == "IVA" and getattr(profile, "iva_condition", "") == "EX":
-            raise forms.ValidationError(
-                "El proveedor exento de IVA no aplica percepciones de IVA."
-            )
-
-        return cleaned
-
-
+# Formset de percepciones impositivas
 PurchasePerceptionFormSet = inlineformset_factory(
     Purchase,
     PurchasePerception,
     form=PurchasePerceptionForm,
-    extra=1,
+    extra=0,
     can_delete=True,
 )
 
-
-# ============================================================
-# PURCHASE RETENTIONS
-# ============================================================
-
-
-class PurchaseRetentionForm(forms.ModelForm):
-    class Meta:
-        model = PurchaseRetention
-        fields = ["retention_type"]
-        widgets = {
-            "retention_type": forms.Select(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, company_id=None, parent_purchase=None, **kwargs):
-        instance = kwargs.get("instance")
-        self.purchase = parent_purchase or (
-            instance.purchase
-            if instance and hasattr(instance, "purchase") and instance.purchase
-            else None
-        )
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        cleaned = super().clean()
-        retention_type = cleaned.get("retention_type")
-
-        if not self.purchase or not getattr(self.purchase, "supplier", None):
-            return cleaned
-
-        supplier = self.purchase.supplier
-        profile = getattr(supplier, "tax_profile", None)
-
-        if not profile:
-            return cleaned
-
-        if retention_type == "GAN" and getattr(profile, "is_ganancias_exempt", False):
-            raise forms.ValidationError(
-                "Supplier is not subject to Ganancias retention."
-            )
-
-        if retention_type == "IVA" and getattr(profile, "iva_condition", "") == "EX":
-            raise forms.ValidationError("Supplier is not subject to IVA retention.")
-
-        return cleaned
-
-
+# Formset de retenciones impositivas
 PurchaseRetentionFormSet = inlineformset_factory(
     Purchase,
     PurchaseRetention,
     form=PurchaseRetentionForm,
-    extra=1,
+    extra=0,
     can_delete=True,
 )

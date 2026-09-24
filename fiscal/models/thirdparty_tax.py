@@ -32,9 +32,9 @@ class ThirdPartyTaxProfile(models.Model):
     )
 
     customer = models.OneToOneField(
-        "sales.Customer",
+        "customers.Customer",
         on_delete=models.CASCADE,
-        related_name="customer_tax_profile",
+        related_name="tax_profile",
         null=True,
         blank=True,
     )

@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 
 from core.middleware.active_company import get_active_company_from_request
 from sales.forms.customer import CustomerForm
+from sales.models import Customer
 
 from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 from fiscal.forms.thirdparty_tax_profile import ThirdPartyTaxProfileForm

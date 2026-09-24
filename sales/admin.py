@@ -48,10 +48,7 @@ class CustomerAdmin(admin.ModelAdmin):
         "email",
         "phone",
         "is_active",
-        "created_at",
     )
     list_filter = ("company", "is_active")
     search_fields = ("name", "tax_id", "email")
     ordering = ("name",)
-
-    readonly_fields = ("created_at",)

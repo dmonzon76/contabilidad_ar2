@@ -1,40 +1,68 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from company.models import Company
-from django.http import HttpResponse, HttpResponseNotAllowed
-import logging
+from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 
-logger = logging.getLogger(__name__)
+from company.models import Company, CompanyUser
 
 
 @login_required
-def select_company(request):
+def select_company_list(request):
+    """
+    Muestra únicamente las empresas a las que el usuario autenticado
+    tiene acceso activo.
+    """
+    user_companies = CompanyUser.objects.filter(
+        user=request.user,
+        is_active=True
+    ).select_related("company")
 
-    # Acceso universal: mostrar todas las empresas
-    companies = Company.objects.all()
+    companies = [uc.company for uc in user_companies]
 
     return render(
         request,
         "company/select.html",
         {
             "companies": companies,
+            "active_company_id": request.session.get("active_company_id"),
         },
     )
 
 
 @login_required
-def set_active_company(request, company_id):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+def select_company(request, company_id):
+    """
+    Activa una empresa en la sesión únicamente si el usuario pertenece a ella.
+    """
+    has_access = CompanyUser.objects.filter(
+        user=request.user,
+        company_id=company_id,
+        is_active=True
+    ).exists()
 
-    # No validamos CompanyUser porque no lo usamos más
-    request.session["active_company_id"] = company_id
+    if not has_access:
+        raise PermissionDenied("No tenés permisos para acceder a esta empresa.")
 
-    return redirect("main_dashboard")
+    company = get_object_or_404(Company, pk=company_id)
+
+    # Establecer la empresa activa y limpiar la notificación del modal
+    request.session["active_company_id"] = company.id
+    request.session.pop("show_company_select_modal", None)
+    messages.success(request, f"Empresa activa cambiada a: {company.name}")
+
+    next_url = request.POST.get("next") or request.GET.get("next") or "dashboard"
+    return redirect(next_url)
 
 
 @login_required
 def clear_select_modal_flag(request):
-    logger.debug("clear_select_modal_flag called by %s", request.user)
+    """
+    Limpia la bandera de sesión que solicita mostrar el modal de selección de empresa.
+    """
     request.session.pop("show_company_select_modal", None)
-    return HttpResponse("OK")
+    return JsonResponse({"status": "ok"})
+
+
+# Alias de compatibilidad
+set_active_company = select_company

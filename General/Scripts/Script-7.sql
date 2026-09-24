@@ -1,0 +1,1 @@
+UPDATE sales_customer SET tax_profile_id = NULL;

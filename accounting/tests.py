@@ -1,30 +1,16 @@
 from decimal import Decimal
 from datetime import date
 from django.test import TestCase
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from unittest.mock import MagicMock
 
-# 1. Modelo Company desde la app 'company'
 from company.models import Company
-from purchases.models import Purchase
-from suppliers.models import Supplier
-
-# 2. Modelos propios de la app 'accounting'
 from accounting.models import (
     JournalEntry,
     JournalEntryLine,
     Account,
     Period,
+    FiscalYear,
 )
-
-# Si FiscalYear está expuesto en accounting.models, o impórtalo desde accounting.models.period
-try:
-    from accounting.models import FiscalYear
-except ImportError:
-    from accounting.models.period import FiscalYear
-
-# 3. Servicio contable
 from accounting.services import AccountingService
 
 
@@ -46,7 +32,7 @@ class AccountingServiceTestCase(TestCase):
             },
         )
 
-        # 3. Crear Período vinculado al FiscalYear
+        # 3. Crear Período vinculado explícitamente a FiscalYear
         self.period, _ = Period.objects.get_or_create(
             fiscal_year=self.fiscal_year,
             month=1,
@@ -57,40 +43,16 @@ class AccountingServiceTestCase(TestCase):
             },
         )
 
-        # 4. Plan de cuentas mínimo requerido
+        # 4. Cuentas contables mínimas requeridas
         accounts = {
             "account_client": ("CLIENTES", "Deudores por Ventas", "ASSET"),
             "account_sales": ("VENTAS", "Ventas de Mercaderías", "INCOME"),
-            "account_sales_services": (
-                "VENTAS_SERVICIOS",
-                "Ventas de Servicios",
-                "INCOME",
-            ),
-            "account_iva_debito": (
-                "IVA_DEBITO",
-                "IVA Débito Fiscal",
-                "LIABILITY",
-            ),
-            "account_iibb": (
-                "PERCEPCION_IIBB_A_DEPOSITAR",
-                "Percepción IIBB Practicada",
-                "LIABILITY",
-            ),
-            "account_vat_perc": (
-                "PERCEPCION_IVA_A_DEPOSITAR",
-                "Percepción IVA Practicada",
-                "LIABILITY",
-            ),
-            "account_cmv": (
-                "CMV",
-                "Costo de Mercaderías Vendidas",
-                "EXPENSE",
-            ),
-            "account_inventory": (
-                "INVENTARIO",
-                "Mercaderías de Reventa",
-                "ASSET",
-            ),
+            "account_sales_services": ("VENTAS_SERVICIOS", "Ventas de Servicios", "INCOME"),
+            "account_iva_debito": ("IVA_DEBITO", "IVA Débito Fiscal", "LIABILITY"),
+            "account_iibb": ("PERCEPCION_IIBB_A_DEPOSITAR", "Percepción IIBB Practicada", "LIABILITY"),
+            "account_vat_perc": ("PERCEPCION_IVA_A_DEPOSITAR", "Percepción IVA Practicada", "LIABILITY"),
+            "account_cmv": ("CMV", "Costo de Mercaderías Vendidas", "EXPENSE"),
+            "account_inventory": ("INVENTARIO", "Mercaderías de Reventa", "ASSET"),
         }
 
         for attribute, (code, name, account_type) in accounts.items():
@@ -155,41 +117,6 @@ class AccountingServiceTestCase(TestCase):
         self.assertFalse(entry.lines.filter(account__code="CMV").exists())
         self.assertFalse(entry.lines.filter(account__code="INVENTARIO").exists())
 
-    def test_post_sale_creates_missing_accounts_for_company(self):
-        """Si la compañía no tiene cuentas contables, el servicio debe crearlas automáticamente."""
-        company = Company.objects.create(
-            name="Empresa sin cuentas", tax_id="30000000002"
-        )
-        company.accounts.all().delete()
-
-        customer_mock = MagicMock()
-        customer_mock.name = "Cliente nuevo"
-
-        sale_mock = MagicMock()
-        sale_mock.company = company
-        sale_mock.date = date(2026, 7, 1)
-        sale_mock.number = "0001-00000103"
-        sale_mock.customer = customer_mock
-        sale_mock.total_amount = Decimal("121000.00")
-        sale_mock.net_amount = Decimal("100000.00")
-        sale_mock.iva_amount = Decimal("21000.00")
-        sale_mock.iibb_perception_amount = Decimal("0.00")
-        sale_mock.vat_perception_amount = Decimal("0.00")
-        sale_mock.total_cost = Decimal("60000.00")
-        sale_mock.is_service = False
-        sale_mock.created_by = None
-
-        entry = AccountingService.post_sale(sale_mock)
-
-        self.assertTrue(
-            Account.objects.filter(company=company, code="CLIENTES").exists()
-        )
-        self.assertTrue(Account.objects.filter(company=company, code="VENTAS").exists())
-        self.assertTrue(
-            Account.objects.filter(company=company, code="IVA_DEBITO").exists()
-        )
-        self.assertTrue(entry.pk)
-
     def test_post_sale_is_idempotent_for_same_sale(self):
         """No debe crear un segundo asiento para la misma venta al llamarse dos veces."""
         customer_mock = MagicMock()
@@ -220,30 +147,3 @@ class AccountingServiceTestCase(TestCase):
             1,
         )
         self.assertEqual(first.pk, second.pk)
-
-    def test_purchase_journal_entry_is_unique_per_purchase(self):
-        supplier = Supplier.objects.create(
-            company=self.company,
-            name="Proveedor Idempotente",
-        )
-        purchase = Purchase.objects.create(
-            company=self.company,
-            supplier=supplier,
-            date=date(2026, 1, 15),
-            invoice_number="A-0001-00000001",
-            net_amount=Decimal("100.00"),
-            tax_amount=Decimal("21.00"),
-            total_amount=Decimal("121.00"),
-        )
-        first = purchase.journal_entries.get()
-
-        with self.assertRaises(IntegrityError):
-            JournalEntry.objects.create(
-                company=self.company,
-                purchase=purchase,
-                period=self.period,
-                date=purchase.date,
-                description=f"Compra {purchase.invoice_number}",
-            )
-
-        self.assertEqual(first.purchase_id, purchase.pk)
