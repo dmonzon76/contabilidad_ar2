@@ -1,6 +1,7 @@
+import calendar
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import calendar
 
 from accounting.models import FiscalYear, Period
 

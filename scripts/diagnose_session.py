@@ -1,7 +1,7 @@
 import http.cookiejar
-import urllib.request
-import urllib.parse
 import re
+import urllib.parse
+import urllib.request
 
 cj = http.cookiejar.CookieJar()
 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))

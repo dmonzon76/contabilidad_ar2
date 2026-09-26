@@ -3,14 +3,13 @@ from django.utils.html import format_html
 
 from accounting.models import (
     Account,
+    AccountingSettings,
     AccountMovement,
+    FiscalYear,
     JournalEntry,
     JournalEntryLine,
-    FiscalYear,
     Period,
-    AccountingSettings,
 )
-
 
 # ============================================================
 # ACCOUNT

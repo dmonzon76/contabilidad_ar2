@@ -1,6 +1,6 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
 
 from company.models import Company, CompanyUser
 from fiscal.models.company_profile import CompanyProfile

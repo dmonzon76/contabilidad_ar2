@@ -1,5 +1,4 @@
-from django.utils import timezone
-from accounting.models import JournalEntry, JournalEntryLine, Account
+from accounting.models import Account, JournalEntry
 from accounting.models.account_movement import AccountMovement
 from accounting.models.period import Period
 from accounting.services import AccountingService

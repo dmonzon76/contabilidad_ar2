@@ -1,7 +1,7 @@
-from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.test import TestCase
+from django.urls import reverse
 
 from company.models import Company, UserCompany
 from fiscal.models.company_profile import CompanyProfile

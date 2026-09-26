@@ -1,12 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 
-from accounting.models import Account
 from accounting.forms import AccountForm
-from company.models import Company
+from accounting.models import Account
 from accounting.models.period import Period
 from core.utils.company_access import user_has_access
-
 
 # ============================================================
 # ACCOUNTS

@@ -1,7 +1,8 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from products.models import Product
-from products.forms import ProductForm
+from django.shortcuts import get_object_or_404, redirect, render
+
 from core.middleware.active_company import get_active_company_from_request
+from products.forms import ProductForm
+from products.models import Product
 
 
 def product_list(request):

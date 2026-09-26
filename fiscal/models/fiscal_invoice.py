@@ -1,10 +1,9 @@
 from decimal import Decimal
-from django.db import models
+
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from django.db import models
 
 from company.models import Company
-from fiscal.models.tax import Tax
 from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
 
 

@@ -1,12 +1,13 @@
-import pytest
 from datetime import date
 from unittest.mock import patch
 
-from fiscal.models import FiscalInvoice, FiscalInvoiceLine
-from fiscal.afip.wsfe_client import CAEResponse
-from sales.models import Sale
+import pytest
+
 from company.models import Company
 from customers.models import Customer
+from fiscal.afip.wsfe_client import CAEResponse
+from fiscal.models import FiscalInvoice, FiscalInvoiceLine
+from sales.models import Sale
 
 
 # -----------------------------

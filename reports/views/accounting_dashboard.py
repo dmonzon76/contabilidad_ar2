@@ -1,11 +1,11 @@
+from django.db.models import Count, Sum
 from django.shortcuts import render
-from django.db.models import Sum, Count
 from django.utils import timezone
-from core.decorators import company_required
 
-from accounting.models import JournalEntry, JournalEntryLine, Account
-from sales.models.sale import Sale
+from accounting.models import JournalEntry, JournalEntryLine
+from core.decorators import company_required
 from purchases.models.purchase import Purchase
+from sales.models.sale import Sale
 
 
 @company_required

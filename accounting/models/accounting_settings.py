@@ -1,7 +1,7 @@
 from django.db import models
 
-from company.models import Company
 from accounting.models import Account
+from company.models import Company
 
 
 class AccountingSettings(models.Model):

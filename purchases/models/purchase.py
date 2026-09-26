@@ -1,9 +1,11 @@
 from decimal import Decimal
+
 from django.db import models
-from company.models import Company
-from suppliers.models import Supplier
+
 from accounting.models import Account
+from company.models import Company
 from fiscal.models import Tax
+from suppliers.models import Supplier
 
 
 class Purchase(models.Model):

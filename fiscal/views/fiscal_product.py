@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 
-from fiscal.models import FiscalProduct
 from fiscal.forms import FiscalProductForm
+from fiscal.models import FiscalProduct
 
 
 @login_required

@@ -1,5 +1,6 @@
 import os
 import sys
+
 import django
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -10,6 +11,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from django.contrib.auth.models import User
+
 from company.models import CompanyUser
 
 username = "daniel"

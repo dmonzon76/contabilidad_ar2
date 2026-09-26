@@ -2,13 +2,12 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from purchases.models import Supplier
 from purchases.models.purchase import (
     Purchase,
     PurchaseLine,
-    PurchaseTax,
     PurchasePerception,
     PurchaseRetention,
+    PurchaseTax,
 )
 
 # ============================================================

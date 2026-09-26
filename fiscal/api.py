@@ -1,6 +1,8 @@
-from django.http import JsonResponse
 from django.db.models import Q
+from django.http import JsonResponse
+
 from fiscal.models import AFIPActivity
+
 
 def afip_search(request):
     q = request.GET.get("q", "").strip()

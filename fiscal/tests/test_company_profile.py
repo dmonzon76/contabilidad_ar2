@@ -1,9 +1,9 @@
-from django.test import TestCase
 from django.db import IntegrityError
+from django.test import TestCase
 
 from company.models import Company
-from fiscal.models.company_profile import CompanyProfile
 from fiscal.forms.company_tax_profile import CompanyTaxProfileForm
+from fiscal.models.company_profile import CompanyProfile
 
 
 class CompanyProfileModelTests(TestCase):

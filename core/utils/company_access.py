@@ -2,6 +2,7 @@
 
 from django.core.exceptions import PermissionDenied
 
+
 def user_has_access(request, company):
     if not request.user.is_authenticated:
         return False

@@ -1,14 +1,16 @@
 from django.contrib import admin
+
+from fiscal.models.tax import Tax
+
 from .models import (
     AFIPActivity,
-    ThirdPartyTaxProfile,
     CompanyProfile,
     ElectronicVoucherBook,
     FiscalInvoice,
     FiscalProduct,
     FiscalService,
+    ThirdPartyTaxProfile,
 )
-from fiscal.models.tax import Tax
 
 # AFIP Activities
 admin.site.register(AFIPActivity)

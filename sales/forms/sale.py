@@ -1,7 +1,7 @@
 from django import forms
 
-from sales.models.sale import Sale
 from customers.models import Customer
+from sales.models.sale import Sale
 
 
 class SaleForm(forms.ModelForm):

@@ -1,7 +1,7 @@
-from decimal import Decimal
 from django.db import models
 
 from fiscal.models.tax import Tax
+
 
 class FiscalService(models.Model):
     name = models.CharField(max_length=200)

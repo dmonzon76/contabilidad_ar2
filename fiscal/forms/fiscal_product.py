@@ -1,6 +1,8 @@
 from django import forms
+
 from fiscal.models import FiscalProduct
 from fiscal.models.tax import Tax
+
 
 class FiscalProductForm(forms.ModelForm):
     class Meta:

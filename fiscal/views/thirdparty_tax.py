@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 
-from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 from fiscal.forms.thirdparty_tax_profile import ThirdPartyTaxProfileForm
+from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 
 
 @login_required

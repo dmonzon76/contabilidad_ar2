@@ -1,5 +1,7 @@
 import logging
+
 from django.shortcuts import redirect
+
 from company.models import CompanyUser
 
 logger = logging.getLogger(__name__)
@@ -15,11 +17,11 @@ class ActiveCompanyMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # 1. Si el usuario no está autenticado → permitir flujo (login/logout)
+        # 1. Si el usuario no está autenticado → permitir flujo libre
         if not getattr(request, "user", None) or not request.user.is_authenticated:
             return self.get_response(request)
 
-        # 2. Rutas exentas que no requieren empresa activa
+        # 2. Rutas exentas que NO requieren empresa activa previamente seleccionada
         EXEMPT_PREFIXES = (
             "/admin",
             "/accounts/login/",
@@ -27,6 +29,8 @@ class ActiveCompanyMiddleware:
             "/static/",
             "/media/",
             "/company/select/",
+            "/company/set-active/",  # ← Agregado para permitir guardar la empresa activa
+            "/company/clear-modal-flag/",  # ← Agregado para peticiones AJAX del modal
             "/company/new/",
         )
 
@@ -52,7 +56,6 @@ class ActiveCompanyMiddleware:
             .first()
         )
 
-        # Si NO existe la relación CompanyUser → Denegar acceso y redirigir
         if company_user is None:
             logger.warning(
                 "Usuario %s intentó acceder a empresa %s sin relación CompanyUser — reseteando.",

@@ -1,6 +1,8 @@
-from django.urls import path
 from django.shortcuts import redirect
+from django.urls import path
+
 from core.views.dashboard import main_dashboard
+
 
 def root_redirect(request):
     return redirect("main_dashboard")

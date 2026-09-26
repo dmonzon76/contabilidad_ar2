@@ -1,9 +1,10 @@
 from django.db import models
+
 from company.models import Company
 from customers.models import Customer
-from suppliers.models import Supplier
-from sales.models.sale import Sale
 from purchases.models.purchase import Purchase
+from sales.models.sale import Sale
+from suppliers.models import Supplier
 
 
 class AccountMovement(models.Model):

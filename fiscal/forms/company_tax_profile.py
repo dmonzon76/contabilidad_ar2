@@ -1,5 +1,7 @@
 from django import forms
+
 from fiscal.models.company_profile import CompanyProfile
+
 
 class CompanyTaxProfileForm(forms.ModelForm):
     class Meta:

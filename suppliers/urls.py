@@ -1,5 +1,6 @@
 # suppliers/urls.py
 from django.urls import path
+
 from suppliers import views
 
 app_name = "suppliers"

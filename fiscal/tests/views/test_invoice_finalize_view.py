@@ -1,14 +1,15 @@
+from unittest.mock import patch
+
+from accounting.models.journal_entry import JournalEntry
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
-from unittest.mock import patch
-from django.core.exceptions import PermissionDenied
+from fiscal.models.vat_book import VATBookEntry
 
 from company.models import Company, UserCompany
 from fiscal.models.fiscal_invoice import FiscalInvoice
 from fiscal.models.fiscal_invoice_line import FiscalInvoiceLine
-from accounting.models.journal_entry import JournalEntry
-from fiscal.models.vat_book import VATBookEntry
 
 
 def make_company(name):

@@ -2,28 +2,16 @@ from django.urls import path
 
 # Accounts
 from accounting.views.account import (
-    account_list,
-    account_create,
-    account_edit,
-    account_delete,
     account_add_child,
-    period_list,
-    period_open,
+    account_create,
+    account_delete,
+    account_edit,
+    account_list,
     period_close,
+    period_list,
     period_lock,
+    period_open,
 )
-
-# Journal
-from accounting.views.journal import (
-    journal_list,
-    journal_create,
-)
-
-# Ledger
-from accounting.views.ledger import ledger_view
-
-# Trial Balance
-from accounting.views.trial_balance import trial_balance_view
 
 # Balance Sheet
 from accounting.views.balance_sheet import balance_sheet_view
@@ -31,13 +19,25 @@ from accounting.views.balance_sheet import balance_sheet_view
 # Dashboard + Fiscal Years
 from accounting.views.dashboard import (
     accounting_dashboard,
+    fiscal_year_close,
     fiscal_year_list,
     fiscal_year_open,
-    fiscal_year_close,
 )
 
 # NEW: Create Fiscal Year
 from accounting.views.fiscal_year_create import fiscal_year_create
+
+# Journal
+from accounting.views.journal import (
+    journal_create,
+    journal_list,
+)
+
+# Ledger
+from accounting.views.ledger import ledger_view
+
+# Trial Balance
+from accounting.views.trial_balance import trial_balance_view
 
 app_name = "accounting"
 

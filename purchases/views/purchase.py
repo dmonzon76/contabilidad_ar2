@@ -1,29 +1,29 @@
 from django.db import transaction
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-
-from purchases.models.purchase import Purchase
-from purchases.forms.purchase import (
-    PurchaseForm,
-    PurchaseLineFormSet,
-    PurchaseTaxFormSet,
-    PurchasePerceptionFormSet,
-    PurchaseRetentionFormSet,
-)
-
-from inventory.integration import (
-    update_inventory_from_purchase,
-    revert_inventory_from_purchase,
-)
-
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from accounting.integration import delete_journal_entries_for_purchase, delete_supplier_cc_from_purchase
+from accounting.models import JournalEntry
 from accounting.services import AccountingService
 
 # VALIDACIÓN CONTABLE
 from accounting.utils.period_validation import (
-    get_open_period_for_date,
     NoOpenPeriodError,
+    get_open_period_for_date,
 )
+from inventory.integration import (
+    revert_inventory_from_purchase,
+    update_inventory_from_purchase,
+)
+from purchases.forms import purchase
+from purchases.forms.purchase import (
+    PurchaseForm,
+    PurchaseLineFormSet,
+    PurchasePerceptionFormSet,
+    PurchaseRetentionFormSet,
+    PurchaseTaxFormSet,
+)
+from purchases.models.purchase import Purchase
 
 # ============================================================
 # LISTA DE COMPRAS
@@ -290,6 +290,8 @@ class PurchaseDeleteView(DetailView):
 
     def post(self, request, *args, **kwargs):
         purchase = self.get_object()
+        JournalEntry.objects.filter(purchase=purchase).delete()
+        revert_inventory_from_purchase(purchase)
 
         delete_journal_entries_for_purchase(purchase)
         delete_supplier_cc_from_purchase(purchase)

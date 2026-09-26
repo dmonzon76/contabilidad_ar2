@@ -2,6 +2,7 @@
 
 from company.models import CompanyUser
 
+
 def get_active_company(request):
     """
     Devuelve la empresa activa seleccionada por el usuario.

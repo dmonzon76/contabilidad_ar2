@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from company.models import Company, CompanyUser
 
@@ -31,6 +32,7 @@ def select_company_list(request):
 
 
 @login_required
+@require_POST
 def select_company(request, company_id):
     """
     Activa una empresa en la sesión únicamente si el usuario pertenece a ella.
@@ -46,19 +48,21 @@ def select_company(request, company_id):
 
     company = get_object_or_404(Company, pk=company_id)
 
-    # Establecer la empresa activa y limpiar la notificación del modal
     request.session["active_company_id"] = company.id
     request.session.pop("show_company_select_modal", None)
     messages.success(request, f"Empresa activa cambiada a: {company.name}")
 
-    next_url = request.POST.get("next") or request.GET.get("next") or "dashboard"
-    return redirect(next_url)
+    next_url = request.POST.get("next") or request.GET.get("next") or "main_dashboard"
+    try:
+        return redirect(next_url)
+    except Exception:
+        return redirect("main_dashboard")
 
 
 @login_required
 def clear_select_modal_flag(request):
     """
-    Limpia la bandera de sesión que solicita mostrar el modal de selección de empresa.
+    Limpia la bandera de sesión del modal flotante.
     """
     request.session.pop("show_company_select_modal", None)
     return JsonResponse({"status": "ok"})

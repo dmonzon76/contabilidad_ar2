@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.shortcuts import redirect, render
 
-from accounting.models import JournalEntry, Period
 from accounting.forms import JournalEntryForm, JournalEntryLineFormSet
+from accounting.models import JournalEntry, Period
 from core.utils.company_access import user_has_access
 
 

@@ -4,7 +4,6 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 
 from accounting.forms import FiscalYearForm
-from accounting.models import FiscalYear
 from core.utils.company_access import user_has_access
 
 

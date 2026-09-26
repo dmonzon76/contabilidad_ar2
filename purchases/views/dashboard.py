@@ -4,9 +4,8 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from core.utils.company_access import user_has_access
-from suppliers.models import Supplier
-
 from purchases.models import Purchase
+from suppliers.models import Supplier
 
 
 @login_required

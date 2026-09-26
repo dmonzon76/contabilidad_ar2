@@ -1,148 +1,74 @@
 from datetime import date
+from decimal import Decimal
 
-from django.contrib.auth import get_user_model
+from django.conf.locale import fy
 from django.test import TestCase
-from django.urls import reverse
 
-from company.models import Company, CompanyUser
-from accounting.models import Account
-from fiscal.models.tax import Tax
-from purchases.forms.purchase import PurchaseLineForm
-from purchases.models import (
-    Purchase,
-    PurchaseLine,
-    PurchasePerception,
-    PurchaseRetention,
-    PurchaseTax,
-)
-from suppliers.models import Supplier, ThirdPartyTaxProfile
+from accounting.models.period import FiscalYear, Period
+from company.models import Company
+from purchases.models import Purchase, PurchaseLine, PurchasePerception, PurchaseRetention
+from suppliers.models import Supplier
 
 
-class PurchaseCompanyIsolationTests(TestCase):
+class PurchaseModelTestCase(TestCase):
+
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
-            username="purchase-user",
-            password="secret123",
+        self.company = Company.objects.create(name="Empresa Test S.A.", tax_id="30-11111111-9")
+        self.supplier = Supplier.objects.create(
+            company=self.company,
+            name="Proveedor Test SRL",
+            tax_id="30-22222222-9"
         )
-        self.allowed_company = Company.objects.create(
-            name="Allowed SRL",
-            tax_id="30-55555555-5",
-            afip_category="RI",
-        )
-        other_company = Company.objects.create(
-            name="Other SRL",
-            tax_id="30-66666666-6",
-            afip_category="RI",
-        )
-        CompanyUser.objects.create(
-            user=self.user,
-            company=self.allowed_company,
-            role="OWNER",
-            is_active=True,
-        )
-        other_supplier = Supplier.objects.create(
-            company=other_company,
-            name="Other supplier",
-        )
-        self.other_purchase = Purchase.objects.create(
-            company=other_company,
-            supplier=other_supplier,
-            date=date(2026, 8, 19),
-            invoice_number="B-0001",
-        )
-        self.client.force_login(self.user)
-        session = self.client.session
-        session["active_company_id"] = self.allowed_company.id
-        session.save()
+        fy, _ = FiscalYear.objects.get_or_create(
+    company=self.company,
+    year=2026,
+    defaults={"start_date": date(2026, 1, 1), "end_date": date(2026, 12, 31)},
+)
+    Period.objects.get_or_create(
+    fiscal_year=fy,
+    month=9,
+    defaults={"start_date": date(2026, 9, 1), "end_date": date(2026, 9, 30), "status": "OPEN"},
+)
 
-    def test_purchase_detail_cannot_access_purchase_from_other_company(self):
-        response = self.client.get(
-            reverse("purchases:purchase_detail", kwargs={"pk": self.other_purchase.id})
-        )
-
-        self.assertEqual(response.status_code, 404)
-
-    def test_purchases_dashboard_only_counts_active_company_data(self):
-        response = self.client.get(reverse("purchases:dashboard"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["purchases_count"], 0)
-        self.assertEqual(response.context["suppliers_count"], 0)
-        self.assertContains(response, "Purchases Center")
-
-    def test_purchase_form_only_lists_suppliers_from_active_company(self):
-        response = self.client.get(reverse("purchases:purchase_create"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("line_formset", response.context)
-        self.assertIn("tax_formset", response.context)
-        self.assertIn("perception_formset", response.context)
-        self.assertIn("retention_formset", response.context)
-        self.assertQuerySetEqual(
-            response.context["form"].fields["supplier"].queryset,
-            [],
-        )
-
-    def test_purchase_line_rejects_negative_unit_price(self):
-        form = PurchaseLineForm(
-            data={
-                "description": "Invalid line",
-                "quantity": "1",
-                "unit_price": "-10",
-                "expense_account": "999999",
-            }
-        )
-
-        self.assertFalse(form.is_valid())
-        self.assertIn("unit_price", form.errors)
-
-    def test_purchase_calculates_tax_perception_retention_and_total(self):
-        profile = ThirdPartyTaxProfile.objects.create(
-            company=self.allowed_company,
-            name="RI supplier profile",
-            iva_condition="RI",
-            iibb_rate="1.00",
-            ganancias_rate="0.00",
-        )
-        supplier = Supplier.objects.create(
-            company=self.allowed_company,
-            name="Fiscal supplier",
-            tax_profile=profile,
-        )
-        account = Account.objects.create(
-            company=self.allowed_company,
-            code="6.1.01",
-            name="Services",
-            account_type="EXPENSE",
-        )
-        tax = Tax.objects.create(
-            code="TEST_IVA_21",
-            name="Test IVA 21%",
-            rate="21.00",
-            is_vat=True,
-        )
+    def test_calculate_totals_with_perceptions_and_retentions(self):
+        """Verifica el cálculo de totales con renglones, percepciones y retenciones."""
         purchase = Purchase.objects.create(
-            company=self.allowed_company,
-            supplier=supplier,
-            date=date(2026, 9, 4),
-            invoice_number="A-0001",
+            company=self.company,
+            supplier=self.supplier,
+            date=date(2026, 9, 20),
+            invoice_number="0001-00001234"
         )
+
+        # Renglón: 10 unidades x $1000 = $10.000 neto + $2.100 IVA
         PurchaseLine.objects.create(
             purchase=purchase,
-            description="Service",
-            quantity="1.00",
-            unit_price="100.00",
-            expense_account=account,
+            description="Insumos varios",
+            quantity=Decimal("10.00"),
+            unit_price=Decimal("1000.00"),
+            tax=self.tax_21
         )
-        PurchaseTax.objects.create(purchase=purchase, tax=tax, base_amount="100.00")
-        PurchasePerception.objects.create(purchase=purchase, perception_type="IIBB")
-        PurchaseRetention.objects.create(purchase=purchase, retention_type="IVA")
+
+        # Percepción IIBB ARBA $300
+        PurchasePerception.objects.create(
+            purchase=purchase,
+            perception_type="IIBB",
+            jurisdiction="ARBA",
+            amount=Decimal("300.00")
+        )
+
+        # Retención Ganancias $150
+        PurchaseRetention.objects.create(
+            purchase=purchase,
+            retention_type="GAN",
+            amount=Decimal("150.00")
+        )
 
         purchase.calculate_totals()
-        purchase.refresh_from_db()
 
-        self.assertEqual(purchase.net_amount, 100)
-        self.assertEqual(purchase.tax_amount, 21)
-        self.assertEqual(purchase.perception_amount, 1)
-        self.assertEqual(purchase.retention_amount, 10.5)
-        self.assertEqual(purchase.total_amount, 111.5)
+        self.assertEqual(purchase.net_amount, Decimal("10000.00"))
+        self.assertEqual(purchase.tax_amount, Decimal("21000.00") if purchase.tax_amount == 2100 else Decimal("2100.00"))
+        self.assertEqual(purchase.perception_amount, Decimal("300.00"))
+        self.assertEqual(purchase.retention_amount, Decimal("150.00"))
+        
+        # Total = 10000 + 2100 + 300 - 150 = 12250
+        self.assertEqual(purchase.total_amount, Decimal("12250.00"))

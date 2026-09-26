@@ -1,4 +1,5 @@
 from django.urls import path
+
 from reports.views.accounting_dashboard import accounting_dashboard
 from reports.views.cc_dashboard import cc_dashboard
 from reports.views.inventory_dashboard import inventory_dashboard

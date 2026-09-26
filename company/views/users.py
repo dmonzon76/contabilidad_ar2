@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from company.models import Company, CompanyUser
+from django.shortcuts import get_object_or_404, redirect, render
+
 from company.forms.user import CompanyUserForm
+from company.models import Company, CompanyUser
 from core.utils.company_access import user_has_access
 
 

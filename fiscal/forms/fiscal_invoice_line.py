@@ -1,6 +1,7 @@
 # fiscal/forms/fiscal_invoice_line.py
 
 from django import forms
+
 from fiscal.models.fiscal_invoice_line import FiscalInvoiceLine
 from fiscal.models.tax import Tax
 

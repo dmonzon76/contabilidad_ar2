@@ -1,13 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
-from django.views.decorators.http import require_http_methods
 from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
 
-from fiscal.models import FiscalInvoice, FiscalInvoiceLine
-from fiscal.forms import FiscalInvoiceLineForm
-
-from core.utils.company_active import get_active_company
 from core.utils.company_access import user_has_access
+from core.utils.company_active import get_active_company
+from fiscal.forms import FiscalInvoiceLineForm
+from fiscal.models import FiscalInvoice, FiscalInvoiceLine
+
 
 @login_required
 @permission_required("fiscal.add_fiscalinvoiceline", raise_exception=True)

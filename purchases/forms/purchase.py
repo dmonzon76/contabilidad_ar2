@@ -1,16 +1,16 @@
 from django import forms
 from django.forms import inlineformset_factory
 
+from accounting.models import Account
+from fiscal.models import Tax
 from purchases.models import (
     Purchase,
     PurchaseLine,
-    PurchaseTax,
     PurchasePerception,
     PurchaseRetention,
+    PurchaseTax,
 )
 from suppliers.models import Supplier
-from fiscal.models import Tax
-from accounting.models import Account
 
 
 class PurchaseForm(forms.ModelForm):

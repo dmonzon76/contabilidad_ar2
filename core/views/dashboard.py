@@ -1,13 +1,14 @@
 import json
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from django.db.models import Sum
+
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 
 from company.models import Company
-from sales.models.sale import Sale
-from purchases.models.purchase import Purchase
 from inventory.models import InventoryMovement
+from purchases.models.purchase import Purchase
+from sales.models.sale import Sale
 
 
 @login_required

@@ -1,9 +1,12 @@
+from datetime import date
 from decimal import Decimal
 
+from django.conf.locale import fy
 from django.test import TestCase
 
+from accounting.models.journal import JournalEntry
+from accounting.models.period import FiscalYear, Period
 from company.models import Company
-from accounting.models.journal import JournalEntry, JournalEntryLine
 from fiscal.models.fiscal_invoice import FiscalInvoice
 from fiscal.models.fiscal_invoice_line import FiscalInvoiceLine
 
@@ -20,6 +23,17 @@ class InvoiceAccountingTests(TestCase):
 
     def setUp(self):
         self.company = make_company()
+        fy, _ = FiscalYear.objects.get_or_create(
+        
+        company=self.company,
+    year=2026,
+    defaults={"start_date": date(2026, 1, 1), "end_date": date(2026, 12, 31)},
+)
+    Period.objects.get_or_create(
+    fiscal_year=fy,
+    month=9,
+    defaults={"start_date": date(2026, 9, 1), "end_date": date(2026, 9, 30), "status": "OPEN"},
+)
 
     def test_invoice_creates_journal_entry(self):
         invoice = FiscalInvoice.objects.create(

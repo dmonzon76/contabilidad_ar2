@@ -1,11 +1,12 @@
 from datetime import date
-from django.db.models import Sum, F
-from django.shortcuts import render, get_object_or_404, redirect
+
+from django.db.models import F, Sum
+from django.shortcuts import get_object_or_404, redirect, render
+
 from core.decorators import company_required
 
 from .forms import InventoryItemForm, InventoryMovementForm, LocationForm
 from .models import InventoryItem, InventoryMovement, Location
-
 
 # ============================
 # Locations

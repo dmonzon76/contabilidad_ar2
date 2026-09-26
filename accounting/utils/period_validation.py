@@ -1,4 +1,5 @@
 from datetime import date
+
 from accounting.models import Period
 
 

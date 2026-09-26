@@ -1,9 +1,10 @@
-from django.test import TestCase
 from unittest.mock import patch
 
+from django.test import TestCase
+
 from company.models import Company
-from fiscal.models.fiscal_invoice import FiscalInvoice
 from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
+from fiscal.models.fiscal_invoice import FiscalInvoice
 
 
 def make_company():

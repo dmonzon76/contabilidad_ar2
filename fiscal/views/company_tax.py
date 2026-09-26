@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest
+from django.shortcuts import redirect, render
 
 from core.middleware.active_company import get_active_company_from_request
-from fiscal.models.company_profile import CompanyProfile
 from fiscal.forms.company_tax_profile import CompanyTaxProfileForm
+from fiscal.models.company_profile import CompanyProfile
 
 
 @login_required

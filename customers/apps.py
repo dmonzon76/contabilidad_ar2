@@ -5,4 +5,4 @@ class CustomersConfig(AppConfig):
     name = "customers"
 
     def ready(self):
-        import customers.signals
+        pass

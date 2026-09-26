@@ -1,136 +1,67 @@
-from django.db import transaction
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
 
-from core.middleware.active_company import get_active_company_from_request
-from sales.forms.customer import CustomerForm
-from sales.models import Customer
-
-from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 from fiscal.forms.thirdparty_tax_profile import ThirdPartyTaxProfileForm
+from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
+from sales.forms.customer import CustomerForm
+from sales.models.customer import Customer
 
 
-# ---------------------------------------------------------
-# LIST VIEW
-# ---------------------------------------------------------
 @login_required
 def customer_list(request):
-    company = get_active_company_from_request(request)
-    customers = Customer.objects.filter(company=company).order_by("name")
-
+    """
+    Lista los clientes pertenecientes a la empresa activa.
+    """
+    company_id = request.session.get("active_company_id")
+    customers = Customer.objects.filter(company_id=company_id, is_active=True)
     return render(
         request,
-        "sales/customers/list.html",
-        {
-            "company": company,
-            "customers": customers,
-        },
+        "sales/customers/customer_list.html",
+        {"customers": customers}
     )
 
 
-# ---------------------------------------------------------
-# CREATE VIEW
-# ---------------------------------------------------------
 @login_required
 def customer_create(request):
-    company = get_active_company_from_request(request)
+    """
+    Crea un nuevo cliente y le asigna su perfil fiscal automáticamente.
+    """
+    company_id = request.session.get("active_company_id")
 
     if request.method == "POST":
         form = CustomerForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
                 customer = form.save(commit=False)
-                customer.company = company
+                customer.company_id = company_id
                 customer.save()
 
-                tax_profile = customer.tax_profile
-                if tax_profile is None:
-                    tax_profile = ThirdPartyTaxProfile.objects.create(
-                        company=company,
-                        customer=customer,
-                        afip_category="RI",
-                        vat_21=False,
-                        vat_105=False,
-                        vat_27=False,
-                        vat_exempt=False,
-                        vat_non_taxed=False,
-                        ganancias_status="NO_CORRESPONDE",
-                        iibb_status="NO_CORRESPONDE",
-                        uses_perceptions=False,
-                        uses_retentions=False,
-                    )
+                tax_profile = ThirdPartyTaxProfile.objects.create(
+                    company_id=company_id,
+                    afip_category="RI",
+                )
+                customer.tax_profile = tax_profile
+                customer.save(update_fields=["tax_profile"])
 
-                    customer.tax_profile = tax_profile
-                    customer.save(update_fields=["tax_profile"])
-
-            return redirect("sales:customer_tax_edit", customer_id=customer.id)
+            return redirect("sales:customer_list")
     else:
         form = CustomerForm()
 
     return render(
         request,
         "sales/customers/form.html",
-        {
-            "company": company,
-            "form": form,
-            "mode": "create",
-        },
+        {"form": form, "mode": "create"}
     )
 
 
-# ---------------------------------------------------------
-# EDIT FISCAL PROFILE
-# ---------------------------------------------------------
-@login_required
-def customer_tax_edit(request, customer_id):
-    company = get_active_company_from_request(request)
-    customer = get_object_or_404(Customer, id=customer_id, company=company)
-
-    tax_profile = customer.tax_profile
-    if tax_profile is None:
-        tax_profile = ThirdPartyTaxProfile.objects.create(
-            company=company,
-            customer=customer,
-            afip_category="RI",
-            vat_21=False,
-            vat_105=False,
-            vat_27=False,
-            vat_exempt=False,
-            vat_non_taxed=False,
-            ganancias_status="NO_CORRESPONDE",
-            iibb_status="NO_CORRESPONDE",
-            uses_perceptions=False,
-            uses_retentions=False,
-        )
-        customer.tax_profile = tax_profile
-        customer.save(update_fields=["tax_profile"])
-
-    if request.method == "POST":
-        form = ThirdPartyTaxProfileForm(request.POST, instance=tax_profile)
-        if form.is_valid():
-            form.save()
-            return redirect("sales:customer_edit", customer_id=customer.id)
-    else:
-        form = ThirdPartyTaxProfileForm(instance=tax_profile)
-
-    return render(
-        request,
-        "sales/customers/tax_profile_form.html",
-        {
-            "company": company,
-            "customer": customer,
-            "form": form,
-        },
-    )
-
-
-# ---------------------------------------------------------
-# EDIT VIEW
-# ---------------------------------------------------------
 @login_required
 def customer_edit(request, customer_id):
-    company = get_active_company_from_request(request)
-    customer = get_object_or_404(Customer, id=customer_id, company=company)
+    """
+    Edita los datos generales de un cliente existente.
+    """
+    company_id = request.session.get("active_company_id")
+    customer = get_object_or_404(Customer, id=customer_id, company_id=company_id)
 
     if request.method == "POST":
         form = CustomerForm(request.POST, instance=customer)
@@ -143,45 +74,35 @@ def customer_edit(request, customer_id):
     return render(
         request,
         "sales/customers/form.html",
-        {
-            "company": company,
-            "form": form,
-            "mode": "edit",
-            "customer": customer,
-        },
+        {"form": form, "mode": "edit", "customer": customer}
     )
 
 
-# ---------------------------------------------------------
-# DEACTIVATE VIEW
-# ---------------------------------------------------------
 @login_required
-def customer_deactivate(request, customer_id):
-    company = get_active_company_from_request(request)
-    customer = get_object_or_404(Customer, id=customer_id, company=company)
-    customer.is_active = False
-    customer.save(update_fields=["is_active"])
+def customer_tax_edit(request, customer_id):
+    """
+    Edita el perfil fiscal del cliente.
+    """
+    company_id = request.session.get("active_company_id")
+    customer = get_object_or_404(Customer, id=customer_id, company_id=company_id)
 
-    return redirect("sales:customer_list")
-
-
-# ---------------------------------------------------------
-# DELETE VIEW
-# ---------------------------------------------------------
-@login_required
-def customer_delete(request, customer_id):
-    company = get_active_company_from_request(request)
-    customer = get_object_or_404(Customer, id=customer_id, company=company)
+    if not customer.tax_profile:
+        customer.tax_profile = ThirdPartyTaxProfile.objects.create(
+            company_id=company_id,
+            afip_category="RI",
+        )
+        customer.save(update_fields=["tax_profile"])
 
     if request.method == "POST":
-        customer.delete()
-        return redirect("sales:customer_list")
+        form = ThirdPartyTaxProfileForm(request.POST, instance=customer.tax_profile)
+        if form.is_valid():
+            form.save()
+            return redirect("sales:customer_list")
+    else:
+        form = ThirdPartyTaxProfileForm(instance=customer.tax_profile)
 
     return render(
         request,
-        "sales/customers/delete.html",
-        {
-            "company": company,
-            "customer": customer,
-        },
+        "sales/customers/tax_profile_form.html",
+        {"customer": customer, "form": form}
     )

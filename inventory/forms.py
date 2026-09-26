@@ -1,5 +1,6 @@
 from django import forms
-from .models import Location, InventoryItem, InventoryMovement
+
+from .models import InventoryItem, InventoryMovement, Location
 
 
 class LocationForm(forms.ModelForm):

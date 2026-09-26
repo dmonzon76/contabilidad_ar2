@@ -4,8 +4,8 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import transaction
 
-from fiscal.models import FiscalInvoiceLine
 from fiscal.afip.wsfe_client import WSFEClient
+from fiscal.models import FiscalInvoiceLine
 
 
 @transaction.atomic

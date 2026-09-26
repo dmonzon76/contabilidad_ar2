@@ -2,47 +2,41 @@ from django.urls import path
 
 # --- EXISTING VIEWS ---
 from fiscal.views.afip_activity import (
-    afip_activity_list,
     afip_activity_create,
     afip_activity_edit,
+    afip_activity_list,
 )
-
 from fiscal.views.company_tax import company_tax_profile
-
-from fiscal.views.thirdparty_tax import (
-    thirdparty_tax_list,
-    thirdparty_tax_edit,
-)
-
 from fiscal.views.electronic_voucher_book import (
-    electronic_voucher_book_list,
     electronic_voucher_book_create,
-    electronic_voucher_book_edit,
     electronic_voucher_book_delete,
+    electronic_voucher_book_edit,
+    electronic_voucher_book_list,
 )
 
 # --- NEW FISCAL MODULE VIEWS ---
 from fiscal.views.fiscal_invoice import (
-    fiscal_invoice_list,
-    fiscal_invoice_detail,
     fiscal_invoice_create,
+    fiscal_invoice_detail,
+    fiscal_invoice_list,
 )
-
 from fiscal.views.fiscal_invoice_line import (
     fiscal_invoice_line_add,
     fiscal_invoice_line_delete,
 )
-
 from fiscal.views.fiscal_product import (
-    fiscal_product_list,
     fiscal_product_create,
     fiscal_product_edit,
+    fiscal_product_list,
 )
-
 from fiscal.views.fiscal_service import (
-    fiscal_service_list,
     fiscal_service_create,
     fiscal_service_edit,
+    fiscal_service_list,
+)
+from fiscal.views.thirdparty_tax import (
+    thirdparty_tax_edit,
+    thirdparty_tax_list,
 )
 
 app_name = "fiscal"

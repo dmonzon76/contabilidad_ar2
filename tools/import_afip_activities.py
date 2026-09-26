@@ -1,6 +1,8 @@
-from django.core.management.base import BaseCommand
-from fiscal.models import AFIPActivity
 from pathlib import Path
+
+from django.core.management.base import BaseCommand
+
+from fiscal.models import AFIPActivity
 
 
 class Command(BaseCommand):

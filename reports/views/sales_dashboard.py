@@ -1,12 +1,10 @@
+from django.db.models import Sum
 from django.shortcuts import render
-from django.db.models import Sum, Count
 from django.utils import timezone
-from core.decorators import company_required
 
+from core.decorators import company_required
 from sales.models.sale import Sale
 from sales.models.sale_item import SaleItem
-from inventory.models import InventoryMovement
-from accounting.models import JournalEntry
 
 
 @company_required

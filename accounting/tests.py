@@ -1,17 +1,17 @@
-from decimal import Decimal
 from datetime import date
-from django.test import TestCase
+from decimal import Decimal
 from unittest.mock import MagicMock
 
-from company.models import Company
+from django.test import TestCase
+
 from accounting.models import (
-    JournalEntry,
-    JournalEntryLine,
     Account,
-    Period,
     FiscalYear,
+    JournalEntry,
+    Period,
 )
 from accounting.services import AccountingService
+from company.models import Company
 
 
 class AccountingServiceTestCase(TestCase):

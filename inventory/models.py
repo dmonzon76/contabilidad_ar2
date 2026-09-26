@@ -1,13 +1,13 @@
 from decimal import Decimal
 
-from django.db import models, transaction
 from django.core.exceptions import ValidationError
+from django.db import models, transaction
 
 from company.models import Company
-from products.models import Product
-from sales.models.sale import Sale
-from purchases.models.purchase import Purchase
 from fiscal.models.tax import Tax
+from products.models import Product
+from purchases.models.purchase import Purchase
+from sales.models.sale import Sale
 
 
 class Location(models.Model):

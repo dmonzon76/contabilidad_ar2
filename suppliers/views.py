@@ -1,11 +1,11 @@
 # suppliers/views.py
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 
-from suppliers.models import Supplier
 from suppliers.forms.supplier import SupplierForm
+from suppliers.models import Supplier
 
 
 @login_required

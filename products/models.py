@@ -1,8 +1,9 @@
 from decimal import Decimal
+
 from django.db import models
 
-from company.models import Company
 from accounting.models import Account
+from company.models import Company
 from fiscal.models.tax import Tax
 
 

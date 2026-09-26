@@ -1,12 +1,12 @@
-from django.test import TestCase, RequestFactory
+import uuid
+
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.test import RequestFactory, TestCase
 
 from company.models import Company, CompanyUser
-
 from fiscal.middleware.company_middleware import get_active_company_from_request
 
-import uuid
 
 def make_company(name):
     return Company.objects.create(

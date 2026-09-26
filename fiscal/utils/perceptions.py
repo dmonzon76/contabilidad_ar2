@@ -1,3 +1,7 @@
+
+from decimal import Decimal
+
+
 def calculate_perceptions(customer, subtotal):
     profile = customer.tax_profile
 
@@ -16,7 +20,7 @@ def calculate_retentions(customer, subtotal):
     return subtotal * profile.ganancias_percentage
 
 
-from decimal import Decimal
+
 
 
 def _invoice_subtotal(invoice):

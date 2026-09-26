@@ -2,8 +2,8 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from company.models import Company
 from accounting.models.tax import Tax
+from company.models import Company
 from fiscal.models.fiscal_invoice import FiscalInvoice
 from fiscal.models.fiscal_invoice_line import FiscalInvoiceLine
 

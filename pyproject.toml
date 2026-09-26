@@ -1,0 +1,29 @@
+[tool.ruff]
+# Directorios excluidos del análisis
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "**/migrations/*",
+]
+
+line-length = 120
+
+[tool.ruff.lint]
+# Seleccionar solo reglas de errores críticos e importaciones:
+# E = Errores estándar de sintaxis/runtime (pycodestyle)
+# F = Importaciones rotas / variables no definidas (Pyflakes)
+# I = Orden e importaciones (isort)
+select = ["E", "F", "I"]
+
+# Ignorar advertencias no críticas y reglas de estilo de Django
+ignore = [
+    "RUF012", # Mutable default value for class attribute (CHOICES / Meta.fields)
+    "E501",   # Line too long (líneas largas)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Permitir re-exportación de módulos en los __init__.py
+"__init__.py" = ["F401"]
+

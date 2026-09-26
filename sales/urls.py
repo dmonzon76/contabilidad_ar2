@@ -1,18 +1,19 @@
 from django.urls import path
-from .views.sales import (
-    SaleListView,
-    SaleCreateView,
-    SaleDetailView,
-    sale_item_add,
-    issue_sale,  # ← 1. Importar la vista
-)
+
 from .views.customers import (
-    customer_list,
     customer_create,
-    customer_tax_edit,
     customer_edit,
+    customer_list,
+    customer_tax_edit,
 )
 from .views.dashboard import sales_dashboard
+from .views.sales import (
+    SaleCreateView,
+    SaleDetailView,
+    SaleListView,
+    issue_sale,  # ← 1. Importar la vista
+    sale_item_add,
+)
 
 app_name = "sales"
 

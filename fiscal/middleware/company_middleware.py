@@ -1,5 +1,4 @@
 from django.core.exceptions import PermissionDenied
-from company.models import CompanyUser
 
 from company.models import Company, CompanyUser
 

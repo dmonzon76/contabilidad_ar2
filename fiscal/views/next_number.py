@@ -1,5 +1,6 @@
 from django.db import models, transaction
 
+
 class FiscalInvoice(models.Model):
     company = models.ForeignKey("company.Company", on_delete=models.CASCADE)
     customer = models.ForeignKey("customers.Customer", on_delete=models.PROTECT)

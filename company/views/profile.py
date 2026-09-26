@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 
 from company.models import Company
-from fiscal.models.company_profile import CompanyProfile
-from fiscal.forms.company_tax_profile import CompanyTaxProfileForm
-
 from core.utils.company_access import user_has_access
+from fiscal.forms.company_tax_profile import CompanyTaxProfileForm
+from fiscal.models.company_profile import CompanyProfile
 
 
 @login_required

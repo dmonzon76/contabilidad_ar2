@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.shortcuts import render
+
 from company.models import Company
 
 IVA_CONDITIONS = [

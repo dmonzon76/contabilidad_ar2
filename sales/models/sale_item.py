@@ -2,9 +2,10 @@ from decimal import Decimal
 
 from django.db import models
 
-from .sale import Sale
-from products.models import Product
 from fiscal.models.tax import Tax
+from products.models import Product
+
+from .sale import Sale
 
 
 class SaleItem(models.Model):

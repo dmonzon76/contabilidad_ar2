@@ -1,11 +1,10 @@
+from django.db.models import F, Sum
 from django.shortcuts import render
-from django.db.models import Sum, Count, F
 from django.utils import timezone
 
+from core.decorators import company_required
 from inventory.models import InventoryItem, InventoryMovement
 from purchases.models.purchase import PurchaseLine
-from sales.models.sale_item import SaleItem
-from core.decorators import company_required
 
 
 @company_required

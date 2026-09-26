@@ -1,8 +1,7 @@
 from django import forms
 
-from sales.models.sale_item import SaleItem
 from products.models import Product
-from fiscal.models.tax import Tax
+from sales.models.sale_item import SaleItem
 
 
 class SaleItemForm(forms.ModelForm):

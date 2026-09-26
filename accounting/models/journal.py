@@ -1,8 +1,9 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from company.models import Company
+
 from .account import Account
 from .period import Period
 

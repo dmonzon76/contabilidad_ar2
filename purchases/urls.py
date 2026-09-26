@@ -1,21 +1,20 @@
 from django.urls import path
 
+from purchases.views.dashboard import purchases_dashboard
 from purchases.views.purchase import (
-    PurchaseListView,
-    PurchaseDetailView,
     PurchaseCreateView,
-    PurchaseUpdateView,
     PurchaseDeleteView,
+    PurchaseDetailView,
+    PurchaseListView,
+    PurchaseUpdateView,
     purchase_recalculate,
 )
-
 from purchases.views.supplier import (
-    supplier_list,
     supplier_create,
     supplier_edit,
+    supplier_list,
     supplier_tax_edit,
 )
-from purchases.views.dashboard import purchases_dashboard
 
 app_name = "purchases"
 

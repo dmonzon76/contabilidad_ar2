@@ -1,6 +1,6 @@
 import http.client
-import urllib.parse
 import re
+import urllib.parse
 
 conn = http.client.HTTPConnection("127.0.0.1", 8000)
 conn.request("GET", "/accounts/login/?next=/dashboard/")

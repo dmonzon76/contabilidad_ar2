@@ -1,15 +1,14 @@
-from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
-from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
-from fiscal.models.fiscal_invoice import FiscalInvoice
-from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
-from sales.models.sale import Sale
-
-from core.utils.company_active import get_active_company
 from core.utils.company_access import user_has_access
+from core.utils.company_active import get_active_company
+from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
+from fiscal.models.fiscal_invoice import FiscalInvoice
+from sales.models.sale import Sale
 
 
 @login_required
