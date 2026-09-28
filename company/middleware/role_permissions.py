@@ -38,25 +38,17 @@ class RolePermissionMiddleware:
         if not app_name or app_name not in self.PERMISSION_MAP:
             return self.get_response(request)
 
-        cu = CompanyUser.objects.filter(
-            user=request.user,
-            company_id=company_id,
-            is_active=True
-        ).first()
-        is_write = request.method in ("POST", "PUT", "PATCH", "DELETE")
-
-        if cu.role not in ("OWNER", "ADMIN"):
-            required_perm = self.PERMISSION_MAP[app_name].get("edit" if is_write else "view")
-        if required_perm and not getattr(cu, required_perm, False):
+        cu = CompanyUser.objects.filter(user=request.user, company_id=company_id, is_active=True).first()
+        if cu is None:
             return HttpResponseForbidden("No tenés permisos para esta acción.")
 
-        # Los roles OWNER y ADMIN tienen acceso total a todos los módulos
-        if getattr(cu, "role", None) in ("OWNER", "ADMIN"):
-            return self.get_response(request)
+        is_write = request.method in ("POST", "PUT", "PATCH", "DELETE")
+        required_perm = self.PERMISSION_MAP[app_name].get("edit" if is_write else "view")
 
-        is_write_operation = request.method not in ("GET", "HEAD", "OPTIONS")
-        perm_type = "edit" if is_write_operation else "view"
-        required_perm = self.PERMISSION_MAP[app_name].get(perm_type)
+        if cu.role in ("OWNER", "ADMIN"):
+            if not is_write and required_perm and hasattr(cu, required_perm) and not getattr(cu, required_perm):
+                return HttpResponseForbidden("No tenés permisos para esta acción.")
+            return self.get_response(request)
 
         if required_perm and not getattr(cu, required_perm, False):
             return HttpResponseForbidden("No tenés permisos para realizar esta acción en el módulo.")

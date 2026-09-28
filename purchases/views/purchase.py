@@ -2,6 +2,8 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
+
+import inventory.integration
 from accounting.integration import delete_journal_entries_for_purchase, delete_supplier_cc_from_purchase
 from accounting.models import JournalEntry
 from accounting.services import AccountingService
@@ -11,11 +13,6 @@ from accounting.utils.period_validation import (
     NoOpenPeriodError,
     get_open_period_for_date,
 )
-from inventory.integration import (
-    revert_inventory_from_purchase,
-    update_inventory_from_purchase,
-)
-from purchases.forms import purchase
 from purchases.forms.purchase import (
     PurchaseForm,
     PurchaseLineFormSet,
@@ -180,7 +177,7 @@ class PurchaseCreateView(CreateView):
 
                 self.object = purchase
 
-                update_inventory_from_purchase(purchase)
+                inventory.integration.update_inventory_from_purchase(purchase)
                 AccountingService.post_purchase(purchase)
 
                 return redirect("purchases:purchase_list")
@@ -291,11 +288,11 @@ class PurchaseDeleteView(DetailView):
     def post(self, request, *args, **kwargs):
         purchase = self.get_object()
         JournalEntry.objects.filter(purchase=purchase).delete()
-        revert_inventory_from_purchase(purchase)
+        inventory.integration.revert_inventory_from_purchase(purchase)
 
         delete_journal_entries_for_purchase(purchase)
         delete_supplier_cc_from_purchase(purchase)
-        revert_inventory_from_purchase(purchase)
+        inventory.integration.revert_inventory_from_purchase(purchase)
 
         purchase.delete()
 

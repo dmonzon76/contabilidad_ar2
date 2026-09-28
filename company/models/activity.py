@@ -1,7 +1,9 @@
+
 from django.db import models
 
-from company.models import Company
 from fiscal.models import AFIPActivity
+
+from .models import Company
 
 
 class CompanyActivity(models.Model):

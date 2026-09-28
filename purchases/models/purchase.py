@@ -19,11 +19,11 @@ class Purchase(models.Model):
     invoice_number = models.CharField(max_length=50)
 
     # Totales
-    net_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    perception_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    retention_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    net_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    perception_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    retention_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -37,80 +37,137 @@ class Purchase(models.Model):
     def calculate_totals(self):
         money = Decimal("0.01")
 
-        # 1) Subtotal Neto por líneas
-        net_total = sum((line.subtotal for line in self.lines.all()), Decimal("0.00"))
-        self.net_amount = net_total.quantize(money)
+        # 1) Subtotal Neto Gravado desde las líneas de compra
+        self.net_amount = sum(
+            (line.quantity * line.unit_price for line in self.lines.all()),
+            Decimal("0"),
+        ).quantize(money)
 
-        # 2) Sincronización de IVA por alícuota en PurchaseTax
-        tax_by_type = {}
-        for line in self.lines.all():
-            line_subtotal = line.subtotal
-            if line.tax:
-                tax_obj = line.tax
-                line_vat = line.tax_amount
-                if tax_obj not in tax_by_type:
-                    tax_by_type[tax_obj] = {"base": Decimal("0.00"), "amount": Decimal("0.00")}
-                tax_by_type[tax_obj]["base"] += line_subtotal
-                tax_by_type[tax_obj]["amount"] += line_vat
+        # 2) IVA / Impuestos automáticos desde Tax
+        for tax_line in self.taxes.all():
+            tax_obj = tax_line.tax
+            if tax_obj is None:
+                tax_line.amount = Decimal("0")
+                tax_line.save(update_fields=["amount"])
+                continue
 
-        if self.lines.exists() and tax_by_type:
-            self.taxes.exclude(tax__in=tax_by_type.keys()).delete()
-            for tax_obj, data in tax_by_type.items():
-                p_tax, _ = self.taxes.get_or_create(
-                    tax=tax_obj,
-                    defaults={
-                        "base_amount": data["base"].quantize(money),
-                        "amount": data["amount"].quantize(money),
-                    },
-                )
-                p_tax.base_amount = data["base"].quantize(money)
-                p_tax.amount = data["amount"].quantize(money)
-                p_tax.save(update_fields=["base_amount", "amount"])
+            if tax_line.base_amount <= 0:
+                tax_line.base_amount = self.net_amount
 
-        self.tax_amount = sum((t.amount for t in self.taxes.all()), Decimal("0.00")).quantize(money)
+            tax_line.amount = (
+                tax_line.base_amount * tax_obj.rate / Decimal("100")
+            ).quantize(money)
+            tax_line.save(update_fields=["base_amount", "amount"])
 
-        # 3) Percepciones sufridas (IIBB por Jurisdicción, IVA, MUNI, etc.)
+        # 3) Percepciones automáticas basadas en perfil fiscal del proveedor
         profile = getattr(self.supplier, "tax_profile", None)
 
+        if profile:
+            # --- IIBB ---
+            is_iibb_agent = getattr(profile, "is_iibb_perception_agent", False)
+            iibb_rate = Decimal(str(getattr(profile, "iibb_perception_rate", 0) or "0"))
+
+            if (is_iibb_agent or iibb_rate > 0) and not getattr(profile, "is_iibb_exempt", False):
+                iibb_perc, _ = self.perceptions.get_or_create(
+                    perception_type="IIBB",
+                    defaults={"amount": Decimal("0")},
+                )
+                if iibb_rate > 0:
+                    iibb_perc.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(money)
+                else:
+                    iibb_perc.amount = Decimal("0")
+                iibb_perc.save()
+
+            # --- IVA ---
+            is_iva_agent = getattr(profile, "is_iva_perception_agent", False)
+            iva_rate = Decimal(str(getattr(profile, "iva_perception_rate", 0) or "0"))
+            afip_cat = getattr(profile, "afip_category", "")
+
+            if is_iva_agent or iva_rate > 0:
+                iva_perc, _ = self.perceptions.get_or_create(
+                    perception_type="IVA",
+                    defaults={"amount": Decimal("0")},
+                )
+                if iva_rate > 0:
+                    iva_perc.amount = (self.net_amount * iva_rate / Decimal("100")).quantize(money)
+                elif is_iva_agent and afip_cat == "RI":
+                    iva_perc.amount = (self.net_amount * Decimal("0.03")).quantize(money)
+                else:
+                    iva_perc.amount = Decimal("0")
+                iva_perc.save()
+
+        # Recalcular cualquier otra percepción existente
         for p in self.perceptions.all():
             if not profile:
+                p.amount = Decimal("0")
+                p.save()
                 continue
 
-            if p.amount == Decimal("0.00"):
-                if p.perception_type == "IIBB":
-                    iibb_rate = Decimal(str(getattr(profile, "iibb_percentage", 0) or "0"))
-                    if iibb_rate > 0 and getattr(profile, "iibb_status", "") != "EXENTO":
-                        p.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(money)
+            if p.perception_type == "IIBB":
+                iibb_rate = Decimal(str(getattr(profile, "iibb_perception_rate", 0) or "0"))
+                if iibb_rate > 0 and not getattr(profile, "is_iibb_exempt", False):
+                    p.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(money)
+                else:
+                    p.amount = Decimal("0")
+                p.save()
 
-                elif p.perception_type == "IVA":
-                    iva_perc_rate = Decimal(str(getattr(profile, "iva_perception_percentage", 0) or "0"))
-                    if iva_perc_rate > 0:
-                        p.amount = (self.net_amount * iva_perc_rate / Decimal("100")).quantize(money)
-                    elif getattr(profile, "afip_category", "") == "RI":
-                        p.amount = (self.net_amount * Decimal("0.03")).quantize(money)
+            elif p.perception_type == "IVA":
+                iva_rate = Decimal(str(getattr(profile, "iva_perception_rate", 0) or "0"))
+                if iva_rate > 0:
+                    p.amount = (self.net_amount * iva_rate / Decimal("100")).quantize(money)
+                elif getattr(profile, "is_iva_perception_agent", False) and getattr(profile, "afip_category", "") == "RI":
+                    p.amount = (self.net_amount * Decimal("0.03")).quantize(money)
+                else:
+                    p.amount = Decimal("0")
+                p.save()
 
-            p.save()
+            elif p.perception_type == "MUNI":
+                p.amount = Decimal("0")
+                p.save()
 
-        # 4) Retenciones practicadas
+        # 4) Retenciones automáticas basadas en perfil fiscal del proveedor
         for r in self.retentions.all():
             if not profile:
+                r.amount = Decimal("0")
+                r.save()
                 continue
 
-            if r.amount == Decimal("0.00"):
-                if r.retention_type == "GAN":
-                    gan_rate = Decimal(str(getattr(profile, "ganancias_percentage", 0) or "0"))
-                    if gan_rate > 0 and getattr(profile, "ganancias_status", "") != "EXENTO":
-                        r.amount = (self.net_amount * gan_rate / Decimal("100")).quantize(money)
+            if r.retention_type == "GAN":
+                ganancias_rate = Decimal(str(getattr(profile, "ganancias_retention_rate", 0) or "0"))
+                if ganancias_rate > 0 and getattr(profile, "ganancias_status", "") == "INSCRIPTO" and not getattr(profile, "is_ganancias_exempt", False):
+                    r.amount = (self.net_amount * ganancias_rate / Decimal("100")).quantize(money)
+                else:
+                    r.amount = Decimal("0")
 
-                elif r.retention_type == "IVA":
-                    if getattr(profile, "afip_category", "") == "RI":
-                        r.amount = (self.tax_amount * Decimal("0.50")).quantize(money)
+            elif r.retention_type == "IVA":
+                iva_ret_rate = Decimal(str(getattr(profile, "iva_retention_rate", 0) or "0"))
+                iva_total = sum(t.amount for t in self.taxes.all())
+                if iva_ret_rate > 0:
+                    r.amount = (iva_total * iva_ret_rate / Decimal("100")).quantize(money)
+                elif getattr(profile, "afip_category", "") == "RI":
+                    r.amount = (iva_total * Decimal("0.50")).quantize(money)
+                else:
+                    r.amount = Decimal("0")
+
+            elif r.retention_type == "SUSS":
+                suss_rate = Decimal(str(getattr(profile, "suss_retention_rate", 0) or "0"))
+                if suss_rate > 0:
+                    r.amount = (self.net_amount * suss_rate / Decimal("100")).quantize(money)
+                else:
+                    r.amount = Decimal("0")
 
             r.save()
 
         # 5) Totales finales
-        self.perception_amount = sum((p.amount for p in self.perceptions.all()), Decimal("0.00")).quantize(money)
-        self.retention_amount = sum((r.amount for r in self.retentions.all()), Decimal("0.00")).quantize(money)
+        self.tax_amount = sum(
+            (t.amount for t in self.taxes.all()), Decimal("0")
+        ).quantize(money)
+        self.perception_amount = sum(
+            (p.amount for p in self.perceptions.all()), Decimal("0")
+        ).quantize(money)
+        self.retention_amount = sum(
+            (r.amount for r in self.retentions.all()), Decimal("0")
+        ).quantize(money)
 
         self.total_amount = (
             self.net_amount
@@ -127,6 +184,7 @@ class Purchase(models.Model):
 
         if is_new:
             from accounting.services import AccountingService
+
             AccountingService.post_purchase(self)
 
 
@@ -192,3 +250,4 @@ class PurchaseRetention(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name="retentions")
     retention_type = models.CharField(max_length=10, choices=RETENTION_CHOICES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+

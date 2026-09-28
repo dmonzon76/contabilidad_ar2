@@ -19,7 +19,6 @@ select = ["E", "F", "I"]
 
 # Ignorar advertencias no críticas y reglas de estilo de Django
 ignore = [
-    "RUF012", # Mutable default value for class attribute (CHOICES / Meta.fields)
     "E501",   # Line too long (líneas largas)
 ]
 

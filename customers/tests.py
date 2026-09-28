@@ -56,6 +56,6 @@ class CustomerCompanyIsolationTests(TestCase):
         self.assertTrue(Customer.objects.filter(pk=self.customer.pk).exists())
 
 
-from django.test import TestCase
+
 
 # Create your tests here.

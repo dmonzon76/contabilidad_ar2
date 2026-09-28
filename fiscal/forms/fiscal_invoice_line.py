@@ -23,8 +23,8 @@ class FiscalInvoiceLineForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        company = kwargs.pop("company", None)
+       
         super().__init__(*args, **kwargs)
 
         # Filtrar impuestos habilitados
-        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
+        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)  # type: ignore[attr-defined]

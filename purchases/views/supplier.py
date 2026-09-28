@@ -37,6 +37,33 @@ def supplier_create(request):
 
 
 @login_required
+def supplier_list(request):
+    company = get_active_company_from_request(request)
+    suppliers = Supplier.objects.filter(company=company).order_by("name")
+    return render(request, "purchases/supplier_list.html", {"suppliers": suppliers})
+
+
+@login_required
+def supplier_edit(request, supplier_id):
+    company = get_active_company_from_request(request)
+    supplier = get_object_or_404(Supplier, id=supplier_id, company=company)
+
+    if request.method == "POST":
+        form = SupplierForm(request.POST, instance=supplier)
+        if form.is_valid():
+            form.save()
+            return redirect("purchases:supplier_list")
+    else:
+        form = SupplierForm(instance=supplier)
+
+    return render(
+        request,
+        "purchases/supplier_form.html",
+        {"supplier": supplier, "form": form},
+    )
+
+
+@login_required
 def supplier_tax_edit(request, supplier_id):
     company = get_active_company_from_request(request)
     supplier = get_object_or_404(Supplier, id=supplier_id, company=company)

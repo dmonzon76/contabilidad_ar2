@@ -1,13 +1,12 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView
 
 from accounting.services import AccountingService
-
-# VALIDACIÓN CONTABLE
 from accounting.utils.period_validation import (
     NoOpenPeriodError,
     get_open_period_for_date,
@@ -16,19 +15,6 @@ from inventory.integration import update_inventory_from_sale
 from sales.forms.sale import SaleForm
 from sales.forms.sale_item import SaleItemForm
 from sales.models.sale import Sale
-
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.views.generic import CreateView, DetailView, ListView
-
-from sales.forms.sale import SaleForm
-from sales.models.sale import Sale
-
-from django.views.decorators.http import require_POST
-
-from fiscal.models import ElectronicVoucherBook, FiscalInvoice, FiscalInvoiceLine
-from sales.models.sale import Sale
-
 
 # ============================================================
 # LISTA DE VENTAS

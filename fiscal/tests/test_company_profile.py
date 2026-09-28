@@ -10,7 +10,7 @@ class CompanyProfileModelTests(TestCase):
 
     def test_unique_constraint_prevents_duplicates(self):
         company = Company.objects.create(name="Test Co")
-        existing = CompanyProfile.objects.get(company=company)
+        CompanyProfile.objects.get(company=company)
 
         with self.assertRaises(IntegrityError):
             CompanyProfile.objects.create(company=company)

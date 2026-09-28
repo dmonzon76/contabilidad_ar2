@@ -1,9 +1,9 @@
 from datetime import date
 from decimal import Decimal
 
-from django.conf.locale import fy
 from django.test import TestCase
 
+from accounting.models.account import Account
 from accounting.models.journal import JournalEntry
 from accounting.models.period import FiscalYear, Period
 from company.models import Company
@@ -20,26 +20,44 @@ def make_company():
 
 
 class InvoiceAccountingTests(TestCase):
-
     def setUp(self):
         self.company = make_company()
-        fy, _ = FiscalYear.objects.get_or_create(
-        
-        company=self.company,
-    year=2026,
-    defaults={"start_date": date(2026, 1, 1), "end_date": date(2026, 12, 31)},
-)
-    Period.objects.get_or_create(
-    fiscal_year=fy,
-    month=9,
-    defaults={"start_date": date(2026, 9, 1), "end_date": date(2026, 9, 30), "status": "OPEN"},
-)
+        fiscal_year, _ = FiscalYear.objects.get_or_create(
+            company=self.company,
+            year=2026,
+            defaults={
+                "start_date": date(2026, 1, 1),
+                "end_date": date(2026, 12, 31),
+            },
+        )
+        Period.objects.get_or_create(
+            fiscal_year=fiscal_year,
+            month=9,
+            defaults={
+                "start_date": date(2026, 9, 1),
+                "end_date": date(2026, 9, 30),
+                "status": "OPEN",
+            },
+        )
+        for code, name, account_type in (
+            ("CAJA", "Caja", "ASSET"),
+            ("VENTAS", "Ventas", "INCOME"),
+            ("IVA_DEBITO", "IVA Débito Fiscal", "LIABILITY"),
+        ):
+            Account.objects.create(
+                company=self.company,
+                code=code,
+                name=name,
+                account_type=account_type,
+            )
 
     def test_invoice_creates_journal_entry(self):
         invoice = FiscalInvoice.objects.create(
             company=self.company,
             point_of_sale=1,
             number=1,
+            date=date(2026, 9, 20),
+            customer_name="Cliente de prueba",
         )
 
         FiscalInvoiceLine.objects.create(

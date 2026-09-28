@@ -1,5 +1,3 @@
-from accounting.models import Account
-from company.models import Company
 
 PLAN_DE_CUENTAS = [
 
@@ -155,3 +153,5 @@ PLAN_DE_CUENTAS = [
     {"code": "6.2", "name": "Gastos de Ventas", "type": "EXPENSE", "parent": "6"},
     {"code": "6.2.01", "name": "Publicidad", "type": "EXPENSE", "parent": "6.2"},
     {"code": "6.2.02", "name": "Comisiones", "type": "EXPENSE", "parent": "6.2"},
+
+]

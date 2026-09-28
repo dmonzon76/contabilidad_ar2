@@ -1,3 +1,4 @@
+import calendar
 from datetime import date
 from decimal import Decimal
 from unittest.mock import MagicMock
@@ -15,12 +16,9 @@ from company.models import Company
 
 
 class AccountingServiceTestCase(TestCase):
-
     def setUp(self):
         # 1. Crear empresa de prueba
-        self.company = Company.objects.create(
-            name="Empresa Test S.A.", tax_id="30-12345678-9"
-        )
+        self.company = Company.objects.create(name="Empresa Test S.A.", tax_id="30-12345678-9")
 
         # 2. Crear Ejercicio Fiscal (FiscalYear)
         self.fiscal_year, _ = FiscalYear.objects.get_or_create(
@@ -32,16 +30,17 @@ class AccountingServiceTestCase(TestCase):
             },
         )
 
-        # 3. Crear Período vinculado explícitamente a FiscalYear
-        self.period, _ = Period.objects.get_or_create(
-            fiscal_year=self.fiscal_year,
-            month=1,
-            defaults={
-                "start_date": date(2026, 1, 1),
-                "end_date": date(2026, 1, 31),
-                "status": "OPEN",
-            },
-        )
+        # 3. Crear los períodos abiertos que cubren las fechas de prueba
+        for month in range(1, 13):
+            Period.objects.get_or_create(
+                fiscal_year=self.fiscal_year,
+                month=month,
+                defaults={
+                    "start_date": date(2026, month, 1),
+                    "end_date": date(2026, month, calendar.monthrange(2026, month)[1]),
+                    "status": "OPEN",
+                },
+            )
 
         # 4. Cuentas contables mínimas requeridas
         accounts = {

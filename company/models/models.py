@@ -1,5 +1,8 @@
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Company(models.Model):
@@ -62,10 +65,10 @@ class Company(models.Model):
             sales = Sale.objects.filter(company=self)
             return {
                 "net": sum(s.net_amount for s in sales),
-                "iva": sum(s.tax_amount for s in sales),
+                "iva": sum(s.iva_amount for s in sales),
                 "total": sum(s.total_amount for s in sales),
             }
-        except:
+        except Exception:
             return {"net": 0, "iva": 0, "total": 0}
 
     @property
@@ -74,8 +77,15 @@ class Company(models.Model):
             from sales.models.sale import Sale
 
             return Sale.objects.filter(company=self).order_by("-date", "-id").first()
-        except:
+        except Exception:
             return None
+
+
+@receiver(post_save, sender=Company)
+def create_fiscal_profile(sender, instance, created, **kwargs):
+    if created:
+        profile_model = apps.get_model("fiscal", "CompanyProfile")
+        profile_model.objects.get_or_create(company=instance)
 
 
 class CompanyProfile(models.Model):
