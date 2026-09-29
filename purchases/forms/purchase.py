@@ -109,11 +109,11 @@ class PurchaseLineForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if company:
-            self.fields["tax"].queryset = Tax.objects.filter(
-                company=company,
-                is_active=True,
-            )
-            self.fields["expense_account"].queryset = Account.objects.filter(
+           self.fields["tax"].queryset = Tax.objects.filter(
+            enabled=True,
+)
+            
+           self.fields["expense_account"].queryset = Account.objects.filter(
                 company=company,
                 is_active=True,
             )
