@@ -51,6 +51,16 @@ class ThirdPartyTaxProfile(models.Model):
         related_name="fiscal_tax_profiles",
     )
 
+    name = models.CharField(
+        max_length=150,
+    )
+
+    tax_id = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+    )
+
     # ------------------------------------------------------------------
     # 1. CATEGORÍA PRINCIPAL Y AFIP
     # ------------------------------------------------------------------
@@ -154,7 +164,11 @@ class ThirdPartyTaxProfile(models.Model):
         verbose_name = "Perfil Fiscal de Tercero"
         verbose_name_plural = "Perfiles Fiscales de Terceros"
 
+    
+    
     def __str__(self):
-        if hasattr(self, "customer_profile") and self.customer_profile:
-            return f"{self.company.name} – Perfil de Cliente: {self.customer_profile.name}"
-        return f"{self.company.name} – Perfil Fiscal #{self.pk}"
+        return (
+        f"{self.name} ({self.tax_id})"
+        if self.tax_id
+        else self.name
+    )

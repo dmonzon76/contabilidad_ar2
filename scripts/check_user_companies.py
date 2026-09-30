@@ -1,3 +1,5 @@
+
+# ruff: noqa: E402ruff check .
 import os
 import sys
 

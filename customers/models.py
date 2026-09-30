@@ -1,80 +1,69 @@
-from decimal import Decimal
-
 from django.db import models
-from django.shortcuts import render
 
 from company.models import Company
-
-IVA_CONDITIONS = [
-    ("RI", "Responsable Inscripto"),
-    ("MONO", "Monotributo"),
-    ("EX", "Exento"),
-    ("CF", "Consumidor Final"),
-    ("NR", "No Responsable"),
-]
+from fiscal.models import ThirdPartyTaxProfile
 
 
 class Customer(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    """
+    Cliente.
 
-    name = models.CharField(max_length=150)
-    tax_id = models.CharField(max_length=20, blank=True, null=True)
-    iva_condition = models.CharField(
-        max_length=10,
-        choices=IVA_CONDITIONS,
-        default="CF",
+    Toda la información fiscal vive en ThirdPartyTaxProfile.
+    Este modelo solamente mantiene información comercial.
+    """
+    tax_profile = models.ForeignKey(
+    ThirdPartyTaxProfile,
+    on_delete=models.PROTECT,
+    related_name="customers",
+    null=True,
+    blank=True,
+)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="customers",
     )
-    iibb_rate = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal("0")
+
+    name = models.CharField(
+        max_length=255,
     )
-    is_iibb_exempt = models.BooleanField(default=False)
-    ganancias_rate = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal("0")
-    )
-    is_ganancias_exempt = models.BooleanField(default=False)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=50, blank=True, null=True)
-    address = models.CharField(max_length=200, blank=True, null=True)
-    city = models.CharField(
-        max_length=100,
+
+    email = models.EmailField(
         blank=True,
         null=True,
     )
 
-    province = models.CharField(
-        max_length=100,
+    phone = models.CharField(
+        max_length=50,
         blank=True,
         null=True,
     )
 
-    country = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        default="Argentina",
-    )
-
-    customer_type = models.CharField(
-        max_length=20,
-        choices=[
-            ("individual", "Individual"),
-            ("company", "Company"),
-        ],
-        default="company",
-    )
-
-    notes = models.TextField(
+    address = models.CharField(
+        max_length=255,
         blank=True,
         null=True,
     )
 
-    is_active = models.BooleanField(default=True)
+    tax_profile = models.ForeignKey(
+        ThirdPartyTaxProfile,
+        on_delete=models.PROTECT,
+        related_name="customers",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["name"]
+        unique_together = ("company", "name")
 
     def __str__(self):
         return self.name
-
-
-def customer_list(request):
-    company = request.active_company
-    customers = Customer.objects.filter(company=company, is_active=True)
-    return render(request, "customers/customer_list.html", {"customers": customers})

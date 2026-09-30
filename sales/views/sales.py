@@ -13,7 +13,6 @@ from accounting.utils.period_validation import (
 )
 from inventory.integration import update_inventory_from_sale
 from sales.forms.sale import SaleForm
-from sales.forms.sale_item import SaleItemForm
 from sales.models.sale import Sale
 
 # ============================================================

@@ -10,12 +10,12 @@ class SupplierAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "company",
-        "tax_id",
+        "tax_profile",
         "email",
         "phone",
         "is_active",
     )
 
     list_filter = ("company", "is_active")
-    search_fields = ("name", "tax_id", "email", "phone")
+    search_fields = ("name", "tax_profile", "email", "phone")
     ordering = ("name",)
