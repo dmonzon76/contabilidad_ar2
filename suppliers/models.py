@@ -14,7 +14,7 @@ class Supplier(models.Model):
     tax_profile = models.ForeignKey(
     ThirdPartyTaxProfile,
     on_delete=models.PROTECT,
-    related_name="customers",
+    related_name="suppliers",
     null=True,
     blank=True,
 )
@@ -46,15 +46,7 @@ class Supplier(models.Model):
         null=True,
     )
 
-    tax_profile = models.ForeignKey(
-        ThirdPartyTaxProfile,
-        on_delete=models.PROTECT,
-        related_name="suppliers",
-    )
-
-    is_active = models.BooleanField(
-        default=True,
-    )
+   
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -68,3 +60,4 @@ class Supplier(models.Model):
 
     def __str__(self):
         return self.name
+    tax_id = None

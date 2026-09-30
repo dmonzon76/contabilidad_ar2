@@ -52,8 +52,11 @@ class ThirdPartyTaxProfile(models.Model):
     )
 
     name = models.CharField(
-        max_length=150,
-    )
+    max_length=150,
+    blank=True,
+    null=True,
+)
+    
 
     tax_id = models.CharField(
         max_length=20,

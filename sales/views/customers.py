@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
+from customers.models import Customer
 from fiscal.forms.thirdparty_tax_profile import ThirdPartyTaxProfileForm
 from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 from sales.forms.customer import CustomerForm
-from sales.models.customer import Customer
 
 
 @login_required

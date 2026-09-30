@@ -13,9 +13,9 @@ class SupplierAdmin(admin.ModelAdmin):
         "tax_profile",
         "email",
         "phone",
-        "is_active",
+        "address",
     )
 
-    list_filter = ("company", "is_active")
+    list_filter = ("company", )
     search_fields = ("name", "tax_profile", "email", "phone")
     ordering = ("name",)

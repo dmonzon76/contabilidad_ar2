@@ -13,7 +13,7 @@ class SupplierForm(forms.ModelForm):
             "email",
             "phone",
             "address",
-            "is_active",
+            
         ]
 
         widgets = {
