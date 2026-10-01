@@ -14,7 +14,7 @@ def supplier_create(request):
     company = get_active_company_from_request(request)
 
     if request.method == "POST":
-        form = SupplierForm(request.POST)
+        form = SupplierForm(request.POST, company=company)
         if form.is_valid():
             with transaction.atomic():
                 supplier = form.save(commit=False)
@@ -31,7 +31,7 @@ def supplier_create(request):
 
             return redirect("purchases:supplier_tax_edit", supplier_id=supplier.id)
     else:
-        form = SupplierForm()
+        form = SupplierForm(company=company)
 
     return render(request, "purchases/supplier_form.html", {"form": form})
 
@@ -49,12 +49,12 @@ def supplier_edit(request, supplier_id):
     supplier = get_object_or_404(Supplier, id=supplier_id, company=company)
 
     if request.method == "POST":
-        form = SupplierForm(request.POST, instance=supplier)
+        form = SupplierForm(request.POST, instance=supplier, company=company)
         if form.is_valid():
             form.save()
             return redirect("purchases:supplier_list")
     else:
-        form = SupplierForm(instance=supplier)
+        form = SupplierForm(instance=supplier, company=company)
 
     return render(
         request,

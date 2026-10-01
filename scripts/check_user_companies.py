@@ -12,9 +12,8 @@ if PROJECT_ROOT not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from django.contrib.auth.models import User
 
-from company.models import CompanyUser
+
 
 username = "daniel"
 user = User.objects.filter(username=username).first()

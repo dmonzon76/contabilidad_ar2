@@ -26,7 +26,7 @@ def sales_dashboard(request):
         ]
         or 0,
         "customers_count": Customer.objects.filter(
-            company=company, is_active=True
+            company=company
         ).count(),
         "recent_sales": sales.select_related("customer")[:5],
     }

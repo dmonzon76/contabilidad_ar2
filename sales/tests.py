@@ -33,6 +33,7 @@ class SalesCompanyIsolationTests(TestCase):
         other_customer = Customer.objects.create(
             company=other_company,
             name="Other customer",
+            tax_id="30-55555555-5",
         )
         self.other_sale = Sale.objects.create(
             company=other_company,
@@ -71,6 +72,7 @@ class SalesCompanyIsolationTests(TestCase):
         customer = Customer.objects.create(
             company=self.allowed_company,
             name="Allowed customer",
+            tax_id="30-66666666-6",
         )
 
         response = self.client.get(reverse("sales:sale_create"))
@@ -85,6 +87,7 @@ class SalesCompanyIsolationTests(TestCase):
         customer = Customer.objects.create(
             company=self.allowed_company,
             name="Allowed customer",
+            tax_id="30-77777777-7",
         )
         form = SaleForm(
             data={"customer": customer.id},

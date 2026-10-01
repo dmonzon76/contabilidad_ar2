@@ -8,16 +8,9 @@ class Supplier(models.Model):
     """
     Proveedor.
 
-    Toda la información fiscal vive en ThirdPartyTaxProfile.
-    Este modelo solamente mantiene información comercial.
+    La información comercial vive aquí.
+    La información fiscal vive en ThirdPartyTaxProfile.
     """
-    tax_profile = models.ForeignKey(
-    ThirdPartyTaxProfile,
-    on_delete=models.PROTECT,
-    related_name="suppliers",
-    null=True,
-    blank=True,
-)
 
     company = models.ForeignKey(
         Company,
@@ -27,6 +20,22 @@ class Supplier(models.Model):
 
     name = models.CharField(
         max_length=255,
+    )
+
+    tax_id = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=False,
+        null=False,
+        verbose_name="CUIT",
+    )
+
+    tax_profile = models.ForeignKey(
+        ThirdPartyTaxProfile,
+        on_delete=models.PROTECT,
+        related_name="suppliers",
+        null=True,
+        blank=True,
     )
 
     email = models.EmailField(
@@ -46,12 +55,12 @@ class Supplier(models.Model):
         null=True,
     )
 
-   
+    is_active = models.BooleanField(
+        default=True,
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -59,5 +68,4 @@ class Supplier(models.Model):
         unique_together = ("company", "name")
 
     def __str__(self):
-        return self.name
-    tax_id = None
+        return f"{self.name}" 

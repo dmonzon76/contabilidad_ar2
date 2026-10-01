@@ -1,6 +1,7 @@
 from django import forms
 
 from customers.models import Customer
+from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 from sales.models.sale import Sale
 
 
@@ -14,7 +15,6 @@ class SaleForm(forms.ModelForm):
         if company_id is not None:
             self.fields["customer"].queryset = Customer.objects.filter(
                 company_id=company_id,
-                is_active=True,
             ).order_by("name")
 
         self.fields["date"].widget = forms.DateInput(
@@ -31,3 +31,15 @@ class SaleForm(forms.ModelForm):
             "customer",
             "date",
         ]
+
+class SupplierForm(forms.ModelForm):
+
+    def __init__(self, *args, company=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if company:
+            self.fields["tax_profile"].queryset = (
+                ThirdPartyTaxProfile.objects.filter(
+                    company=company
+                ).order_by("name")
+            )

@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from company.models import Company, CompanyUser
+from customers.forms import CustomerForm
 from customers.models import Customer
 
 
@@ -31,6 +32,7 @@ class CustomerCompanyIsolationTests(TestCase):
         self.customer = Customer.objects.create(
             company=self.other_company,
             name="Private Customer",
+            tax_id="30-55555555-5",
         )
         self.client.force_login(self.user)
         session = self.client.session
@@ -55,7 +57,31 @@ class CustomerCompanyIsolationTests(TestCase):
         self.assertEqual(delete_response.status_code, 404)
         self.assertTrue(Customer.objects.filter(pk=self.customer.pk).exists())
 
+    def test_customer_form_requires_cuit(self):
+        form = CustomerForm({"name": "New customer"})
 
+        self.assertFalse(form.is_valid())
+        self.assertIn("tax_id", form.errors)
 
+    def test_customer_creation_requires_cuit(self):
+        response = self.client.post(
+            reverse("customers:customer_add"),
+            {"name": "New customer", "tax_id": ""},
+        )
 
-# Create your tests here.
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("tax_id", response.context["form"].errors)
+        self.assertFalse(Customer.objects.filter(name="New customer").exists())
+
+    def test_customer_creation_saves_cuit(self):
+        response = self.client.post(
+            reverse("customers:customer_add"),
+            {"name": "New customer", "tax_id": "30-99999999-9"},
+        )
+
+        customer = Customer.objects.get(name="New customer")
+        self.assertRedirects(
+            response,
+            reverse("customers:customer_detail", args=[customer.pk]),
+        )
+        self.assertEqual(customer.tax_id, "30-99999999-9")

@@ -14,7 +14,7 @@ def customer_list(request):
     Lista los clientes pertenecientes a la empresa activa.
     """
     company_id = request.session.get("active_company_id")
-    customers = Customer.objects.filter(company_id=company_id, is_active=True)
+    customers = Customer.objects.filter(company_id=company_id)
     return render(
         request,
         "sales/customers/customer_list.html",

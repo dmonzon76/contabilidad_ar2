@@ -27,7 +27,12 @@ class Customer(models.Model):
     name = models.CharField(
         max_length=255,
     )
-
+    tax_id = models.CharField(
+        max_length=20,
+        blank=False,
+        null=False,
+        verbose_name="CUIT",
+    )
     email = models.EmailField(
         blank=True,
         null=True,
@@ -58,4 +63,4 @@ class Customer(models.Model):
         unique_together = ("company", "name")
 
     def __str__(self):
-        return self.name
+        return self.name # type: ignore

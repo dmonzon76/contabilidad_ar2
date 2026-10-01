@@ -1,3 +1,5 @@
+from unicodedata import name
+
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -151,6 +153,12 @@ class PurchaseCreateView(CreateView):
         form = self.get_form()
 
         if form.is_valid():
+           print("PURCHASE FORM VALID")
+        else:
+            print("PURCHASE FORM INVALID")
+            print(form.errors)
+
+
             purchase = form.save(commit=False)
             purchase.company_id = request.session.get("active_company_id")
             purchase.supplier = form.cleaned_data["supplier"]
@@ -174,6 +182,11 @@ class PurchaseCreateView(CreateView):
                         formset.instance = purchase
                         formset.save()
                     purchase.calculate_totals()
+
+
+                    print(f"\n{name}")
+                    print("valid:", formset.is_valid())
+                    print(formset.errors)
 
                 self.object = purchase
 

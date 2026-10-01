@@ -10,6 +10,7 @@
     <thead>
         <tr>
             <th>Name</th>
+            <th>CUIT</th>
             <th>Email</th>
             <th>Phone</th>
         </tr>
@@ -18,6 +19,7 @@
         {% for c in customers %}
         <tr>
             <td><a href="{% url 'customers:customer_detail' c.pk %}">{{ c.name }}</a></td>
+            <td>{{ c.tax_id }}</td>
             <td>{{ c.email }}</td>
             <td>{{ c.phone }}</td>
         </tr>

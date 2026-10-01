@@ -29,7 +29,7 @@ def supplier_add(request):
     """Crear un nuevo proveedor. Usa supplier_form.html con mode='add'."""
     company = request.active_company
     if request.method == "POST":
-        form = SupplierForm(request.POST)
+        form = SupplierForm(request.POST, company=company)
         if form.is_valid():
             s = form.save(commit=False)
             s.company = company
@@ -37,7 +37,7 @@ def supplier_add(request):
             messages.success(request, "Supplier created")
             return redirect("suppliers:supplier_detail", s.pk)
     else:
-        form = SupplierForm()
+        form = SupplierForm(company=company)
     return render(
         request, "suppliers/supplier_form.html", {"form": form, "mode": "add"}
     )
@@ -46,18 +46,18 @@ def supplier_add(request):
 @login_required
 def supplier_edit(request, pk):
     """Editar proveedor existente. Usa supplier_form.html con mode='edit'."""
+    company = request.active_company
     company_id = request.session.get("active_company_id")
     supplier = get_object_or_404(Supplier, pk=pk, company_id=company_id)
-    company = request.active_company
 
     if request.method == "POST":
-        form = SupplierForm(request.POST, instance=supplier)
+        form = SupplierForm(request.POST, instance=supplier, company=company)
         if form.is_valid():
             form.save()
             messages.success(request, "Supplier updated")
             return redirect("suppliers:supplier_detail", supplier.pk)
     else:
-        form = SupplierForm(instance=supplier)
+        form = SupplierForm(instance=supplier, company=company)
 
     context = {
         "form": form,
