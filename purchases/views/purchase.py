@@ -1,5 +1,3 @@
-from unicodedata import name
-
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -116,7 +114,8 @@ class PurchaseCreateView(CreateView):
         purchase = self.object or Purchase(
             company_id=self.request.session.get("active_company_id")
         )
-        context.update(self._get_formsets(purchase))
+        for name, formset in self._get_formsets(purchase).items():
+            context.setdefault(name, formset)
         return context
 
     def _get_formsets(self, purchase):
@@ -124,28 +123,18 @@ class PurchaseCreateView(CreateView):
         company_id = self.request.session.get("active_company_id")
 
         return {
-            "line_formset": PurchaseLineFormSet(data=data, instance=purchase),
+            "line_formset": PurchaseLineFormSet(
+                data=data,
+                instance=purchase,
+                form_kwargs={"company_id": company_id},
+            ),
             "tax_formset": PurchaseTaxFormSet(
                 data=data,
                 instance=purchase,
                 form_kwargs={"company_id": company_id},
             ),
-            "perception_formset": PurchasePerceptionFormSet(
-                data=data,
-                instance=purchase,
-                form_kwargs={
-                    "company_id": company_id,
-                    "parent_purchase": purchase,
-                },
-            ),
-            "retention_formset": PurchaseRetentionFormSet(
-                data=data,
-                instance=purchase,
-                form_kwargs={
-                    "company_id": company_id,
-                    "parent_purchase": purchase,
-                },
-            ),
+            "perception_formset": PurchasePerceptionFormSet(data=data, instance=purchase),
+            "retention_formset": PurchaseRetentionFormSet(data=data, instance=purchase),
         }
 
     def post(self, request, *args, **kwargs):
@@ -153,52 +142,65 @@ class PurchaseCreateView(CreateView):
         form = self.get_form()
 
         if form.is_valid():
-           print("PURCHASE FORM VALID")
-        else:
-            print("PURCHASE FORM INVALID")
-            print(form.errors)
-
-
             purchase = form.save(commit=False)
             purchase.company_id = request.session.get("active_company_id")
-            purchase.supplier = form.cleaned_data["supplier"]
 
-            # VALIDACIÓN CONTABLE
             try:
-                period = get_open_period_for_date(purchase.date)
-                purchase.period = period
+                get_open_period_for_date(purchase.date)
             except NoOpenPeriodError as e:
                 form.add_error(None, str(e))
                 return self.render_to_response(
-                    self.get_context_data(form=form, **self._get_formsets(purchase))
+                    self.get_context_data(
+                        form=form,
+                        **self._get_formsets(purchase),
+                    )
                 )
 
             formsets = self._get_formsets(purchase)
-
-            if all(formset.is_valid() for formset in formsets.values()):
+            formset_labels = {
+                "line_formset": "renglones de la compra",
+                "tax_formset": "impuestos",
+                "perception_formset": "percepciones",
+                "retention_formset": "retenciones",
+            }
+            formsets_valid = {
+                name: formset.is_valid()
+                for name, formset in formsets.items()
+            }
+            if all(formsets_valid.values()):
                 with transaction.atomic():
                     purchase.save()
                     for formset in formsets.values():
                         formset.instance = purchase
                         formset.save()
                     purchase.calculate_totals()
-
-
-                    print(f"\n{name}")
-                    print("valid:", formset.is_valid())
-                    print(formset.errors)
+                    AccountingService.post_purchase(purchase)
 
                 self.object = purchase
-
                 inventory.integration.update_inventory_from_purchase(purchase)
-                AccountingService.post_purchase(purchase)
-
                 return redirect("purchases:purchase_list")
 
-        return self.render_to_response(
-            self.get_context_data(form=form, **self._get_formsets(form.instance))
-        )
+            invalid_sections = [
+                formset_labels[name]
+                for name, is_valid in formsets_valid.items()
+                if not is_valid
+            ]
+            form.add_error(
+                None,
+                "No se pudo guardar la compra. Revisá los errores en: "
+                + ", ".join(invalid_sections)
+                + ".",
+            )
+            return self.render_to_response(
+                self.get_context_data(form=form, **formsets)
+            )
 
+        return self.render_to_response(
+            self.get_context_data(
+                form=form,
+                **self._get_formsets(form.instance),
+            )
+        )
 
 # ============================================================
 # EDITAR COMPRA
@@ -224,28 +226,18 @@ class PurchaseUpdateView(UpdateView):
         data = self.request.POST if self.request.method == "POST" else None
         company_id = self.request.session.get("active_company_id")
         return {
-            "line_formset": PurchaseLineFormSet(data=data, instance=purchase),
+            "line_formset": PurchaseLineFormSet(
+                data=data,
+                instance=purchase,
+                form_kwargs={"company_id": company_id},
+            ),
             "tax_formset": PurchaseTaxFormSet(
                 data=data,
                 instance=purchase,
                 form_kwargs={"company_id": company_id},
             ),
-            "perception_formset": PurchasePerceptionFormSet(
-                data=data,
-                instance=purchase,
-                form_kwargs={
-                    "company_id": company_id,
-                    "parent_purchase": purchase,
-                },
-            ),
-            "retention_formset": PurchaseRetentionFormSet(
-                data=data,
-                instance=purchase,
-                form_kwargs={
-                    "company_id": company_id,
-                    "parent_purchase": purchase,
-                },
-            ),
+            "perception_formset": PurchasePerceptionFormSet(data=data, instance=purchase),
+            "retention_formset": PurchaseRetentionFormSet(data=data, instance=purchase),
         }
 
     def post(self, request, *args, **kwargs):

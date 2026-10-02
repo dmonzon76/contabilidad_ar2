@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import forms
 from django.forms import inlineformset_factory
 
@@ -11,6 +13,17 @@ from purchases.models import (
     PurchaseTax,
 )
 from suppliers.models import Supplier
+
+
+class TaxSelect(forms.Select):
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(
+            name, value, label, selected, index, subindex=subindex, attrs=attrs
+        )
+        tax = getattr(value, "instance", None)
+        if tax is not None:
+            option["attrs"]["data-rate"] = str(tax.rate)
+        return option
 
 
 class PurchaseForm(forms.ModelForm):
@@ -100,22 +113,23 @@ class PurchaseLineForm(forms.ModelForm):
                     "placeholder": "0.00",
                 }
             ),
-            "tax": forms.Select(attrs={"class": "form-select"}),
+            "tax": TaxSelect(attrs={"class": "form-select"}),
             "expense_account": forms.Select(attrs={"class": "form-select"}),
         }
 
     def __init__(self, *args, **kwargs):
         company = kwargs.pop("company", None)
+        company_id = kwargs.pop("company_id", None)
         super().__init__(*args, **kwargs)
 
-        if company:
-           self.fields["tax"].queryset = Tax.objects.filter(
-            enabled=True,
-)
-            
-           self.fields["expense_account"].queryset = Account.objects.filter(
-                company=company,
-                is_active=True,
+        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
+        if company is not None:
+            self.fields["expense_account"].queryset = Account.objects.filter(
+                company=company, is_active=True
+            )
+        elif company_id is not None:
+            self.fields["expense_account"].queryset = Account.objects.filter(
+                company_id=company_id, is_active=True
             )
 
 
@@ -185,23 +199,24 @@ class PurchaseTaxForm(forms.ModelForm):
     class Meta:
         model = PurchaseTax
         fields = ["tax", "base_amount"]
+        widgets = {"tax": TaxSelect()}
 
     def __init__(self, *args, **kwargs):
-        company_id = kwargs.pop("company_id", None)
+        kwargs.pop("company_id", None)
         super().__init__(*args, **kwargs)
 
-        if company_id is not None:
-            self.fields["tax"].queryset = Tax.objects.filter(
-                company_id=company_id,
-                is_active=True,
-            )
+        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
+        self.fields["base_amount"].required = False
+
+    def clean_base_amount(self):
+        return self.cleaned_data.get("base_amount") or Decimal("0")
 
 
 PurchaseTaxFormSet = inlineformset_factory(
     Purchase,
     PurchaseTax,
     form=PurchaseTaxForm,
-    extra=0,
+    extra=1,
     can_delete=True,
 )
 
@@ -210,7 +225,7 @@ PurchasePerceptionFormSet = inlineformset_factory(
     Purchase,
     PurchasePerception,
     form=PurchasePerceptionForm,
-    extra=0,
+    extra=1,
     can_delete=True,
 )
 
@@ -219,6 +234,6 @@ PurchaseRetentionFormSet = inlineformset_factory(
     Purchase,
     PurchaseRetention,
     form=PurchaseRetentionForm,
-    extra=0,
+    extra=1,
     can_delete=True,
 )
