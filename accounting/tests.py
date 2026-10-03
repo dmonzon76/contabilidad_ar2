@@ -3,7 +3,9 @@ from datetime import date
 from decimal import Decimal
 from unittest.mock import MagicMock
 
+from django.template.loader import render_to_string
 from django.test import TestCase
+from django.urls import reverse
 
 from accounting.models import (
     Account,
@@ -91,6 +93,31 @@ class AccountingServiceTestCase(TestCase):
         total_debit = sum(line.debit for line in lines if line.debit)
         total_credit = sum(line.credit for line in lines if line.credit)
         self.assertEqual(total_debit, total_credit)
+
+    def test_period_list_template_renders_navigation_links(self):
+        period = Period.objects.get(fiscal_year=self.fiscal_year, month=1)
+
+        html = render_to_string(
+            "accounting/period_list.html",
+            {"periods": Period.objects.filter(pk=period.pk)},
+        )
+
+        self.assertIn(
+            f'href="{reverse("accounting:fiscal_year_create")}"',
+            html,
+        )
+        self.assertIn(
+            f'href="{reverse("accounting:period_open", args=[period.pk])}"',
+            html,
+        )
+        self.assertIn(
+            f'href="{reverse("accounting:period_close", args=[period.pk])}"',
+            html,
+        )
+        self.assertIn(
+            f'href="{reverse("accounting:period_lock", args=[period.pk])}"',
+            html,
+        )
 
     def test_post_sale_service_no_inventory_cost(self):
         """Prueba venta de servicio (no debe afectar cuentas de inventario ni CMV)."""

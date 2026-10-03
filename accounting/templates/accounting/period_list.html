@@ -3,7 +3,15 @@
 {% block content %}
 <div class="container mt-4">
 
-    <h2 class="mb-4">Fiscal Periods</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Fiscal Periods</h2>
+
+        <a href="{% url 'accounting:fiscal_year_create' %}" class="btn btn-primary">
+            Create Fiscal Year
+        </a>
+    </div>
+
+    {% if periods %}
 
     <table class="table table-bordered table-hover table-sm">
         <thead class="table-light">
@@ -13,13 +21,14 @@
                 <th>Start</th>
                 <th>End</th>
                 <th>Status</th>
-                <th style="width: 220px;">Actions</th>
+                <th style="width:220px;">Actions</th>
             </tr>
         </thead>
 
         <tbody>
             {% for p in periods %}
             <tr>
+
                 <td>{{ p.fiscal_year.year }}</td>
                 <td>{{ p.month }}</td>
                 <td>{{ p.start_date }}</td>
@@ -36,14 +45,44 @@
                 </td>
 
                 <td>
-                    <a href="{% url 'accounting:period_open' p.id %}" class="btn btn-sm btn-outline-success">Open</a>
-                    <a href="{% url 'accounting:period_close' p.id %}" class="btn btn-sm btn-outline-danger">Close</a>
-                    <a href="{% url 'accounting:period_lock' p.id %}" class="btn btn-sm btn-outline-secondary">Lock</a>
+                    <div class="btn-group btn-group-sm">
+
+                        <a href="{% url 'accounting:period_open' p.id %}" class="btn btn-outline-success">
+                            Open
+                        </a>
+
+                        <a href="{% url 'accounting:period_close' p.id %}" class="btn btn-outline-danger">
+                            Close
+                        </a>
+
+                        <a href="{% url 'accounting:period_lock' p.id %}" class="btn btn-outline-secondary">
+                            Lock
+                        </a>
+
+                    </div>
                 </td>
+
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    {% else %}
+
+    <div class="alert alert-warning">
+        <h5 class="mb-2">No fiscal periods found</h5>
+
+        <p class="mb-3">
+            You must create a Fiscal Year before registering
+            purchases, sales, journal entries or inventory movements.
+        </p>
+
+        <a href="{% url 'accounting:fiscal_year_create' %}" class="btn btn-primary">
+            Create Fiscal Year
+        </a>
+    </div>
+
+    {% endif %}
 
 </div>
 {% endblock %}

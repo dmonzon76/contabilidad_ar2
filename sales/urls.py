@@ -1,6 +1,5 @@
 from django.urls import path
 
-
 from .views.dashboard import sales_dashboard
 from .views.sales import (
     SaleCreateView,
@@ -10,7 +9,8 @@ from .views.sales import (
     sale_item_add,
 )
 
-app_name = "sales"
+APP_NAME = "sales"
+
 
 urlpatterns = [
     # Dashboard

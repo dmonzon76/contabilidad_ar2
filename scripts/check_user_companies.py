@@ -1,5 +1,5 @@
+# ruff: noqa: E402
 
-# ruff: noqa: E402ruff check .
 import os
 import sys
 
@@ -12,17 +12,28 @@ if PROJECT_ROOT not in sys.path:
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
+from companies.models import CompanyUser
+from django.contrib.auth import get_user_model
 
-
+User = get_user_model()
 
 username = "daniel"
+
 user = User.objects.filter(username=username).first()
+
 if not user:
     print("NOUSER")
 else:
     print("USER:", user.username, "id", user.id)
-    qs = CompanyUser.objects.filter(user=user, is_active=True).select_related("company")
+
+    qs = (
+        CompanyUser.objects
+        .filter(user=user, is_active=True)
+        .select_related("company")
+    )
+
     print("COUNT:", qs.count())
+
     for cu in qs:
         print(
             "COMPANY_ID:",
