@@ -16,9 +16,7 @@ def make_company(name):
     )
 
 
-
 class CompanyMiddlewareTests(TestCase):
-
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.create_user(username="daniel", password="123")

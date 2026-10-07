@@ -68,4 +68,4 @@ class Supplier(models.Model):
         unique_together = ("company", "name")
 
     def __str__(self):
-        return f"{self.name}" 
+        return f"{self.name}"

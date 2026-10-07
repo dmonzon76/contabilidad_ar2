@@ -30,9 +30,7 @@ class Period(models.Model):
         ("LOCKED", "Locked"),
     ]
 
-    fiscal_year = models.ForeignKey(
-        FiscalYear, on_delete=models.CASCADE, related_name="periods"
-    )
+    fiscal_year = models.ForeignKey(FiscalYear, on_delete=models.CASCADE, related_name="periods")
     month = models.IntegerField()  # 1 = January, 12 = December
     start_date = models.DateField()
     end_date = models.DateField()

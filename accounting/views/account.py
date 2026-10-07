@@ -10,21 +10,23 @@ from core.utils.company_access import user_has_access
 # ACCOUNTS
 # ============================================================
 
+
 @login_required
 def account_list(request):
     company = request.active_company
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    accounts = Account.objects.filter(
-        company=company,
-        parent__isnull=True
-    ).order_by("code")
+    accounts = Account.objects.filter(company=company, parent__isnull=True).order_by("code")
 
-    return render(request, "accounting/account_list.html", {
-        "company": company,
-        "accounts": accounts,
-    })
+    return render(
+        request,
+        "accounting/account_list.html",
+        {
+            "company": company,
+            "accounts": accounts,
+        },
+    )
 
 
 @login_required
@@ -43,10 +45,14 @@ def account_create(request):
     else:
         form = AccountForm()
 
-    return render(request, "accounting/account_create.html", {
-        "form": form,
-        "company": company,
-    })
+    return render(
+        request,
+        "accounting/account_create.html",
+        {
+            "form": form,
+            "company": company,
+        },
+    )
 
 
 @login_required
@@ -65,11 +71,15 @@ def account_edit(request, account_id):
     else:
         form = AccountForm(instance=account)
 
-    return render(request, "accounting/account_edit.html", {
-        "form": form,
-        "company": company,
-        "account": account,
-    })
+    return render(
+        request,
+        "accounting/account_edit.html",
+        {
+            "form": form,
+            "company": company,
+            "account": account,
+        },
+    )
 
 
 @login_required
@@ -81,10 +91,14 @@ def account_delete(request, account_id):
     account = get_object_or_404(Account, id=account_id, company=company)
 
     if account.children.exists():
-        return render(request, "accounting/account_delete_error.html", {
-            "account": account,
-            "company": company,
-        })
+        return render(
+            request,
+            "accounting/account_delete_error.html",
+            {
+                "account": account,
+                "company": company,
+            },
+        )
 
     account.delete()
     return redirect("accounting:account_list")
@@ -115,21 +129,28 @@ def account_add_child(request, parent_id):
         else:
             suggested_code = parent.code + ".1"
 
-        form = AccountForm(initial={
-            "code": suggested_code,
-            "account_type": parent.account_type,
-        })
+        form = AccountForm(
+            initial={
+                "code": suggested_code,
+                "account_type": parent.account_type,
+            }
+        )
 
-    return render(request, "accounting/account_add_child.html", {
-        "form": form,
-        "parent": parent,
-        "company": company,
-    })
+    return render(
+        request,
+        "accounting/account_add_child.html",
+        {
+            "form": form,
+            "parent": parent,
+            "company": company,
+        },
+    )
 
 
 # ============================================================
 # PERIODS (ANUALES)
 # ============================================================
+
 
 @login_required
 def period_list(request):
@@ -137,16 +158,20 @@ def period_list(request):
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    periods = Period.objects.filter(
-        fiscal_year__company=company
-    ).select_related("fiscal_year").order_by(
-        "fiscal_year__start_date"
+    periods = (
+        Period.objects.filter(fiscal_year__company=company)
+        .select_related("fiscal_year")
+        .order_by("fiscal_year__start_date")
     )
 
-    return render(request, "accounting/period_list.html", {
-        "company": company,
-        "periods": periods,
-    })
+    return render(
+        request,
+        "accounting/period_list.html",
+        {
+            "company": company,
+            "periods": periods,
+        },
+    )
 
 
 @login_required

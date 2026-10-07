@@ -4,6 +4,7 @@ from core.modules import MODULES
 
 register = template.Library()
 
+
 @register.simple_tag
 def get_modules():
     """

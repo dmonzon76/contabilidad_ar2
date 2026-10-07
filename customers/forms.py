@@ -8,12 +8,8 @@ class CustomerForm(forms.ModelForm):
         model = Customer
         fields = ["name", "tax_id", "email", "phone", "address"]
         widgets = {
-            "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Razón Social / Nombre"}
-            ),
-            "tax_id": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "CUIT"}
-            ),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Razón Social / Nombre"}),
+            "tax_id": forms.TextInput(attrs={"class": "form-control", "placeholder": "CUIT"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
             "phone": forms.TextInput(attrs={"class": "form-control"}),
             "address": forms.TextInput(attrs={"class": "form-control"}),

@@ -4,7 +4,3 @@ from .company_views import (
     company_edit,
     company_list,
 )
-
-
-
-

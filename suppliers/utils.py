@@ -5,9 +5,9 @@ def validate_cuit(cuit: str) -> bool:
     """
     if not cuit or len(cuit) != 11 or not cuit.isdigit():
         return False
-    mult = [5,4,3,2,7,6,5,4,3,2]
+    mult = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2]
     digits = list(map(int, cuit))
-    s = sum([a*b for a,b in zip(mult, digits[:10])])
+    s = sum([a * b for a, b in zip(mult, digits[:10])])
     mod = 11 - (s % 11)
     if mod == 11:
         mod = 0

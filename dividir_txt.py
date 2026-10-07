@@ -12,7 +12,7 @@ for i in range(partes):
     fin = inicio + lineas_por_parte
     contenido = lineas[inicio:fin]
 
-    nombre_parte = f"codigo_parte_{i+1}.txt"
+    nombre_parte = f"codigo_parte_{i + 1}.txt"
     with open(nombre_parte, "w", encoding="utf-8") as salida:
         salida.writelines(contenido)
 

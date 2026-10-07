@@ -14,8 +14,7 @@ def ledger_view(request, account_id):
     account = get_object_or_404(Account, id=account_id, company=company)
 
     lines = (
-        JournalEntryLine.objects
-        .filter(account=account, entry__company=company)
+        JournalEntryLine.objects.filter(account=account, entry__company=company)
         .select_related("entry")
         .order_by("entry__date", "entry__id")
     )
@@ -25,18 +24,24 @@ def ledger_view(request, account_id):
 
     for line in lines:
         running_balance += line.debit - line.credit
-        ledger_rows.append({
-            "date": line.entry.date,
-            "description": line.description or line.entry.description,
-            "debit": line.debit,
-            "credit": line.credit,
-            "balance": running_balance,
-            "entry_id": line.entry.id,
-        })
+        ledger_rows.append(
+            {
+                "date": line.entry.date,
+                "description": line.description or line.entry.description,
+                "debit": line.debit,
+                "credit": line.credit,
+                "balance": running_balance,
+                "entry_id": line.entry.id,
+            }
+        )
 
-    return render(request, "accounting/ledger/view.html", {
-        "company": company,
-        "account": account,
-        "ledger_rows": ledger_rows,
-        "final_balance": running_balance,
-    })
+    return render(
+        request,
+        "accounting/ledger/view.html",
+        {
+            "company": company,
+            "account": account,
+            "ledger_rows": ledger_rows,
+            "final_balance": running_balance,
+        },
+    )

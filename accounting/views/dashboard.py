@@ -17,12 +17,8 @@ def accounting_dashboard(request):
     if not company or not user_has_access(request, company):
         return render(request, "errors/403.html", status=403)
 
-    current_fy = FiscalYear.objects.filter(
-        company=company, status="OPEN"
-    ).order_by("-start_date").first()
-    current_period = Period.objects.filter(
-        fiscal_year__company=company, status="OPEN"
-    ).order_by("-start_date").first()
+    current_fy = FiscalYear.objects.filter(company=company, status="OPEN").order_by("-start_date").first()
+    current_period = Period.objects.filter(fiscal_year__company=company, status="OPEN").order_by("-start_date").first()
 
     context = {
         "current_fiscal_year": current_fy,

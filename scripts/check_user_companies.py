@@ -26,11 +26,7 @@ if not user:
 else:
     print("USER:", user.username, "id", user.id)
 
-    qs = (
-        CompanyUser.objects
-        .filter(user=user, is_active=True)
-        .select_related("company")
-    )
+    qs = CompanyUser.objects.filter(user=user, is_active=True).select_related("company")
 
     print("COUNT:", qs.count())
 

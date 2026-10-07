@@ -19,4 +19,3 @@ class CompanyForm(forms.ModelForm):
             "start_date",
             "accounting_start_date",
         ]
-

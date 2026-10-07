@@ -115,6 +115,4 @@ class PurchaseAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, f"{count} journal entries generated.")
 
-    action_generate_entries.short_description = (
-        "Generate journal entries for selected purchases"
-    )
+    action_generate_entries.short_description = "Generate journal entries for selected purchases"

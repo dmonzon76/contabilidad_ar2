@@ -5,7 +5,6 @@ from accounting.models import FiscalYear, Period
 
 
 class FiscalYearService:
-
     @staticmethod
     def create_year(company, year):
 
@@ -20,7 +19,6 @@ class FiscalYearService:
         )
 
         for month in range(1, 13):
-
             start_date = date(year, month, 1)
 
             end_date = date(

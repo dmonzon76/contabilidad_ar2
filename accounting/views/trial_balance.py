@@ -21,20 +21,26 @@ def trial_balance_view(request):
         debit = acc.total_debit(company)
         credit = acc.total_credit(company)
 
-        rows.append({
-            "account": acc,
-            "debit": debit,
-            "credit": credit,
-            "balance": debit - credit,
-        })
+        rows.append(
+            {
+                "account": acc,
+                "debit": debit,
+                "credit": credit,
+                "balance": debit - credit,
+            }
+        )
 
         total_debit += debit
         total_credit += credit
 
-    return render(request, "accounting/trial_balance.html", {
-        "company": company,
-        "rows": rows,
-        "total_debit": total_debit,
-        "total_credit": total_credit,
-        "is_balanced": total_debit == total_credit,
-    })
+    return render(
+        request,
+        "accounting/trial_balance.html",
+        {
+            "company": company,
+            "rows": rows,
+            "total_debit": total_debit,
+            "total_credit": total_credit,
+            "is_balanced": total_debit == total_credit,
+        },
+    )

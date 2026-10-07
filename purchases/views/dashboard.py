@@ -22,13 +22,8 @@ def purchases_dashboard(request):
         "company": company,
         "purchases_count": purchases.count(),
         "purchases_total": purchases.aggregate(total=Sum("total_amount"))["total"] or 0,
-        "current_month_total": current_month_purchases.aggregate(
-            total=Sum("total_amount")
-        )["total"]
-        or 0,
-        "suppliers_count": Supplier.objects.filter(
-            company=company, is_active=True
-        ).count(),
+        "current_month_total": current_month_purchases.aggregate(total=Sum("total_amount"))["total"] or 0,
+        "suppliers_count": Supplier.objects.filter(company=company, is_active=True).count(),
         "recent_purchases": purchases.select_related("supplier")[:5],
     }
 

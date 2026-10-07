@@ -20,10 +20,12 @@ def balance_sheet_view(request):
         total = 0
         for acc in accounts:
             bal = acc.balance(company)
-            rows.append({
-                "account": acc,
-                "balance": bal,
-            })
+            rows.append(
+                {
+                    "account": acc,
+                    "balance": bal,
+                }
+            )
             total += bal
         return rows, total
 
@@ -33,13 +35,17 @@ def balance_sheet_view(request):
 
     is_balanced = total_assets == (total_liabilities + total_equity)
 
-    return render(request, "accounting/balance_sheet.html", {
-        "company": company,
-        "asset_rows": asset_rows,
-        "liability_rows": liability_rows,
-        "equity_rows": equity_rows,
-        "total_assets": total_assets,
-        "total_liabilities": total_liabilities,
-        "total_equity": total_equity,
-        "is_balanced": is_balanced,
-    })
+    return render(
+        request,
+        "accounting/balance_sheet.html",
+        {
+            "company": company,
+            "asset_rows": asset_rows,
+            "liability_rows": liability_rows,
+            "equity_rows": equity_rows,
+            "total_assets": total_assets,
+            "total_liabilities": total_liabilities,
+            "total_equity": total_equity,
+            "is_balanced": is_balanced,
+        },
+    )

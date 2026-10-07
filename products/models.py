@@ -36,6 +36,14 @@ class Product(models.Model):
         null=True,
         blank=True,
     )
+    purchase_account = models.ForeignKey(
+        Account,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name="Purchase Account",
+    )
 
     tax = models.ForeignKey(
         Tax,
@@ -75,18 +83,12 @@ class Product(models.Model):
 
         if location:
             try:
-                item = InventoryItem.objects.get(
-                    company=self.company, product=self, location=location
-                )
+                item = InventoryItem.objects.get(company=self.company, product=self, location=location)
                 return item.get_current_cost()
             except InventoryItem.DoesNotExist:
                 return Decimal("0.00")
 
-        item = (
-            InventoryItem.objects.filter(company=self.company, product=self)
-            .order_by("-quantity")
-            .first()
-        )
+        item = InventoryItem.objects.filter(company=self.company, product=self).order_by("-quantity").first()
 
         if item:
             return item.get_current_cost()

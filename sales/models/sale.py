@@ -8,7 +8,6 @@ from customers.models import Customer
 
 
 class Sale(models.Model):
-
     STATUS_CHOICES = [
         ("DRAFT", "Draft"),
         ("ISSUED", "Issued"),
@@ -88,7 +87,6 @@ class Sale(models.Model):
         cost = Decimal("0.00")
 
         for item in self.items.all():
-
             net += item.subtotal
 
             if item.tax and item.tax.is_vat:
@@ -115,7 +113,6 @@ class Sale(models.Model):
         is_new = self.pk is None
 
         if is_new and not self.number:
-
             last = Sale.objects.filter(company=self.company).order_by("-id").first()
 
             if last and last.number and last.number.isdigit():

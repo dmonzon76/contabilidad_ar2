@@ -15,10 +15,14 @@ def journal_list(request):
 
     entries = JournalEntry.objects.filter(company=company).select_related("period").order_by("-date", "-id")
 
-    return render(request, "accounting/journal/list.html", {
-        "company": company,
-        "entries": entries,
-    })
+    return render(
+        request,
+        "accounting/journal/list.html",
+        {
+            "company": company,
+            "entries": entries,
+        },
+    )
 
 
 @login_required
@@ -60,8 +64,12 @@ def journal_create(request):
         form = JournalEntryForm()
         formset = JournalEntryLineFormSet()
 
-    return render(request, "accounting/journal/create.html", {
-        "company": company,
-        "form": form,
-        "formset": formset,
-    })
+    return render(
+        request,
+        "accounting/journal/create.html",
+        {
+            "company": company,
+            "form": form,
+            "formset": formset,
+        },
+    )

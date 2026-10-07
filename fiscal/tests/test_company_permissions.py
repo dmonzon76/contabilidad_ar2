@@ -17,7 +17,6 @@ def make_company(name):
 
 
 class CompanyPermissionTests(TestCase):
-
     def setUp(self):
         self.factory = RequestFactory()
 

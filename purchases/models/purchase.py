@@ -9,6 +9,9 @@ from suppliers.models import Supplier
 
 
 class Purchase(models.Model):
+    perceptions: models.Manager["PurchasePerception"]
+    retentions: models.Manager["PurchaseRetention"]
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     supplier = models.ForeignKey(
         Supplier,
@@ -19,21 +22,11 @@ class Purchase(models.Model):
     invoice_number = models.CharField(max_length=50)
 
     # Totales
-    net_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    tax_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    perception_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    retention_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
-    total_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, default=Decimal("0.00")
-    )
+    net_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    tax_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    perception_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    retention_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
 
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -67,11 +60,7 @@ class Purchase(models.Model):
                 else:
                     if tax_line.base_amount <= 0:
                         tax_line.base_amount = self.net_amount
-                    tax_line.amount = (
-                        tax_line.base_amount
-                        * tax_line.tax.rate
-                        / Decimal("100")
-                    ).quantize(money)
+                    tax_line.amount = (tax_line.base_amount * tax_line.tax.rate / Decimal("100")).quantize(money)
                 tax_line.save(update_fields=["base_amount", "amount"])
             self.tax_amount = sum(
                 (tax_line.amount for tax_line in tax_lines),
@@ -80,6 +69,7 @@ class Purchase(models.Model):
 
         # 3) Percepciones automáticas basadas en perfil fiscal del proveedor
         profile = getattr(self.supplier, "tax_profile", None)
+        ganancias_rate = Decimal("0")
 
         if profile:
             # --- IIBB ---
@@ -103,9 +93,7 @@ class Purchase(models.Model):
                     defaults={"amount": Decimal("0")},
                 )
 
-            ganancias_rate = Decimal(
-                str(getattr(profile, "ganancias_retention_rate", 0) or "0")
-            )
+            ganancias_rate = Decimal(str(getattr(profile, "ganancias_retention_rate", 0) or "0"))
             if (
                 ganancias_rate > 0
                 or getattr(profile, "is_ganancias_exempt", False)
@@ -116,27 +104,21 @@ class Purchase(models.Model):
                     defaults={"amount": Decimal("0")},
                 )
 
-            iva_ret_rate = Decimal(
-                str(getattr(profile, "iva_retention_rate", 0) or "0")
-            )
+            iva_ret_rate = Decimal(str(getattr(profile, "iva_retention_rate", 0) or "0"))
             if iva_ret_rate > 0 or afip_cat == "RI":
                 self.retentions.get_or_create(
                     retention_type="IVA",
                     defaults={"amount": Decimal("0")},
                 )
 
-            iibb_ret_rate = Decimal(
-                str(getattr(profile, "iibb_retention_rate", 0) or "0")
-            )
+            iibb_ret_rate = Decimal(str(getattr(profile, "iibb_retention_rate", 0) or "0"))
             if iibb_ret_rate > 0:
                 self.retentions.get_or_create(
                     retention_type="IIBB",
                     defaults={"amount": Decimal("0")},
                 )
 
-            suss_rate = Decimal(
-                str(getattr(profile, "suss_retention_rate", 0) or "0")
-            )
+            suss_rate = Decimal(str(getattr(profile, "suss_retention_rate", 0) or "0"))
             if suss_rate > 0:
                 self.retentions.get_or_create(
                     retention_type="SUSS",
@@ -181,9 +163,7 @@ class Purchase(models.Model):
 
             elif r.retention_type == "IIBB":
                 if iibb_ret_rate > 0:
-                    r.amount = (
-                        self.net_amount * iibb_ret_rate / Decimal("100")
-                    ).quantize(money)
+                    r.amount = (self.net_amount * iibb_ret_rate / Decimal("100")).quantize(money)
 
             elif r.retention_type == "SUSS":
                 if suss_rate > 0:
@@ -191,21 +171,15 @@ class Purchase(models.Model):
 
             r.save(update_fields=["amount"])
 
-        self.perception_amount = sum(
-            (p.amount for p in self.perceptions.all()), Decimal("0")
-        ).quantize(money)
-        self.retention_amount = sum(
-            (r.amount for r in self.retentions.all()), Decimal("0")
-        ).quantize(money)
+        self.perception_amount = sum((p.amount for p in self.perceptions.all()), Decimal("0")).quantize(money)
+        self.retention_amount = sum((r.amount for r in self.retentions.all()), Decimal("0")).quantize(money)
 
         self.total_amount = (
-            self.net_amount
-            + self.tax_amount
-            + self.perception_amount
-            - self.retention_amount
+            self.net_amount + self.tax_amount + self.perception_amount - self.retention_amount
         ).quantize(money)
 
         self.save()
+
 
 class PurchaseLine(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name="lines")
@@ -213,7 +187,9 @@ class PurchaseLine(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("1.00"))
     unit_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
     tax = models.ForeignKey(Tax, on_delete=models.PROTECT, null=True, blank=True, related_name="purchase_lines")
-    expense_account = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True, related_name="purchase_lines")
+    expense_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, null=True, blank=True, related_name="purchase_lines"
+    )
 
     class Meta:
         ordering = ["id"]
@@ -230,10 +206,28 @@ class PurchaseLine(models.Model):
 
 
 class PurchaseTax(models.Model):
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name="taxes")
-    tax = models.ForeignKey(Tax, on_delete=models.PROTECT, null=True, blank=True, related_name="purchase_taxes")
-    base_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    purchase = models.ForeignKey(
+        Purchase,
+        on_delete=models.CASCADE,
+        related_name="taxes",
+    )
+
+    tax = models.ForeignKey(
+        Tax,
+        on_delete=models.PROTECT,
+    )
+
+    taxable_base = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        default=0,
+    )
+
+    amount = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        default=0,
+    )
 
 
 class PurchasePerception(models.Model):
@@ -243,20 +237,59 @@ class PurchasePerception(models.Model):
         ("MUNI", "Municipal"),
         ("INTERNOS", "Impuestos Internos"),
     )
+
     JURISDICTION_CHOICES = (
         ("ARBA", "Buenos Aires (ARBA)"),
         ("AGIP", "CABA (AGIP)"),
-        ("CÓRDOBA", "Córdoba"),
+        ("CORDOBA", "Córdoba"),
         ("SANTA_FE", "Santa Fe"),
         ("MENDOZA", "Mendoza"),
-        ("TUCUMÁN", "Tucumán"),
+        ("TUCUMAN", "Tucumán"),
         ("OTRA", "Otra Jurisdicción"),
     )
 
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name="perceptions")
-    perception_type = models.CharField(max_length=10, choices=PERCEPTION_CHOICES)
-    jurisdiction = models.CharField(max_length=50, choices=JURISDICTION_CHOICES, default="ARBA", blank=True, null=True)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    purchase = models.ForeignKey(
+        Purchase,
+        on_delete=models.CASCADE,
+        related_name="perceptions",
+    )
+
+    perception_type = models.CharField(
+        max_length=10,
+        choices=PERCEPTION_CHOICES,
+    )
+
+    jurisdiction = models.CharField(
+        max_length=50,
+        choices=JURISDICTION_CHOICES,
+        blank=True,
+        null=True,
+    )
+
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )
+
+    notes = models.CharField(
+        max_length=200,
+        blank=True,
+    )
+
+    def __str__(self):
+        if self.jurisdiction:
+            return f"{self.get_perception_type_display()} {self.get_jurisdiction_display()}"
+
+        return self.get_perception_type_display()
 
 
 class PurchaseRetention(models.Model):

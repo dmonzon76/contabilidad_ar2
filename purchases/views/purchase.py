@@ -33,9 +33,7 @@ class PurchaseListView(ListView):
     context_object_name = "purchases"
 
     def get_queryset(self):
-        return Purchase.objects.filter(
-            company_id=self.request.session.get("active_company_id")
-        )
+        return Purchase.objects.filter(company_id=self.request.session.get("active_company_id"))
 
 
 # ============================================================
@@ -49,9 +47,7 @@ class PurchaseDetailView(DetailView):
     context_object_name = "purchase"
 
     def get_queryset(self):
-        return Purchase.objects.filter(
-            company_id=self.request.session.get("active_company_id")
-        )
+        return Purchase.objects.filter(company_id=self.request.session.get("active_company_id"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -111,9 +107,7 @@ class PurchaseCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        purchase = self.object or Purchase(
-            company_id=self.request.session.get("active_company_id")
-        )
+        purchase = self.object or Purchase(company_id=self.request.session.get("active_company_id"))
         for name, formset in self._get_formsets(purchase).items():
             context.setdefault(name, formset)
         return context
@@ -163,10 +157,7 @@ class PurchaseCreateView(CreateView):
                 "perception_formset": "percepciones",
                 "retention_formset": "retenciones",
             }
-            formsets_valid = {
-                name: formset.is_valid()
-                for name, formset in formsets.items()
-            }
+            formsets_valid = {name: formset.is_valid() for name, formset in formsets.items()}
             if all(formsets_valid.values()):
                 with transaction.atomic():
                     purchase.save()
@@ -180,20 +171,12 @@ class PurchaseCreateView(CreateView):
                 inventory.integration.update_inventory_from_purchase(purchase)
                 return redirect("purchases:purchase_list")
 
-            invalid_sections = [
-                formset_labels[name]
-                for name, is_valid in formsets_valid.items()
-                if not is_valid
-            ]
+            invalid_sections = [formset_labels[name] for name, is_valid in formsets_valid.items() if not is_valid]
             form.add_error(
                 None,
-                "No se pudo guardar la compra. Revisá los errores en: "
-                + ", ".join(invalid_sections)
-                + ".",
+                "No se pudo guardar la compra. Revisá los errores en: " + ", ".join(invalid_sections) + ".",
             )
-            return self.render_to_response(
-                self.get_context_data(form=form, **formsets)
-            )
+            return self.render_to_response(self.get_context_data(form=form, **formsets))
 
         return self.render_to_response(
             self.get_context_data(
@@ -201,6 +184,7 @@ class PurchaseCreateView(CreateView):
                 **self._get_formsets(form.instance),
             )
         )
+
 
 # ============================================================
 # EDITAR COMPRA
@@ -256,9 +240,7 @@ class PurchaseUpdateView(UpdateView):
                 purchase.period = period
             except NoOpenPeriodError as e:
                 form.add_error(None, str(e))
-                return self.render_to_response(
-                    self.get_context_data(form=form, **self._get_formsets(purchase))
-                )
+                return self.render_to_response(self.get_context_data(form=form, **self._get_formsets(purchase)))
 
             formsets = self._get_formsets(purchase)
 
@@ -273,9 +255,7 @@ class PurchaseUpdateView(UpdateView):
                 self.object = purchase
                 return redirect(self.get_success_url())
 
-        return self.render_to_response(
-            self.get_context_data(form=form, **self._get_formsets(purchase))
-        )
+        return self.render_to_response(self.get_context_data(form=form, **self._get_formsets(purchase)))
 
     def get_success_url(self):
         return reverse_lazy("purchases:purchase_detail", kwargs={"pk": self.object.pk})

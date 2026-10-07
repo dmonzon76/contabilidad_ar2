@@ -38,9 +38,7 @@ def supplier_add(request):
             return redirect("suppliers:supplier_detail", s.pk)
     else:
         form = SupplierForm(company=company)
-    return render(
-        request, "suppliers/supplier_form.html", {"form": form, "mode": "add"}
-    )
+    return render(request, "suppliers/supplier_form.html", {"form": form, "mode": "add"})
 
 
 @login_required
@@ -78,9 +76,7 @@ def supplier_delete(request, pk):
         messages.success(request, "Supplier deleted")
         return redirect("suppliers:supplier_list")
 
-    return render(
-        request, "suppliers/supplier_confirm_delete.html", {"supplier": supplier}
-    )
+    return render(request, "suppliers/supplier_confirm_delete.html", {"supplier": supplier})
 
 
 @login_required
@@ -92,11 +88,6 @@ def supplier_autocomplete(request):
     """
     q = request.GET.get("q", "").strip()
     company_id = request.session.get("active_company_id")
-    qs = Supplier.objects.filter(company_id=company_id, name__icontains=q).order_by(
-        "name"
-    )[:10]
-    results = [
-        {"id": s.pk, "text": s.name, "tax_id": s.tax_id or "", "email": s.email or ""}
-        for s in qs
-    ]
+    qs = Supplier.objects.filter(company_id=company_id, name__icontains=q).order_by("name")[:10]
+    results = [{"id": s.pk, "text": s.name, "tax_id": s.tax_id or "", "email": s.email or ""} for s in qs]
     return JsonResponse({"results": results})

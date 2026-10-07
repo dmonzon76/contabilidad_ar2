@@ -35,9 +35,7 @@ class ActiveCompanyMiddleware:
 
         if company_id:
             try:
-                request.active_company = request.user.companyuser_set.get(
-                    company_id=company_id
-                ).company
+                request.active_company = request.user.companyuser_set.get(company_id=company_id).company
             except CompanyUser.DoesNotExist:
                 request.active_company = None
         else:

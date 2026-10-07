@@ -4,22 +4,18 @@ from django.db import models, transaction
 
 class ElectronicVoucherBook(models.Model):
     VOUCHER_TYPES = [
-        ('FA', 'Factura A'),
-        ('FB', 'Factura B'),
-        ('FC', 'Factura C'),
-        ('NCA', 'Nota de Crédito A'),
-        ('NCB', 'Nota de Crédito B'),
-        ('NCC', 'Nota de Crédito C'),
-        ('NDA', 'Nota de Débito A'),
-        ('NDB', 'Nota de Débito B'),
-        ('NDC', 'Nota de Débito C'),
+        ("FA", "Factura A"),
+        ("FB", "Factura B"),
+        ("FC", "Factura C"),
+        ("NCA", "Nota de Crédito A"),
+        ("NCB", "Nota de Crédito B"),
+        ("NCC", "Nota de Crédito C"),
+        ("NDA", "Nota de Débito A"),
+        ("NDB", "Nota de Débito B"),
+        ("NDC", "Nota de Débito C"),
     ]
 
-    company = models.ForeignKey(
-        "company.Company",
-        on_delete=models.CASCADE,
-        related_name="voucher_books"
-    )
+    company = models.ForeignKey("company.Company", on_delete=models.CASCADE, related_name="voucher_books")
 
     point_of_sale = models.IntegerField()
     voucher_type = models.CharField(max_length=4, choices=VOUCHER_TYPES)

@@ -20,7 +20,7 @@ def electronic_voucher_book_list(request):
         return HttpResponseForbidden("Access denied")
 
     books = ElectronicVoucherBook.objects.filter(company=company)
-    return render(request, 'fiscal/electronic_voucher_book_list.html', {'books': books})
+    return render(request, "fiscal/electronic_voucher_book_list.html", {"books": books})
 
 
 @login_required
@@ -40,11 +40,11 @@ def electronic_voucher_book_create(request):
             book = form.save(commit=False)
             book.company = company
             book.save()
-            return redirect('fiscal:electronic_voucher_book_list')
+            return redirect("fiscal:electronic_voucher_book_list")
     else:
         form = ElectronicVoucherBookForm()
 
-    return render(request, 'fiscal/electronic_voucher_book_form.html', {'form': form})
+    return render(request, "fiscal/electronic_voucher_book_form.html", {"form": form})
 
 
 @login_required
@@ -64,11 +64,11 @@ def electronic_voucher_book_edit(request, book_id):
         form = ElectronicVoucherBookForm(request.POST, instance=book)
         if form.is_valid():
             form.save()
-            return redirect('fiscal:electronic_voucher_book_list')
+            return redirect("fiscal:electronic_voucher_book_list")
     else:
         form = ElectronicVoucherBookForm(instance=book)
 
-    return render(request, 'fiscal/electronic_voucher_book_form.html', {'form': form})
+    return render(request, "fiscal/electronic_voucher_book_form.html", {"form": form})
 
 
 @login_required
@@ -84,4 +84,4 @@ def electronic_voucher_book_delete(request, book_id):
 
     book = get_object_or_404(ElectronicVoucherBook, id=book_id, company=company)
     book.delete()
-    return redirect('fiscal:electronic_voucher_book_list')
+    return redirect("fiscal:electronic_voucher_book_list")

@@ -18,7 +18,6 @@ def make_company(name):
 
 
 class ElectronicVoucherBookViewTests(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username="daniel", password="123")
         self.company_a = make_company("Company A")
@@ -84,8 +83,8 @@ class ElectronicVoucherBookViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Datos del libro IVA
-        self.assertContains(response, "1000")   # base imponible
-        self.assertContains(response, "210")    # IVA
-        self.assertContains(response, "1210")   # total
+        self.assertContains(response, "1000")  # base imponible
+        self.assertContains(response, "210")  # IVA
+        self.assertContains(response, "1210")  # total
         self.assertContains(response, "11112222")  # CAE
-        self.assertContains(response, "1")      # punto de venta / número
+        self.assertContains(response, "1")  # punto de venta / número

@@ -1,4 +1,3 @@
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -62,9 +61,7 @@ class SupplierCompanyTests(TestCase):
             tax_profile=self.profile,
         )
 
-        response = self.client.get(
-            reverse("suppliers:supplier_edit", args=[supplier.pk])
-        )
+        response = self.client.get(reverse("suppliers:supplier_edit", args=[supplier.pk]))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(

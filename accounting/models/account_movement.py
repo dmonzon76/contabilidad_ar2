@@ -16,20 +16,12 @@ class AccountMovement(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     # Cliente o proveedor (uno de los dos)
-    customer = models.ForeignKey(
-        Customer, null=True, blank=True, on_delete=models.CASCADE
-    )
-    supplier = models.ForeignKey(
-        Supplier, null=True, blank=True, on_delete=models.CASCADE
-    )
+    customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, null=True, blank=True, on_delete=models.CASCADE)
 
     # Origen del movimiento
-    sale = models.ForeignKey(
-        Sale, null=True, blank=True, on_delete=models.SET_NULL
-    )
-    purchase = models.ForeignKey(
-        Purchase, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    sale = models.ForeignKey(Sale, null=True, blank=True, on_delete=models.SET_NULL)
+    purchase = models.ForeignKey(Purchase, null=True, blank=True, on_delete=models.SET_NULL)
 
     movement_type = models.CharField(max_length=10, choices=MOVEMENT_TYPES)
     amount = models.DecimalField(max_digits=12, decimal_places=2)

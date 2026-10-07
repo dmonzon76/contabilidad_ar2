@@ -21,13 +21,8 @@ def sales_dashboard(request):
         "company": company,
         "sales_count": sales.count(),
         "sales_total": sales.aggregate(total=Sum("total_amount"))["total"] or 0,
-        "current_month_total": current_month_sales.aggregate(total=Sum("total_amount"))[
-            "total"
-        ]
-        or 0,
-        "customers_count": Customer.objects.filter(
-            company=company
-        ).count(),
+        "current_month_total": current_month_sales.aggregate(total=Sum("total_amount"))["total"] or 0,
+        "customers_count": Customer.objects.filter(company=company).count(),
         "recent_sales": sales.select_related("customer")[:5],
     }
 

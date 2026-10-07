@@ -15,10 +15,7 @@ def sales_dashboard(request):
     # ============================
     # VENTAS DEL DÍA
     # ============================
-    sales_today = Sale.objects.filter(
-        company_id=company_id,
-        date=today
-    )
+    sales_today = Sale.objects.filter(company_id=company_id, date=today)
 
     sales_today_total = sales_today.aggregate(total=Sum("total_amount"))["total"] or 0
     sales_today_count = sales_today.count()
@@ -62,20 +59,14 @@ def sales_dashboard(request):
     # VENTAS POR HORA
     # ============================
     sales_by_hour_today = (
-        sales_today
-        .values("created_at__hour")
-        .annotate(total=Sum("total_amount"))
-        .order_by("created_at__hour")
+        sales_today.values("created_at__hour").annotate(total=Sum("total_amount")).order_by("created_at__hour")
     )
 
     # ============================
     # TOP CLIENTES DEL DÍA
     # ============================
     top_customers_today = (
-        sales_today
-        .values("customer__name")
-        .annotate(total=Sum("total_amount"))
-        .order_by("-total")[:10]
+        sales_today.values("customer__name").annotate(total=Sum("total_amount")).order_by("-total")[:10]
     )
 
     context = {

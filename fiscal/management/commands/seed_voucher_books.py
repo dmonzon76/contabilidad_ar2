@@ -20,17 +20,13 @@ class Command(BaseCommand):
         if company_id:
             companies = Company.objects.filter(pk=company_id)
             if not companies.exists():
-                self.stderr.write(
-                    self.style.ERROR(f"No se encontró ninguna empresa con ID {company_id}.")
-                )
+                self.stderr.write(self.style.ERROR(f"No se encontró ninguna empresa con ID {company_id}."))
                 return
         else:
             companies = Company.objects.all()
 
         if not companies.exists():
-            self.stderr.write(
-                self.style.WARNING("No existen empresas registradas en la base de datos.")
-            )
+            self.stderr.write(self.style.WARNING("No existen empresas registradas en la base de datos."))
             return
 
         # Tipos de comprobantes principales para facturación electrónica
@@ -59,15 +55,11 @@ class Command(BaseCommand):
                 if created:
                     created_count += 1
                     self.stdout.write(
-                        self.style.SUCCESS(
-                            f"  + Creado talonario {v_type} ({v_name}) para PV {point_of_sale}"
-                        )
+                        self.style.SUCCESS(f"  + Creado talonario {v_type} ({v_name}) para PV {point_of_sale}")
                     )
                 else:
                     self.stdout.write(
-                        self.style.NOTICE(
-                            f"  . El talonario {v_type} ({v_name}) para PV {point_of_sale} ya existía"
-                        )
+                        self.style.NOTICE(f"  . El talonario {v_type} ({v_name}) para PV {point_of_sale} ya existía")
                     )
 
             if created_count > 0:

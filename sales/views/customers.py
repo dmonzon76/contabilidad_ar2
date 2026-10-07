@@ -15,11 +15,7 @@ def customer_list(request):
     """
     company_id = request.session.get("active_company_id")
     customers = Customer.objects.filter(company_id=company_id)
-    return render(
-        request,
-        "sales/customers/customer_list.html",
-        {"customers": customers}
-    )
+    return render(request, "sales/customers/customer_list.html", {"customers": customers})
 
 
 @login_required
@@ -48,11 +44,7 @@ def customer_create(request):
     else:
         form = CustomerForm()
 
-    return render(
-        request,
-        "sales/customers/form.html",
-        {"form": form, "mode": "create"}
-    )
+    return render(request, "sales/customers/form.html", {"form": form, "mode": "create"})
 
 
 @login_required
@@ -71,11 +63,7 @@ def customer_edit(request, customer_id):
     else:
         form = CustomerForm(instance=customer)
 
-    return render(
-        request,
-        "sales/customers/form.html",
-        {"form": form, "mode": "edit", "customer": customer}
-    )
+    return render(request, "sales/customers/form.html", {"form": form, "mode": "edit", "customer": customer})
 
 
 @login_required
@@ -101,8 +89,4 @@ def customer_tax_edit(request, customer_id):
     else:
         form = ThirdPartyTaxProfileForm(instance=customer.tax_profile)
 
-    return render(
-        request,
-        "sales/customers/tax_profile_form.html",
-        {"customer": customer, "form": form}
-    )
+    return render(request, "sales/customers/tax_profile_form.html", {"customer": customer, "form": form})

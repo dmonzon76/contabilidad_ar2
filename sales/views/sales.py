@@ -27,9 +27,7 @@ class SaleListView(ListView):
     context_object_name = "sales"
 
     def get_queryset(self):
-        return Sale.objects.filter(
-            company_id=self.request.session.get("active_company_id")
-        )
+        return Sale.objects.filter(company_id=self.request.session.get("active_company_id"))
 
 
 # ============================================================
@@ -49,9 +47,6 @@ class SaleCreateView(CreateView):
 
     def form_valid(self, form):
         company = self.request.active_company
-        
-
-        
 
         sale = form.save(commit=False)
         sale.company = company
@@ -82,9 +77,7 @@ class SaleDetailView(DetailView):
     context_object_name = "sale"
 
     def get_queryset(self):
-        return Sale.objects.filter(
-            company_id=self.request.session.get("active_company_id")
-        )
+        return Sale.objects.filter(company_id=self.request.session.get("active_company_id"))
 
 
 # ============================================================
@@ -104,7 +97,6 @@ def sale_item_add(request, sale_id):
         get_open_period_for_date(sale.date)
 
     except NoOpenPeriodError as e:
-
         messages.error(
             request,
             f"No se puede agregar items: {e}",
@@ -120,14 +112,12 @@ def sale_item_add(request, sale_id):
         )
 
     if request.method == "POST":
-
         form = SaleItemForm(
             request.POST,
             company=sale.company,
         )
 
         if form.is_valid():
-
             item = form.save(commit=False)
 
             item.sale = sale
@@ -144,7 +134,6 @@ def sale_item_add(request, sale_id):
         print(form.errors)
 
     else:
-
         form = SaleItemForm(
             company=sale.company,
         )
@@ -159,8 +148,8 @@ def sale_item_add(request, sale_id):
     )
 
 
-
 # ... (vistas anteriores) ...
+
 
 @login_required
 @require_POST
@@ -199,6 +188,7 @@ def issue_sale(request, pk):
 
     return redirect("sales:sale_detail", pk=sale.pk)
 
+
 # ============================================================
 # ELIMINAR VENTA
 # ============================================================
@@ -230,7 +220,6 @@ def sale_delete(request, pk):
     return redirect("sales:sale_list")
 
 
-
 def get_voucher_type_for_customer(customer):
     """Determina la clave de comprobante (FA, FB, FC) según perfil fiscal AFIP."""
     profile = getattr(customer, "tax_profile", None)
@@ -242,5 +231,3 @@ def get_voucher_type_for_customer(customer):
         return "FB"
     else:
         return "FC"
-
-

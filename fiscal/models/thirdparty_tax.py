@@ -52,11 +52,10 @@ class ThirdPartyTaxProfile(models.Model):
     )
 
     name = models.CharField(
-    max_length=150,
-    blank=True,
-    null=True,
-)
-    
+        max_length=150,
+        blank=True,
+        null=True,
+    )
 
     tax_id = models.CharField(
         max_length=20,
@@ -67,9 +66,7 @@ class ThirdPartyTaxProfile(models.Model):
     # ------------------------------------------------------------------
     # 1. CATEGORÍA PRINCIPAL Y AFIP
     # ------------------------------------------------------------------
-    afip_category = models.CharField(
-        max_length=10, choices=AFIP_CATEGORY_CHOICES, default="RI"
-    )
+    afip_category = models.CharField(max_length=10, choices=AFIP_CATEGORY_CHOICES, default="RI")
 
     # Condición IVA
     vat_21 = models.BooleanField(default=True)
@@ -167,11 +164,5 @@ class ThirdPartyTaxProfile(models.Model):
         verbose_name = "Perfil Fiscal de Tercero"
         verbose_name_plural = "Perfiles Fiscales de Terceros"
 
-    
-    
     def __str__(self):
-        return (
-        f"{self.name} ({self.tax_id})"
-        if self.tax_id
-        else self.name
-    )
+        return f"{self.name} ({self.tax_id})" if self.tax_id else self.name

@@ -55,7 +55,6 @@ def update_inventory_from_sale(sale):
         return
 
     for s_item in sale.items.all():
-
         inv_item = InventoryItem.objects.get(
             company=company,
             product=s_item.product,
@@ -89,9 +88,7 @@ def update_inventory_from_sale(sale):
 def revert_inventory_from_sale(sale):
     company = sale.company
 
-    movements = InventoryMovement.objects.filter(
-        company=company, sale=sale, movement_type="OUT"
-    )
+    movements = InventoryMovement.objects.filter(company=company, sale=sale, movement_type="OUT")
 
     for mv in movements:
         item = mv.item
@@ -109,9 +106,7 @@ def revert_inventory_from_sale(sale):
 def revert_inventory_from_purchase(purchase):
     company = purchase.company
 
-    movements = InventoryMovement.objects.filter(
-        company=company, purchase=purchase, movement_type="IN"
-    )
+    movements = InventoryMovement.objects.filter(company=company, purchase=purchase, movement_type="IN")
 
     for mv in movements:
         item = mv.item

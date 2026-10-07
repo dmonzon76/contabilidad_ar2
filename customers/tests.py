@@ -46,12 +46,8 @@ class CustomerCompanyIsolationTests(TestCase):
         self.assertNotContains(response, self.customer.name)
 
     def test_edit_and_delete_reject_customers_from_other_companies(self):
-        edit_response = self.client.get(
-            reverse("customers:customer_edit", kwargs={"pk": self.customer.pk})
-        )
-        delete_response = self.client.post(
-            reverse("customers:customer_delete", kwargs={"pk": self.customer.pk})
-        )
+        edit_response = self.client.get(reverse("customers:customer_edit", kwargs={"pk": self.customer.pk}))
+        delete_response = self.client.post(reverse("customers:customer_delete", kwargs={"pk": self.customer.pk}))
 
         self.assertEqual(edit_response.status_code, 404)
         self.assertEqual(delete_response.status_code, 404)

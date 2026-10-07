@@ -36,9 +36,7 @@ def fiscal_invoice_create(request, sale_id):
     ).first()
 
     if not voucher_book:
-        return HttpResponseForbidden(
-            "No active electronic voucher book configured for this company."
-        )
+        return HttpResponseForbidden("No active electronic voucher book configured for this company.")
 
     invoice_number = FiscalInvoice.next_number(
         company=company,
@@ -65,11 +63,7 @@ def fiscal_invoice_list(request):
     if not company:
         return HttpResponseForbidden("No active company")
 
-    invoices = (
-        FiscalInvoice.objects.filter(company=company)
-        .select_related("voucher_book")
-        .order_by("-date", "-id")
-    )
+    invoices = FiscalInvoice.objects.filter(company=company).select_related("voucher_book").order_by("-date", "-id")
 
     return render(request, "fiscal/fiscal_invoice_list.html", {"invoices": invoices})
 

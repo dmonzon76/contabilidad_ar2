@@ -9,7 +9,6 @@ from .sale import Sale
 
 
 class SaleItem(models.Model):
-
     sale = models.ForeignKey(
         Sale,
         on_delete=models.CASCADE,
@@ -66,14 +65,13 @@ class SaleItem(models.Model):
         ordering = ["id"]
 
     def __str__(self):
-        return f"{self.description} " f"({self.quantity} × {self.unit_price})"
+        return f"{self.description} ({self.quantity} × {self.unit_price})"
 
     def save(self, *args, **kwargs):
 
         self.subtotal = self.quantity * self.unit_price
 
         if self.product:
-
             try:
                 cost = self.product.get_current_cost()
 

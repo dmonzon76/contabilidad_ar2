@@ -26,7 +26,6 @@ class FiscalYearService:
         from calendar import monthrange
 
         for month in range(1, 13):
-
             Period.objects.get_or_create(
                 fiscal_year=fiscal_year,
                 month=month,
@@ -62,22 +61,15 @@ def fiscal_year_create(request):
     )
 
     if request.method == "POST" and form.is_valid():
-
         with transaction.atomic():
-
             fiscal_year = FiscalYearService.create_year(
                 company=company,
                 year=form.cleaned_data["year"],
             )
 
-        messages.success(
-            request,
-            f"Fiscal year {fiscal_year.year} and its 12 periods were created."
-        )
+        messages.success(request, f"Fiscal year {fiscal_year.year} and its 12 periods were created.")
 
-        return redirect(
-            "accounting:fiscal_year_list"
-        )
+        return redirect("accounting:fiscal_year_list")
 
     return render(
         request,

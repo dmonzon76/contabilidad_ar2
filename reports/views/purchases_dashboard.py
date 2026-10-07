@@ -18,9 +18,7 @@ def purchases_dashboard(request):
     # ============================
     purchases_today = Purchase.objects.filter(company_id=company_id, date=today)
 
-    purchases_today_total = (
-        purchases_today.aggregate(total=Sum("total_amount"))["total"] or 0
-    )
+    purchases_today_total = purchases_today.aggregate(total=Sum("total_amount"))["total"] or 0
     purchases_today_count = purchases_today.count()
 
     # ============================
@@ -32,9 +30,9 @@ def purchases_dashboard(request):
     # ENTRADAS DE INVENTARIO DEL DÍA
     # ============================
     inventory_in_today = (
-        InventoryMovement.objects.filter(
-            company_id=company_id, movement_type="IN", date=today
-        ).aggregate(total=Sum("quantity"))["total"]
+        InventoryMovement.objects.filter(company_id=company_id, movement_type="IN", date=today).aggregate(
+            total=Sum("quantity")
+        )["total"]
         or 0
     )
 
@@ -42,18 +40,14 @@ def purchases_dashboard(request):
     # TOP PROVEEDORES DEL DÍA
     # ============================
     top_suppliers_today = (
-        purchases_today.values("supplier__name")
-        .annotate(total=Sum("total_amount"))
-        .order_by("-total")[:10]
+        purchases_today.values("supplier__name").annotate(total=Sum("total_amount")).order_by("-total")[:10]
     )
 
     # ============================
     # TOP PRODUCTOS COMPRADOS
     # ============================
     top_products_today = (
-        PurchaseLine.objects.filter(
-            purchase__company_id=company_id, purchase__date=today
-        )
+        PurchaseLine.objects.filter(purchase__company_id=company_id, purchase__date=today)
         .values("product__name")
         .annotate(total_qty=Sum("quantity"))
         .order_by("-total_qty")[:10]
@@ -63,9 +57,7 @@ def purchases_dashboard(request):
     # COMPRAS POR CATEGORÍA
     # ============================
     purchases_by_category_today = (
-        PurchaseLine.objects.filter(
-            purchase__company_id=company_id, purchase__date=today
-        )
+        PurchaseLine.objects.filter(purchase__company_id=company_id, purchase__date=today)
         .values("product__category__name")
         .annotate(total=Sum("subtotal"))
         .order_by("-total")
@@ -75,18 +67,16 @@ def purchases_dashboard(request):
     # COMPRAS POR HORA
     # ============================
     purchases_by_hour_today = (
-        purchases_today.values("created_at__hour")
-        .annotate(total=Sum("total_amount"))
-        .order_by("created_at__hour")
+        purchases_today.values("created_at__hour").annotate(total=Sum("total_amount")).order_by("created_at__hour")
     )
 
     # ============================
     # CUENTA CORRIENTE PROVEEDORES (DÍA)
     # ============================
     cc_suppliers_today_total = (
-        AccountMovement.objects.filter(
-            company_id=company_id, supplier__isnull=False, date=today
-        ).aggregate(total=Sum("amount"))["total"]
+        AccountMovement.objects.filter(company_id=company_id, supplier__isnull=False, date=today).aggregate(
+            total=Sum("amount")
+        )["total"]
         or 0
     )
 

@@ -24,16 +24,20 @@ def main_dashboard(request):
     # KPI — Sales (Month)
     # -----------------------------
     total_sales_month = (
-        Sale.objects.filter(company_id=company_id, date__month=month, date__year=year)
-        .aggregate(total=Sum("total_amount"))["total"] or 0
+        Sale.objects.filter(company_id=company_id, date__month=month, date__year=year).aggregate(
+            total=Sum("total_amount")
+        )["total"]
+        or 0
     )
 
     # -----------------------------
     # KPI — Purchases (Month)
     # -----------------------------
     total_purchases_month = (
-        Purchase.objects.filter(company_id=company_id, date__month=month, date__year=year)
-        .aggregate(total=Sum("total_amount"))["total"] or 0
+        Purchase.objects.filter(company_id=company_id, date__month=month, date__year=year).aggregate(
+            total=Sum("total_amount")
+        )["total"]
+        or 0
     )
 
     # -----------------------------
@@ -45,8 +49,7 @@ def main_dashboard(request):
     # KPI — Inventory Value
     # -----------------------------
     inventory_value = (
-        InventoryMovement.objects.filter(company_id=company_id)
-        .aggregate(total=Sum("quantity"))["total"] or 0
+        InventoryMovement.objects.filter(company_id=company_id).aggregate(total=Sum("quantity"))["total"] or 0
     )
 
     # -----------------------------
@@ -64,15 +67,19 @@ def main_dashboard(request):
 
         sales_values.append(
             float(
-                Sale.objects.filter(company_id=company_id, date__month=month_i, date__year=year_i)
-                .aggregate(total=Sum("total_amount"))["total"] or 0
+                Sale.objects.filter(company_id=company_id, date__month=month_i, date__year=year_i).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
             )
         )
 
         purchases_values.append(
             float(
-                Purchase.objects.filter(company_id=company_id, date__month=month_i, date__year=year_i)
-                .aggregate(total=Sum("total_amount"))["total"] or 0
+                Purchase.objects.filter(company_id=company_id, date__month=month_i, date__year=year_i).aggregate(
+                    total=Sum("total_amount")
+                )["total"]
+                or 0
             )
         )
 
@@ -100,18 +107,15 @@ def main_dashboard(request):
     context = {
         "active_company": company,
         "company": company,
-
         "kpi": {
             "total_sales_month": float(total_sales_month),
             "total_purchases_month": float(total_purchases_month),
             "cash_flow_month": float(cash_flow_month),
             "inventory_value": float(inventory_value),
         },
-
         "top_products": [],
         "top_customers": [],
         "alerts": [],
-
         "dashboard_data_json": json.dumps(dashboard_data),
     }
 

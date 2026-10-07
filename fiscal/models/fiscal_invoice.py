@@ -8,7 +8,6 @@ from fiscal.models.electronic_voucher_book import ElectronicVoucherBook
 
 
 class FiscalInvoice(models.Model):
-
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
@@ -182,9 +181,7 @@ class FiscalInvoice(models.Model):
             .exclude(id=self.id)
             .exists()
         ):
-            raise ValidationError(
-                "Duplicate invoice number for this company and point of sale."
-            )
+            raise ValidationError("Duplicate invoice number for this company and point of sale.")
 
     def save(self, *args, **kwargs):
         self.clean()

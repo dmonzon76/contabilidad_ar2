@@ -9,6 +9,7 @@ ARCHIVOS_IMPORTANTES = ARCHIVOS_PY
 
 ARCHIVO_SALIDA = "todo_mi_codigo.txt"
 
+
 def es_archivo_importante(nombre):
     # Archivos Python
     if nombre in ARCHIVOS_PY:
@@ -33,12 +34,10 @@ def carpeta_ignorada(ruta):
 
 
 with open(ARCHIVO_SALIDA, "w", encoding="utf-8") as salida:
-
     salida.write("### ARCHIVO GENERADO AUTOMÁTICAMENTE ###\n")
     salida.write("### Proyecto Django ERP — Código Completo ###\n\n")
 
     for ruta, carpetas, archivos in os.walk("."):
-
         if carpeta_ignorada(ruta):
             continue
 

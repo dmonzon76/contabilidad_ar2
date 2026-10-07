@@ -10,6 +10,7 @@ class InventoryItemAdmin(admin.ModelAdmin):
     list_display = ("product", "quantity", "min_stock")
     search_fields = ("product__name",)
 
+
 @admin.register(InventoryMovement)
 class InventoryMovementAdmin(admin.ModelAdmin):
     list_display = ("item", "movement_type", "quantity", "date")

@@ -41,6 +41,4 @@ class Command(BaseCommand):
         AFIPActivity.objects.all().delete()
         AFIPActivity.objects.bulk_create(actividades)
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Importadas {len(actividades)} actividades AFIP.")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Importadas {len(actividades)} actividades AFIP."))

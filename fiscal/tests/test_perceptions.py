@@ -21,7 +21,6 @@ def make_company():
 
 
 class PerceptionsTests(TestCase):
-
     def setUp(self):
         self.company = make_company()
 

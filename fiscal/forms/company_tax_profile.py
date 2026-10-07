@@ -33,8 +33,6 @@ class CompanyTaxProfileForm(forms.ModelForm):
 
         if qs.exists():
             # Error asignado al campo NON-FIELD, porque company no está en el form
-            raise forms.ValidationError(
-                "This company already has a tax profile."
-            )
+            raise forms.ValidationError("This company already has a tax profile.")
 
         return cleaned_data

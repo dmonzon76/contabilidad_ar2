@@ -15,9 +15,9 @@ from accounting.models import (
 # ACCOUNT
 # ============================================================
 
+
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-
     list_display = (
         "formatted_name",
         "code",
@@ -64,7 +64,7 @@ class AccountAdmin(admin.ModelAdmin):
             indent,
             color,
             "bold" if level == 0 else "normal",
-            obj.name
+            obj.name,
         )
 
     formatted_name.short_description = "Account"
@@ -74,9 +74,9 @@ class AccountAdmin(admin.ModelAdmin):
 # FISCAL YEAR
 # ============================================================
 
+
 @admin.register(FiscalYear)
 class FiscalYearAdmin(admin.ModelAdmin):
-
     list_display = (
         "year",
         "company",
@@ -90,9 +90,7 @@ class FiscalYearAdmin(admin.ModelAdmin):
         "status",
     )
 
-    search_fields = (
-        "company__name",
-    )
+    search_fields = ("company__name",)
 
     ordering = (
         "company",
@@ -104,9 +102,9 @@ class FiscalYearAdmin(admin.ModelAdmin):
 # PERIOD
 # ============================================================
 
+
 @admin.register(Period)
 class PeriodAdmin(admin.ModelAdmin):
-
     list_display = (
         "fiscal_year",
         "month",
@@ -120,9 +118,7 @@ class PeriodAdmin(admin.ModelAdmin):
         "fiscal_year__company",
     )
 
-    search_fields = (
-        "fiscal_year__year",
-    )
+    search_fields = ("fiscal_year__year",)
 
     ordering = (
         "fiscal_year__year",
@@ -134,8 +130,8 @@ class PeriodAdmin(admin.ModelAdmin):
 # JOURNAL ENTRY LINES
 # ============================================================
 
-class JournalEntryLineInline(admin.TabularInline):
 
+class JournalEntryLineInline(admin.TabularInline):
     model = JournalEntryLine
     extra = 0
 
@@ -144,9 +140,9 @@ class JournalEntryLineInline(admin.TabularInline):
 # JOURNAL ENTRY
 # ============================================================
 
+
 @admin.register(JournalEntry)
 class JournalEntryAdmin(admin.ModelAdmin):
-
     list_display = (
         "id",
         "date",
@@ -160,9 +156,7 @@ class JournalEntryAdmin(admin.ModelAdmin):
         "period",
     )
 
-    search_fields = (
-        "description",
-    )
+    search_fields = ("description",)
 
     ordering = (
         "-date",
@@ -178,9 +172,9 @@ class JournalEntryAdmin(admin.ModelAdmin):
 # ACCOUNT MOVEMENTS
 # ============================================================
 
+
 @admin.register(AccountMovement)
 class AccountMovementAdmin(admin.ModelAdmin):
-
     list_display = (
         "id",
         "company",
@@ -195,9 +189,7 @@ class AccountMovementAdmin(admin.ModelAdmin):
         "movement_type",
     )
 
-    search_fields = (
-        "description",
-    )
+    search_fields = ("description",)
 
     ordering = (
         "-date",
@@ -227,9 +219,9 @@ class AccountMovementAdmin(admin.ModelAdmin):
 # ACCOUNTING SETTINGS
 # ============================================================
 
+
 @admin.register(AccountingSettings)
 class AccountingSettingsAdmin(admin.ModelAdmin):
-
     list_display = (
         "company",
         "account_customers",
@@ -238,21 +230,10 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
         "account_inventory",
     )
 
-    search_fields = (
-        "company__name",
-    )
+    search_fields = ("company__name",)
 
     fieldsets = (
-
-        (
-            "Company",
-            {
-                "fields": (
-                    "company",
-                )
-            }
-        ),
-
+        ("Company", {"fields": ("company",)}),
         (
             "Sales",
             {
@@ -262,9 +243,8 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
                     "account_sales_services",
                     "account_iva_debit",
                 )
-            }
+            },
         ),
-
         (
             "Purchases",
             {
@@ -274,18 +254,9 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
                     "account_inventory",
                     "account_iva_credit",
                 )
-            }
+            },
         ),
-
-        (
-            "Inventory / CMV",
-            {
-                "fields": (
-                    "account_cmv",
-                )
-            }
-        ),
-
+        ("Inventory / CMV", {"fields": ("account_cmv",)}),
         (
             "Cash and Banks",
             {
@@ -293,9 +264,8 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
                     "account_cash",
                     "account_bank",
                 )
-            }
+            },
         ),
-
         (
             "Perceptions",
             {
@@ -303,9 +273,8 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
                     "account_iva_perception_payable",
                     "account_iibb_perception_payable",
                 )
-            }
+            },
         ),
-
         (
             "Retentions",
             {
@@ -314,6 +283,6 @@ class AccountingSettingsAdmin(admin.ModelAdmin):
                     "account_ganancias_retention_payable",
                     "account_iibb_retention_payable",
                 )
-            }
+            },
         ),
     )

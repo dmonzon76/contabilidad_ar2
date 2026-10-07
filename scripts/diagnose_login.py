@@ -17,9 +17,7 @@ post_data = {
     "next": "/dashboard/",
     "csrfmiddlewaretoken": m.group(1),
 }
-resp = session.post(
-    login_url, data=post_data, headers={"Referer": login_url + "?next=/dashboard/"}
-)
+resp = session.post(login_url, data=post_data, headers={"Referer": login_url + "?next=/dashboard/"})
 print("POST status", resp.status_code)
 print("POST URL", resp.url)
 print("Response cookies", session.cookies.get_dict())

@@ -45,11 +45,7 @@ class InventoryItem(models.Model):
         en esta ubicación.
         """
 
-        last_in = (
-            InventoryMovement.objects.filter(item=self, movement_type="IN")
-            .order_by("-date")
-            .first()
-        )
+        last_in = InventoryMovement.objects.filter(item=self, movement_type="IN").order_by("-date").first()
 
         if last_in:
             return last_in.unit_cost
@@ -58,7 +54,6 @@ class InventoryItem(models.Model):
 
 
 class InventoryMovement(models.Model):
-
     MOVEMENT_TYPES = (
         ("IN", "Stock In"),
         ("OUT", "Stock Out"),
@@ -131,11 +126,7 @@ class InventoryMovement(models.Model):
     )
 
     def __str__(self):
-        return (
-            f"{self.get_movement_type_display()} "
-            f"{self.quantity} — "
-            f"{self.item.product.name}"
-        )
+        return f"{self.get_movement_type_display()} {self.quantity} — {self.item.product.name}"
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -155,11 +146,7 @@ class InventoryMovement(models.Model):
                 item.quantity += self.quantity
             elif self.movement_type == "OUT":
                 if item.quantity < self.quantity:
-                    raise ValidationError(
-                        f"Insufficient stock for "
-                        f"{item.product.name}. "
-                        f"Available: {item.quantity}"
-                    )
+                    raise ValidationError(f"Insufficient stock for {item.product.name}. Available: {item.quantity}")
 
                 item.quantity -= self.quantity
 

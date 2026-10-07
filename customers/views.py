@@ -57,6 +57,4 @@ def customer_delete(request, pk):
     if request.method == "POST":
         customer.delete()
         return redirect("customers:customer_list")
-    return render(
-        request, "customers/customer_confirm_delete.html", {"customer": customer}
-    )
+    return render(request, "customers/customer_confirm_delete.html", {"customer": customer})

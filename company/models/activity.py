@@ -1,4 +1,3 @@
-
 from django.db import models
 
 from fiscal.models import AFIPActivity

@@ -16,7 +16,6 @@ def make_company():
 
 
 class InvoiceNumberingTests(TestCase):
-
     def setUp(self):
         self.company = make_company()
         self.book = ElectronicVoucherBook.objects.create(
@@ -64,8 +63,7 @@ class InvoiceNumberingTests(TestCase):
                 customer_name="Test",
             )
 
-    @patch("fiscal.afip.wsfe_client.WSFEClient.get_last_authorized",
-           return_value={"number": 150, "point_of_sale": 1})
+    @patch("fiscal.afip.wsfe_client.WSFEClient.get_last_authorized", return_value={"number": 150, "point_of_sale": 1})
     def test_local_number_matches_afip(self, mock_last):
         from fiscal.models.fiscal_invoice import FiscalInvoice
 

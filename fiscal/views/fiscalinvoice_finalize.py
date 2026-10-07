@@ -55,27 +55,15 @@ def finalize(self):
     self.tax_amount = vat_amount
     self.total_amount = total
     self.vat_21 = sum(
-        (
-            line.line_total * (line.tax.rate / Decimal("100"))
-            for line in lines
-            if line.tax and line.tax.afip_code == 5
-        ),
+        (line.line_total * (line.tax.rate / Decimal("100")) for line in lines if line.tax and line.tax.afip_code == 5),
         Decimal("0.00"),
     )
     self.vat_105 = sum(
-        (
-            line.line_total * (line.tax.rate / Decimal("100"))
-            for line in lines
-            if line.tax and line.tax.afip_code == 4
-        ),
+        (line.line_total * (line.tax.rate / Decimal("100")) for line in lines if line.tax and line.tax.afip_code == 4),
         Decimal("0.00"),
     )
     self.vat_27 = sum(
-        (
-            line.line_total * (line.tax.rate / Decimal("100"))
-            for line in lines
-            if line.tax and line.tax.afip_code == 6
-        ),
+        (line.line_total * (line.tax.rate / Decimal("100")) for line in lines if line.tax and line.tax.afip_code == 6),
         Decimal("0.00"),
     )
     self.vat_exempt = sum(

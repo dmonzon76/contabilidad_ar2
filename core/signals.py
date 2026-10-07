@@ -16,9 +16,7 @@ def clear_sessions_on_start(sender, **kwargs):
 
 @receiver(user_logged_in)
 def log_user_logged_in(sender, user, request, **kwargs):
-    logger.debug(
-        "User logged in: %s, session_keys=%s", user, list(request.session.keys())
-    )
+    logger.debug("User logged in: %s, session_keys=%s", user, list(request.session.keys()))
 
 
 @receiver(user_logged_out)

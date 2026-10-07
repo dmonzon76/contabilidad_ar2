@@ -17,9 +17,7 @@ from suppliers.models import Supplier
 
 class TaxSelect(forms.Select):
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
-        option = super().create_option(
-            name, value, label, selected, index, subindex=subindex, attrs=attrs
-        )
+        option = super().create_option(name, value, label, selected, index, subindex=subindex, attrs=attrs)
         tax = getattr(value, "instance", None)
         if tax is not None:
             option["attrs"]["data-rate"] = str(tax.rate)
@@ -124,13 +122,9 @@ class PurchaseLineForm(forms.ModelForm):
 
         self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
         if company is not None:
-            self.fields["expense_account"].queryset = Account.objects.filter(
-                company=company, is_active=True
-            )
+            self.fields["expense_account"].queryset = Account.objects.filter(company=company, is_active=True)
         elif company_id is not None:
-            self.fields["expense_account"].queryset = Account.objects.filter(
-                company_id=company_id, is_active=True
-            )
+            self.fields["expense_account"].queryset = Account.objects.filter(company_id=company_id, is_active=True)
 
 
 class PurchasePerceptionForm(forms.ModelForm):
@@ -196,20 +190,37 @@ PurchaseLineFormSet = inlineformset_factory(
 
 
 class PurchaseTaxForm(forms.ModelForm):
+    tax = forms.ModelChoiceField(
+        queryset=Tax.objects.filter(enabled=True),
+        widget=TaxSelect(),
+    )
+
     class Meta:
         model = PurchaseTax
-        fields = ["tax", "base_amount"]
-        widgets = {"tax": TaxSelect()}
+        fields = [
+            "tax",
+            "taxable_base",
+        ]
+        widgets = {
+            "tax": TaxSelect(),
+            "taxable_base": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.00",
+                }
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         kwargs.pop("company_id", None)
+
         super().__init__(*args, **kwargs)
 
-        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
-        self.fields["base_amount"].required = False
+        self.fields["taxable_base"].required = False
 
-    def clean_base_amount(self):
-        return self.cleaned_data.get("base_amount") or Decimal("0")
+    def clean_taxable_base(self):
+        return self.cleaned_data.get("taxable_base") or Decimal("0.00")
 
 
 PurchaseTaxFormSet = inlineformset_factory(

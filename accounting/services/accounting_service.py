@@ -82,7 +82,9 @@ class AccountingService:
                 status="OPEN",
             )
         except Period.DoesNotExist:
-            raise ValidationError(f"No existe un período contable abierto para la fecha {date} en la empresa '{company.name}'.")
+            raise ValidationError(
+                f"No existe un período contable abierto para la fecha {date} en la empresa '{company.name}'."
+            )
 
     @staticmethod
     def _existing_entry(company, description, *, date=None, purchase=None, source_key=None):
@@ -113,9 +115,7 @@ class AccountingService:
         period = AccountingService.get_period(company, sale.date)
         description = f"Venta {sale.number}"
 
-        existing = AccountingService._existing_entry(
-            company, description, date=sale.date, source_key=f"sale:{sale.pk}"
-        )
+        existing = AccountingService._existing_entry(company, description, date=sale.date, source_key=f"sale:{sale.pk}")
         if existing:
             return existing
 
@@ -134,9 +134,7 @@ class AccountingService:
         entry = JournalEntry.objects.create(**create_kwargs)
 
         # 1. DEBE: Clientes / Deudores por Ventas (Total de la Venta)
-        account_client = AccountingService.get_account(
-            company, "CUSTOMERS", "account_customers", "Clientes"
-        )
+        account_client = AccountingService.get_account(company, "CUSTOMERS", "account_customers", "Clientes")
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_client,
@@ -150,9 +148,7 @@ class AccountingService:
         sales_setting = "account_sales_services" if is_service else "account_sales_goods"
         sales_label = "Ventas de Servicios" if is_service else "Ventas de Mercaderías"
 
-        account_sales = AccountingService.get_account(
-            company, sales_key, sales_setting, sales_label
-        )
+        account_sales = AccountingService.get_account(company, sales_key, sales_setting, sales_label)
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_sales,
@@ -164,9 +160,7 @@ class AccountingService:
         # 3. HABER: IVA Débito Fiscal
         iva_amount = getattr(sale, "iva_amount", Decimal("0.00")) or getattr(sale, "vat_amount", Decimal("0.00"))
         if iva_amount > 0:
-            account_iva = AccountingService.get_account(
-                company, "IVA_DEBIT", "account_iva_debit", "IVA Débito Fiscal"
-            )
+            account_iva = AccountingService.get_account(company, "IVA_DEBIT", "account_iva_debit", "IVA Débito Fiscal")
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=account_iva,
@@ -206,9 +200,7 @@ class AccountingService:
         # 6. DEBE / HABER: Costo de Mercadería Vendida e Inventario
         total_cost = getattr(sale, "total_cost", Decimal("0.00"))
         if not is_service and total_cost > 0:
-            account_cmv = AccountingService.get_account(
-                company, "COGS", "account_cmv", "Costo de Mercaderías Vendidas"
-            )
+            account_cmv = AccountingService.get_account(company, "COGS", "account_cmv", "Costo de Mercaderías Vendidas")
             account_inventory = AccountingService.get_account(
                 company, "INVENTORY", "account_inventory", "Inventario / Mercaderías"
             )
@@ -304,9 +296,7 @@ class AccountingService:
             )
 
         # 4. HABER: Proveedores (Total a Pagar)
-        account_prov = AccountingService.get_account(
-            company, "SUPPLIERS", "account_suppliers", "Proveedores"
-        )
+        account_prov = AccountingService.get_account(company, "SUPPLIERS", "account_suppliers", "Proveedores")
         JournalEntryLine.objects.create(
             entry=entry,
             account=account_prov,
@@ -361,15 +351,9 @@ class AccountingService:
 
         entry = JournalEntry.objects.create(**create_kwargs)
 
-        account_cash = AccountingService.get_account(
-            company, "CASH", "account_cash", "Caja"
-        )
-        account_sales = AccountingService.get_account(
-            company, "SALES_GOODS", "account_sales_goods", "Ventas"
-        )
-        account_tax = AccountingService.get_account(
-            company, "IVA_DEBIT", "account_iva_debit", "IVA Débito Fiscal"
-        )
+        account_cash = AccountingService.get_account(company, "CASH", "account_cash", "Caja")
+        account_sales = AccountingService.get_account(company, "SALES_GOODS", "account_sales_goods", "Ventas")
+        account_tax = AccountingService.get_account(company, "IVA_DEBIT", "account_iva_debit", "IVA Débito Fiscal")
 
         JournalEntryLine.objects.create(
             entry=entry,
@@ -424,10 +408,11 @@ class AccountingService:
 
         return reverse
 
+
 @staticmethod
 def ensure_required_accounts(company):
     """
     Método de compatibilidad para signals y flujos legacy.
     Evita fallos en la creación automática de empresas.
     """
-    return []        
+    return []

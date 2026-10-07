@@ -8,9 +8,13 @@ from fiscal.models import FiscalService
 @login_required
 def fiscal_service_list(request):
     services = FiscalService.objects.all().order_by("name")
-    return render(request, "fiscal/fiscal_service_list.html", {
-        "services": services,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_service_list.html",
+        {
+            "services": services,
+        },
+    )
 
 
 @login_required
@@ -23,10 +27,14 @@ def fiscal_service_create(request):
     else:
         form = FiscalServiceForm()
 
-    return render(request, "fiscal/fiscal_service_form.html", {
-        "form": form,
-        "mode": "create",
-    })
+    return render(
+        request,
+        "fiscal/fiscal_service_form.html",
+        {
+            "form": form,
+            "mode": "create",
+        },
+    )
 
 
 @login_required
@@ -41,8 +49,12 @@ def fiscal_service_edit(request, pk):
     else:
         form = FiscalServiceForm(instance=service)
 
-    return render(request, "fiscal/fiscal_service_form.html", {
-        "form": form,
-        "mode": "edit",
-        "service": service,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_service_form.html",
+        {
+            "form": form,
+            "mode": "edit",
+            "service": service,
+        },
+    )

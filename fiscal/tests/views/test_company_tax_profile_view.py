@@ -16,7 +16,6 @@ def make_company(name):
 
 
 class CompanyTaxProfileViewTests(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username="daniel", password="123")
         self.company_a = make_company("Company A")

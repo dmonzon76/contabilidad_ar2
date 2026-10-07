@@ -25,7 +25,7 @@ class FiscalInvoice(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["company", "point_of_sale", "voucher_type", "voucher_number"],
-                name="unique_fiscal_invoice_number_per_company"
+                name="unique_fiscal_invoice_number_per_company",
             )
         ]
 
@@ -38,13 +38,8 @@ class FiscalInvoice(models.Model):
         """
 
         qs = (
-            FiscalInvoice.objects
-            .select_for_update()
-            .filter(
-                company=company,
-                point_of_sale=point_of_sale,
-                voucher_type=voucher_type
-            )
+            FiscalInvoice.objects.select_for_update()
+            .filter(company=company, point_of_sale=point_of_sale, voucher_type=voucher_type)
             .order_by("-voucher_number")
         )
 

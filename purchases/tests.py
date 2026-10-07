@@ -90,9 +90,7 @@ class PurchaseModelTestCase(TestCase):
         self.assertEqual(purchase.total_amount, Decimal("12250.00"))
 
     @patch("accounting.services.AccountingService.post_purchase")
-    def test_saving_purchase_does_not_post_incomplete_accounting_entry(
-        self, post_purchase
-    ):
+    def test_saving_purchase_does_not_post_incomplete_accounting_entry(self, post_purchase):
         Purchase.objects.create(
             company=self.company,
             supplier=self.supplier,
@@ -163,9 +161,7 @@ class PurchaseModelTestCase(TestCase):
 
     @patch("accounting.services.AccountingService.post_purchase")
     @patch("inventory.integration.update_inventory_from_purchase")
-    def test_create_view_persists_purchase_and_tax_formsets(
-        self, update_inventory, post_purchase
-    ):
+    def test_create_view_persists_purchase_and_tax_formsets(self, update_inventory, post_purchase):
         session = self.client.session
         session["active_company_id"] = self.company.pk
         session.save()

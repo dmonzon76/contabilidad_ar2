@@ -7,7 +7,6 @@ from fiscal.models.company_profile import CompanyProfile
 
 
 class CompanyProfileModelTests(TestCase):
-
     def test_unique_constraint_prevents_duplicates(self):
         company = Company.objects.create(name="Test Co")
         CompanyProfile.objects.get(company=company)
@@ -31,7 +30,6 @@ class CompanyProfileModelTests(TestCase):
 
 
 class CompanyProfileFormTests(TestCase):
-
     def test_form_prevents_duplicate_profiles(self):
         company = Company.objects.create(name="Form Co")
         CompanyProfile.objects.get(company=company)
@@ -52,6 +50,4 @@ class CompanyProfileFormTests(TestCase):
         form = CompanyTaxProfileForm(data=data, instance=duplicate_instance)
 
         self.assertFalse(form.is_valid())
-        self.assertIn(
-            "This company already has a tax profile.", form.non_field_errors()
-        )
+        self.assertIn("This company already has a tax profile.", form.non_field_errors())

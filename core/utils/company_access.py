@@ -11,6 +11,7 @@ def user_has_access(request, company):
         is_active=True,
     ).exists()
 
+
 def require_company_access(request, company):
     if not user_has_access(request, company):
         raise PermissionDenied("You do not have access to this company.")

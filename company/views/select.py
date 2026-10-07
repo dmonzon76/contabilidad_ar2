@@ -14,10 +14,7 @@ def select_company_list(request):
     Muestra únicamente las empresas a las que el usuario autenticado
     tiene acceso activo.
     """
-    user_companies = CompanyUser.objects.filter(
-        user=request.user,
-        is_active=True
-    ).select_related("company")
+    user_companies = CompanyUser.objects.filter(user=request.user, is_active=True).select_related("company")
 
     companies = [uc.company for uc in user_companies]
 
@@ -37,11 +34,7 @@ def select_company(request, company_id):
     """
     Activa una empresa en la sesión únicamente si el usuario pertenece a ella.
     """
-    has_access = CompanyUser.objects.filter(
-        user=request.user,
-        company_id=company_id,
-        is_active=True
-    ).exists()
+    has_access = CompanyUser.objects.filter(user=request.user, company_id=company_id, is_active=True).exists()
 
     if not has_access:
         raise PermissionDenied("No tenés permisos para acceder a esta empresa.")

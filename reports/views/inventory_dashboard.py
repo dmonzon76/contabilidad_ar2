@@ -16,10 +16,7 @@ def inventory_dashboard(request):
     # STOCK TOTAL (UNIDADES)
     # ============================
     total_stock_units = (
-        InventoryItem.objects.filter(company_id=company_id).aggregate(
-            total=Sum("quantity")
-        )["total"]
-        or 0
+        InventoryItem.objects.filter(company_id=company_id).aggregate(total=Sum("quantity"))["total"] or 0
     )
 
     # ============================
@@ -35,9 +32,7 @@ def inventory_dashboard(request):
     # ============================
     # PRODUCTOS BAJO STOCK MÍNIMO
     # ============================
-    low_stock_count = InventoryItem.objects.filter(
-        company_id=company_id, quantity__lt=F("min_stock")
-    ).count()
+    low_stock_count = InventoryItem.objects.filter(company_id=company_id, quantity__lt=F("min_stock")).count()
 
     # ============================
     # PRODUCTOS SIN MOVIMIENTO 60 DÍAS
@@ -45,25 +40,23 @@ def inventory_dashboard(request):
     last_60 = today - timezone.timedelta(days=60)
 
     no_movement_60_days = (
-        InventoryItem.objects.filter(company_id=company_id)
-        .exclude(movements__date__gte=last_60)
-        .count()
+        InventoryItem.objects.filter(company_id=company_id).exclude(movements__date__gte=last_60).count()
     )
 
     # ============================
     # MOVIMIENTOS DEL DÍA
     # ============================
     mov_in_today = (
-        InventoryMovement.objects.filter(
-            company_id=company_id, movement_type="IN", date=today
-        ).aggregate(total=Sum("quantity"))["total"]
+        InventoryMovement.objects.filter(company_id=company_id, movement_type="IN", date=today).aggregate(
+            total=Sum("quantity")
+        )["total"]
         or 0
     )
 
     mov_out_today = (
-        InventoryMovement.objects.filter(
-            company_id=company_id, movement_type="OUT", date=today
-        ).aggregate(total=Sum("quantity"))["total"]
+        InventoryMovement.objects.filter(company_id=company_id, movement_type="OUT", date=today).aggregate(
+            total=Sum("quantity")
+        )["total"]
         or 0
     )
 
@@ -83,9 +76,7 @@ def inventory_dashboard(request):
     # TOP PRODUCTOS OUT DEL DÍA
     # ============================
     top_products_out_today = (
-        InventoryMovement.objects.filter(
-            company_id=company_id, movement_type="OUT", date=today
-        )
+        InventoryMovement.objects.filter(company_id=company_id, movement_type="OUT", date=today)
         .values("item__product__name")
         .annotate(total=Sum("quantity"))
         .order_by("-total")[:10]
@@ -95,9 +86,7 @@ def inventory_dashboard(request):
     # TOP PROVEEDORES IN DEL DÍA
     # ============================
     top_suppliers_in_today = (
-        PurchaseLine.objects.filter(
-            purchase__company_id=company_id, purchase__date=today
-        )
+        PurchaseLine.objects.filter(purchase__company_id=company_id, purchase__date=today)
         .values("purchase__supplier__name")
         .annotate(total=Sum("quantity"))
         .order_by("-total")[:10]

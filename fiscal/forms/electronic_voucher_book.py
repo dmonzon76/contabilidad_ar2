@@ -7,8 +7,8 @@ class ElectronicVoucherBookForm(forms.ModelForm):
     class Meta:
         model = ElectronicVoucherBook
         fields = [
-            'voucher_type',
-            'point_of_sale',
-            'current_number',
-            'enabled',
+            "voucher_type",
+            "point_of_sale",
+            "current_number",
+            "enabled",
         ]

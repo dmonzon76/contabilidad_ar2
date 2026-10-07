@@ -48,4 +48,3 @@ MODULES = [
         "requires_company": False,
     },
 ]
-

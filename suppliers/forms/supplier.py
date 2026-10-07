@@ -11,9 +11,7 @@ class SupplierForm(forms.ModelForm):
             tax_profile_field = self.fields["tax_profile"]
             if not isinstance(tax_profile_field, forms.ModelChoiceField):
                 raise TypeError("SupplierForm.tax_profile must be a model choice field")
-            tax_profile_field.queryset = ThirdPartyTaxProfile.objects.filter(
-                company=company
-            ).order_by("name")
+            tax_profile_field.queryset = ThirdPartyTaxProfile.objects.filter(company=company).order_by("name")
 
     class Meta:
         model = Supplier

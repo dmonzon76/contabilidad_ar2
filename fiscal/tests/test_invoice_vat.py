@@ -17,7 +17,6 @@ def make_company():
 
 
 class InvoiceVATTests(TestCase):
-
     def setUp(self):
         self.company = make_company()
 

@@ -15,10 +15,14 @@ def company_user_list(request, company_id):
 
     users = CompanyUser.objects.filter(company=company)
 
-    return render(request, "company/users/list.html", {
-        "company": company,
-        "users": users,
-    })
+    return render(
+        request,
+        "company/users/list.html",
+        {
+            "company": company,
+            "users": users,
+        },
+    )
 
 
 @login_required
@@ -37,10 +41,14 @@ def company_user_create(request, company_id):
     else:
         form = CompanyUserForm()
 
-    return render(request, "company/users/create.html", {
-        "company": company,
-        "form": form,
-    })
+    return render(
+        request,
+        "company/users/create.html",
+        {
+            "company": company,
+            "form": form,
+        },
+    )
 
 
 @login_required
@@ -60,11 +68,15 @@ def company_user_edit(request, company_id, user_id):
     else:
         form = CompanyUserForm(instance=user)
 
-    return render(request, "company/users/edit.html", {
-        "company": company,
-        "form": form,
-        "user": user,
-    })
+    return render(
+        request,
+        "company/users/edit.html",
+        {
+            "company": company,
+            "form": form,
+            "user": user,
+        },
+    )
 
 
 @login_required
@@ -80,7 +92,11 @@ def company_user_delete(request, company_id, user_id):
         user.delete()
         return redirect("company:company_user_list", company_id=company.id)
 
-    return render(request, "company/users/delete.html", {
-        "company": company,
-        "user": user,
-    })
+    return render(
+        request,
+        "company/users/delete.html",
+        {
+            "company": company,
+            "user": user,
+        },
+    )

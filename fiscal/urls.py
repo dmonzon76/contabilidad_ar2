@@ -42,53 +42,53 @@ from fiscal.views.thirdparty_tax import (
 app_name = "fiscal"
 
 urlpatterns = [
-
     # -------------------------
     # AFIP ACTIVITIES
     # -------------------------
     path("afip/", afip_activity_list, name="afip_activity_list"),
     path("afip/new/", afip_activity_create, name="afip_activity_create"),
     path("afip/<int:pk>/edit/", afip_activity_edit, name="afip_activity_edit"),
-
     # -------------------------
     # COMPANY TAX PROFILE
     # -------------------------
     path("company/", company_tax_profile, name="company_tax_profile"),
-
     # -------------------------
     # THIRD PARTY TAX PROFILES
     # -------------------------
     path("thirdparty/", thirdparty_tax_list, name="thirdparty_tax_list"),
     path("thirdparty/<int:pk>/edit/", thirdparty_tax_edit, name="thirdparty_tax_edit"),
-
     # -------------------------
     # ELECTRONIC VOUCHER BOOKS
     # -------------------------
     path("electronic-voucher-books/", electronic_voucher_book_list, name="electronic_voucher_book_list"),
     path("electronic-voucher-books/new/", electronic_voucher_book_create, name="electronic_voucher_book_create"),
-    path("electronic-voucher-books/<int:book_id>/edit/", electronic_voucher_book_edit, name="electronic_voucher_book_edit"),
-    path("electronic-voucher-books/<int:book_id>/delete/", electronic_voucher_book_delete, name="electronic_voucher_book_delete"),
-
+    path(
+        "electronic-voucher-books/<int:book_id>/edit/",
+        electronic_voucher_book_edit,
+        name="electronic_voucher_book_edit",
+    ),
+    path(
+        "electronic-voucher-books/<int:book_id>/delete/",
+        electronic_voucher_book_delete,
+        name="electronic_voucher_book_delete",
+    ),
     # -------------------------
     # FISCAL INVOICES
     # -------------------------
     path("invoices/", fiscal_invoice_list, name="fiscal_invoice_list"),
     path("invoices/<int:pk>/", fiscal_invoice_detail, name="fiscal_invoice_detail"),
     path("invoices/create/<int:sale_id>/", fiscal_invoice_create, name="fiscal_invoice_create"),
-
     # -------------------------
     # FISCAL INVOICE LINES (nuevo)
     # -------------------------
     path("invoices/<int:invoice_id>/lines/add/", fiscal_invoice_line_add, name="fiscal_invoice_line_add"),
     path("invoices/lines/<int:line_id>/delete/", fiscal_invoice_line_delete, name="fiscal_invoice_line_delete"),
-
     # -------------------------
     # FISCAL PRODUCTS
     # -------------------------
     path("products/", fiscal_product_list, name="fiscal_product_list"),
     path("products/new/", fiscal_product_create, name="fiscal_product_create"),
     path("products/<int:pk>/edit/", fiscal_product_edit, name="fiscal_product_edit"),
-
     # -------------------------
     # FISCAL SERVICES
     # -------------------------

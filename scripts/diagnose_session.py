@@ -16,9 +16,7 @@ print(
 )
 print("---")
 
-m = re.search(
-    r"name=[\"\']csrfmiddlewaretoken[\"\'] value=[\"\']([^\"\']+)[\"\']", html
-)
+m = re.search(r"name=[\"\']csrfmiddlewaretoken[\"\'] value=[\"\']([^\"\']+)[\"\']", html)
 print("csrf token found", bool(m), m.group(1) if m else None)
 if not m:
     raise RuntimeError("No CSRF token found")
@@ -45,11 +43,7 @@ try:
     print("Login POST status", resp.status)
     print(
         "Headers",
-        [
-            (k, v)
-            for k, v in resp.getheaders()
-            if k.lower() in ("set-cookie", "location")
-        ],
+        [(k, v) for k, v in resp.getheaders() if k.lower() in ("set-cookie", "location")],
     )
     print(
         "Cookies after POST",
@@ -62,11 +56,7 @@ except urllib.error.HTTPError as e:
     print("Login POST failed", e.code)
     print(
         "Headers",
-        [
-            (k, v)
-            for k, v in e.headers.items()
-            if k.lower() in ("set-cookie", "location")
-        ],
+        [(k, v) for k, v in e.headers.items() if k.lower() in ("set-cookie", "location")],
     )
     print(
         "Cookies after failed POST",
@@ -82,6 +72,4 @@ print(
     "Cookies for dashboard",
     [(c.name, c.value, c.domain, c.path, c.secure, c.expires) for c in cj],
 )
-print(
-    "Body snippet", resp.read(300).decode("utf-8", errors="ignore").replace("\n", " ")
-)
+print("Body snippet", resp.read(300).decode("utf-8", errors="ignore").replace("\n", " "))

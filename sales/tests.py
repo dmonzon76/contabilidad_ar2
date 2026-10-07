@@ -45,9 +45,7 @@ class SalesCompanyIsolationTests(TestCase):
         session.save()
 
     def test_sale_detail_cannot_access_sale_from_other_company(self):
-        response = self.client.get(
-            reverse("sales:sale_detail", kwargs={"pk": self.other_sale.id})
-        )
+        response = self.client.get(reverse("sales:sale_detail", kwargs={"pk": self.other_sale.id}))
 
         self.assertEqual(response.status_code, 404)
 

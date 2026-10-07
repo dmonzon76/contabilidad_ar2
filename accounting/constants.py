@@ -2,8 +2,8 @@
 # ACCOUNTING EVENTS
 # ============================================================
 
-class AccountingEvents:
 
+class AccountingEvents:
     # ========================================================
     # SALES
     # ========================================================
@@ -34,13 +34,9 @@ class AccountingEvents:
 
     STOCK_ENTRY = "STOCK_ENTRY"
 
-    STOCK_ADJUSTMENT_POSITIVE = (
-        "STOCK_ADJUSTMENT_POSITIVE"
-    )
+    STOCK_ADJUSTMENT_POSITIVE = "STOCK_ADJUSTMENT_POSITIVE"
 
-    STOCK_ADJUSTMENT_NEGATIVE = (
-        "STOCK_ADJUSTMENT_NEGATIVE"
-    )
+    STOCK_ADJUSTMENT_NEGATIVE = "STOCK_ADJUSTMENT_NEGATIVE"
 
     # ========================================================
     # TAXES
@@ -48,13 +44,9 @@ class AccountingEvents:
 
     VAT_PAYMENT = "VAT_PAYMENT"
 
-    PERCEPTIONS_PAYMENT = (
-        "PERCEPTIONS_PAYMENT"
-    )
+    PERCEPTIONS_PAYMENT = "PERCEPTIONS_PAYMENT"
 
-    RETENTIONS_PAYMENT = (
-        "RETENTIONS_PAYMENT"
-    )
+    RETENTIONS_PAYMENT = "RETENTIONS_PAYMENT"
 
     # ========================================================
     # ACCOUNTING

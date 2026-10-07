@@ -15,12 +15,7 @@ def get_active_company(request):
         return None
 
     try:
-        cu = CompanyUser.objects.get(
-            user=request.user,
-            company_id=active_company_id,
-            is_active=True
-        )
+        cu = CompanyUser.objects.get(user=request.user, company_id=active_company_id, is_active=True)
         return cu.company
     except CompanyUser.DoesNotExist:
         return None
-

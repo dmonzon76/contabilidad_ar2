@@ -15,7 +15,6 @@ APP_NAME = "sales"
 urlpatterns = [
     # Dashboard
     path("dashboard/", sales_dashboard, name="dashboard"),
-
     # Sales
     path("", SaleListView.as_view(), name="sale_list"),
     path("new/", SaleCreateView.as_view(), name="sale_create"),
@@ -23,4 +22,3 @@ urlpatterns = [
     path("<int:sale_id>/add-item/", sale_item_add, name="sale_item_add"),
     path("<int:pk>/issue/", issue_sale, name="issue_sale"),  # ← 2. Registrar la ruta
 ]
-    

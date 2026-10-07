@@ -6,7 +6,6 @@ from sales.models.sale import Sale
 
 
 class SaleForm(forms.ModelForm):
-
     def __init__(self, *args, company_id=None, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -32,14 +31,10 @@ class SaleForm(forms.ModelForm):
             "date",
         ]
 
-class SupplierForm(forms.ModelForm):
 
+class SupplierForm(forms.ModelForm):
     def __init__(self, *args, company=None, **kwargs):
         super().__init__(*args, **kwargs)
 
         if company:
-            self.fields["tax_profile"].queryset = (
-                ThirdPartyTaxProfile.objects.filter(
-                    company=company
-                ).order_by("name")
-            )
+            self.fields["tax_profile"].queryset = ThirdPartyTaxProfile.objects.filter(company=company).order_by("name")

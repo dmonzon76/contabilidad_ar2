@@ -5,51 +5,26 @@ from company.models import Company
 
 
 class AccountingSettings(models.Model):
-
-    company = models.OneToOneField(
-        Company,
-        on_delete=models.CASCADE,
-        related_name="accounting_settings"
-    )
+    company = models.OneToOneField(Company, on_delete=models.CASCADE, related_name="accounting_settings")
 
     # ==========================
     # SALES
     # ==========================
 
     account_customers = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Customers Account"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Customers Account"
     )
 
     account_sales_goods = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Sales Goods"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Sales Goods"
     )
 
     account_sales_services = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Sales Services"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Sales Services"
     )
 
     account_iva_debit = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="VAT Debit"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="VAT Debit"
     )
 
     # ==========================
@@ -57,39 +32,19 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_suppliers = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Suppliers"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Suppliers"
     )
 
     account_inventory = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Inventory"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Inventory"
     )
 
     account_expenses = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Expenses"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Expenses"
     )
 
     account_iva_credit = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="VAT Credit"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="VAT Credit"
     )
 
     # ==========================
@@ -97,12 +52,7 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_cmv = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Cost of Goods Sold"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Cost of Goods Sold"
     )
 
     # ==========================
@@ -110,21 +60,11 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_cash = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Cash"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Cash"
     )
 
     account_bank = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True,
-        verbose_name="Bank"
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True, verbose_name="Bank"
     )
 
     # ==========================
@@ -132,19 +72,11 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_iva_perception_payable = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     account_iibb_perception_payable = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     # ==========================
@@ -152,27 +84,15 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_iva_retention_payable = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     account_ganancias_retention_payable = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     account_iibb_retention_payable = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     # ==========================
@@ -180,11 +100,7 @@ class AccountingSettings(models.Model):
     # ==========================
 
     account_current_year_result = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        related_name="+",
-        null=True,
-        blank=True
+        Account, on_delete=models.PROTECT, related_name="+", null=True, blank=True
     )
 
     class Meta:

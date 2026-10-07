@@ -1,4 +1,3 @@
-
 from decimal import Decimal
 
 
@@ -18,9 +17,6 @@ def calculate_retentions(customer, subtotal):
         return 0
 
     return subtotal * profile.ganancias_percentage
-
-
-
 
 
 def _invoice_subtotal(invoice):

@@ -2,6 +2,7 @@ import os
 
 OUTPUT = "project_tree.txt"
 
+
 def generate_tree(start_path):
     tree_lines = []
 

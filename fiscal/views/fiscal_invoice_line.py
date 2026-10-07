@@ -37,10 +37,14 @@ def fiscal_invoice_line_create(request, invoice_id):
     else:
         form = FiscalInvoiceLineForm(company=company)
 
-    return render(request, "fiscal/fiscal_invoice_line_form.html", {
-        "form": form,
-        "invoice": invoice,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_invoice_line_form.html",
+        {
+            "form": form,
+            "invoice": invoice,
+        },
+    )
 
 
 # Compatibilidad con URLs de código anterior.
@@ -73,11 +77,15 @@ def fiscal_invoice_line_edit(request, pk):
     else:
         form = FiscalInvoiceLineForm(instance=line, company=company)
 
-    return render(request, "fiscal/fiscal_invoice_line_form.html", {
-        "form": form,
-        "invoice": invoice,
-        "line": line,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_invoice_line_form.html",
+        {
+            "form": form,
+            "invoice": invoice,
+            "line": line,
+        },
+    )
 
 
 @login_required

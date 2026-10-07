@@ -13,12 +13,8 @@ class FiscalYearForm(forms.ModelForm):
         fields = ["year", "start_date", "end_date"]
         widgets = {
             "year": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
-            "start_date": forms.DateInput(
-                attrs={"class": "form-control", "type": "date"}
-            ),
-            "end_date": forms.DateInput(
-                attrs={"class": "form-control", "type": "date"}
-            ),
+            "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "end_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
         }
 
     def clean(self):
@@ -32,23 +28,16 @@ class FiscalYearForm(forms.ModelForm):
 
         if year and start_date and end_date:
             if start_date.year != year or end_date.year != year:
-                raise forms.ValidationError(
-                    "The fiscal year dates must belong to the selected year."
-                )
+                raise forms.ValidationError("The fiscal year dates must belong to the selected year.")
             if start_date.month != 1 or start_date.day != 1:
-                raise forms.ValidationError(
-                    "The fiscal year must start on January 1."
-                )
+                raise forms.ValidationError("The fiscal year must start on January 1.")
             if end_date.month != 12 or end_date.day != 31:
-                raise forms.ValidationError(
-                    "The fiscal year must end on December 31."
-                )
+                raise forms.ValidationError("The fiscal year must end on December 31.")
 
-            if self.company and FiscalYear.objects.filter(
-                company=self.company, year=year
-            ).exclude(pk=self.instance.pk).exists():
-                raise forms.ValidationError(
-                    "A fiscal year for this company and year already exists."
-                )
+            if (
+                self.company
+                and FiscalYear.objects.filter(company=self.company, year=year).exclude(pk=self.instance.pk).exists()
+            ):
+                raise forms.ValidationError("A fiscal year for this company and year already exists.")
 
         return cleaned_data

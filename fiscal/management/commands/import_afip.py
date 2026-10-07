@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 defaults={
                     "description": desc,
                     "description_long": desc_long,
-                }
+                },
             )
             count += 1
 

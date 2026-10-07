@@ -15,9 +15,9 @@ def cc_dashboard(request):
     # SALDO TOTAL CLIENTES
     # ============================
     cc_customers_total = (
-        AccountMovement.objects.filter(
-            company_id=company_id, customer__isnull=False
-        ).aggregate(total=Sum("amount"))["total"]
+        AccountMovement.objects.filter(company_id=company_id, customer__isnull=False).aggregate(total=Sum("amount"))[
+            "total"
+        ]
         or 0
     )
 
@@ -25,18 +25,16 @@ def cc_dashboard(request):
     # SALDO TOTAL PROVEEDORES
     # ============================
     cc_suppliers_total = (
-        AccountMovement.objects.filter(
-            company_id=company_id, supplier__isnull=False
-        ).aggregate(total=Sum("amount"))["total"]
+        AccountMovement.objects.filter(company_id=company_id, supplier__isnull=False).aggregate(total=Sum("amount"))[
+            "total"
+        ]
         or 0
     )
 
     # ============================
     # MOVIMIENTOS DEL DÍA
     # ============================
-    cc_movements_today = AccountMovement.objects.filter(
-        company_id=company_id, date=today
-    )
+    cc_movements_today = AccountMovement.objects.filter(company_id=company_id, date=today)
 
     cc_movements_today_count = cc_movements_today.count()
 
@@ -44,18 +42,14 @@ def cc_dashboard(request):
     # MOVIMIENTOS POR TIPO (DEBIT / CREDIT)
     # ============================
     cc_movements_by_type_today = (
-        cc_movements_today.values("movement_type")
-        .annotate(total=Sum("amount"))
-        .order_by("movement_type")
+        cc_movements_today.values("movement_type").annotate(total=Sum("amount")).order_by("movement_type")
     )
 
     # ============================
     # MOVIMIENTOS POR HORA
     # ============================
     cc_movements_by_hour_today = (
-        cc_movements_today.values("created_at__hour")
-        .annotate(total=Sum("amount"))
-        .order_by("created_at__hour")
+        cc_movements_today.values("created_at__hour").annotate(total=Sum("amount")).order_by("created_at__hour")
     )
 
     # ============================

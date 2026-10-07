@@ -19,7 +19,6 @@ def make_company(name):
 
 
 class FiscalDashboardViewTests(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username="daniel", password="123")
         self.company_a = make_company("Company A")
@@ -85,7 +84,7 @@ class FiscalDashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Totales del dashboard
-        self.assertContains(response, "1000")   # base imponible
-        self.assertContains(response, "210")    # IVA
-        self.assertContains(response, "1210")   # total
+        self.assertContains(response, "1000")  # base imponible
+        self.assertContains(response, "210")  # IVA
+        self.assertContains(response, "1210")  # total
         self.assertContains(response, "11112222")  # CAE

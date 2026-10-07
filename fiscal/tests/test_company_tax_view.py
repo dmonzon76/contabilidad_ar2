@@ -7,7 +7,6 @@ from fiscal.models.company_profile import CompanyProfile
 
 
 class CompanyTaxViewTests(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username="daniel", password="123")
         self.company = Company.objects.create(

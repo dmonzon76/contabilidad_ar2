@@ -7,19 +7,11 @@ class BaseModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     created_by = models.ForeignKey(
-        User,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="%(class)s_created"
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="%(class)s_created"
     )
 
     updated_by = models.ForeignKey(
-        User,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="%(class)s_updated"
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="%(class)s_updated"
     )
 
     class Meta:

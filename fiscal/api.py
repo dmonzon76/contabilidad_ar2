@@ -10,15 +10,9 @@ def afip_search(request):
     if not q:
         return JsonResponse([], safe=False)
 
-    results = (
-        AFIPActivity.objects
-        .filter(
-            Q(code__icontains=q) |
-            Q(description__icontains=q) |
-            Q(description_long__icontains=q)
-        )
-        .order_by("code")[:20]
-    )
+    results = AFIPActivity.objects.filter(
+        Q(code__icontains=q) | Q(description__icontains=q) | Q(description_long__icontains=q)
+    ).order_by("code")[:20]
 
     data = [
         {

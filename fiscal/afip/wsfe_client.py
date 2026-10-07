@@ -29,16 +29,10 @@ class WSFEClient:
         self.key = key
         self.cuit = cuit
 
-        self.testing = (
-            testing
-            if testing is not None
-            else getattr(settings, "AFIP_MODE", "testing") == "testing"
-        )
+        self.testing = testing if testing is not None else getattr(settings, "AFIP_MODE", "testing") == "testing"
 
         self.wsdl_url = (
-            getattr(settings, "AFIP_WSFE_TEST_URL", "")
-            if self.testing
-            else getattr(settings, "AFIP_WSFE_PROD_URL", "")
+            getattr(settings, "AFIP_WSFE_TEST_URL", "") if self.testing else getattr(settings, "AFIP_WSFE_PROD_URL", "")
         )
 
     # ---------------------------------------------------------

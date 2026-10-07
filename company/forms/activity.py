@@ -4,7 +4,6 @@ from company.models import CompanyActivity
 
 
 class CompanyActivityForm(forms.ModelForm):
-
     class Meta:
         model = CompanyActivity
         fields = ["activity", "jurisdiction", "is_primary"]
@@ -16,15 +15,8 @@ class CompanyActivityForm(forms.ModelForm):
                     "data-placeholder": "Search AFIP activity...",
                 }
             ),
-            "jurisdiction": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "CABA, BsAs, Córdoba…"
-                }
-            ),
-            "is_primary": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
+            "jurisdiction": forms.TextInput(attrs={"class": "form-control", "placeholder": "CABA, BsAs, Córdoba…"}),
+            "is_primary": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     # -----------------------------
@@ -56,8 +48,6 @@ class CompanyActivityForm(forms.ModelForm):
             return cleaned
 
         if not existing_primary:
-            raise forms.ValidationError(
-                "At least one activity must be marked as primary."
-            )
+            raise forms.ValidationError("At least one activity must be marked as primary.")
 
         return cleaned

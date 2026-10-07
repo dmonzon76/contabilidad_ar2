@@ -53,9 +53,7 @@ def create_sale_journal_entry(sale):
 
 
 def delete_journal_entries_for_sale(sale):
-    JournalEntry.objects.filter(
-        company=sale.company, description__icontains=f"Venta {sale.number}"
-    ).delete()
+    JournalEntry.objects.filter(company=sale.company, description__icontains=f"Venta {sale.number}").delete()
 
 
 # ============================================================
@@ -69,9 +67,7 @@ def create_cmv_journal_entry(sale):
 
 
 def delete_cmv_journal_entry(sale):
-    JournalEntry.objects.filter(
-        company=sale.company, description__icontains=f"CMV Venta {sale.number}"
-    ).delete()
+    JournalEntry.objects.filter(company=sale.company, description__icontains=f"CMV Venta {sale.number}").delete()
 
 
 # ============================================================

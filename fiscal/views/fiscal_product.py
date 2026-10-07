@@ -8,9 +8,13 @@ from fiscal.models import FiscalProduct
 @login_required
 def fiscal_product_list(request):
     products = FiscalProduct.objects.all().order_by("name")
-    return render(request, "fiscal/fiscal_product_list.html", {
-        "products": products,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_product_list.html",
+        {
+            "products": products,
+        },
+    )
 
 
 @login_required
@@ -23,10 +27,14 @@ def fiscal_product_create(request):
     else:
         form = FiscalProductForm()
 
-    return render(request, "fiscal/fiscal_product_form.html", {
-        "form": form,
-        "mode": "create",
-    })
+    return render(
+        request,
+        "fiscal/fiscal_product_form.html",
+        {
+            "form": form,
+            "mode": "create",
+        },
+    )
 
 
 @login_required
@@ -41,8 +49,12 @@ def fiscal_product_edit(request, pk):
     else:
         form = FiscalProductForm(instance=product)
 
-    return render(request, "fiscal/fiscal_product_form.html", {
-        "form": form,
-        "mode": "edit",
-        "product": product,
-    })
+    return render(
+        request,
+        "fiscal/fiscal_product_form.html",
+        {
+            "form": form,
+            "mode": "edit",
+            "product": product,
+        },
+    )

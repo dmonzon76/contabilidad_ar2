@@ -20,8 +20,6 @@ def get_open_period_for_date(operation_date: date):
     ).first()
 
     if not period:
-        raise NoOpenPeriodError(
-            f"No hay un período contable abierto para la fecha {operation_date.isoformat()}."
-        )
+        raise NoOpenPeriodError(f"No hay un período contable abierto para la fecha {operation_date.isoformat()}.")
 
     return period

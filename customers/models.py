@@ -11,13 +11,14 @@ class Customer(models.Model):
     Toda la información fiscal vive en ThirdPartyTaxProfile.
     Este modelo solamente mantiene información comercial.
     """
+
     tax_profile = models.ForeignKey(
-    ThirdPartyTaxProfile,
-    on_delete=models.PROTECT,
-    related_name="customers",
-    null=True,
-    blank=True,
-)
+        ThirdPartyTaxProfile,
+        on_delete=models.PROTECT,
+        related_name="customers",
+        null=True,
+        blank=True,
+    )
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
@@ -50,8 +51,6 @@ class Customer(models.Model):
         null=True,
     )
 
-   
-
     created_at = models.DateTimeField(
         auto_now_add=True,
         null=True,
@@ -63,4 +62,4 @@ class Customer(models.Model):
         unique_together = ("company", "name")
 
     def __str__(self):
-        return self.name # type: ignore
+        return self.name  # type: ignore

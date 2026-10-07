@@ -47,11 +47,7 @@ class ActiveCompanyMiddleware:
 
         # 4. Validar pertenencia activa en CompanyUser (Aislamiento Multiempresa)
         company_user = (
-            CompanyUser.objects.filter(
-                user=request.user,
-                company_id=active_company_id,
-                is_active=True
-            )
+            CompanyUser.objects.filter(user=request.user, company_id=active_company_id, is_active=True)
             .select_related("company")
             .first()
         )

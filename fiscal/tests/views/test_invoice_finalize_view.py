@@ -21,7 +21,6 @@ def make_company(name):
 
 
 class InvoiceFinalizeViewTests(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_user(username="daniel", password="123")
         self.company_a = make_company("Company A")
@@ -63,8 +62,10 @@ class InvoiceFinalizeViewTests(TestCase):
         with self.assertRaises(PermissionDenied):
             self.client.get(reverse("fiscal:invoice_finalize", args=[self.invoice.id]))
 
-    @patch("fiscal.afip.wsfe_client.WSFEClient.create_invoice",
-           return_value={"success": True, "cae": "11112222", "due_date": "2026-12-31"})
+    @patch(
+        "fiscal.afip.wsfe_client.WSFEClient.create_invoice",
+        return_value={"success": True, "cae": "11112222", "due_date": "2026-12-31"},
+    )
     def test_finalize_generates_cae_and_accounting(self, mock_afip):
         self.client.login(username="daniel", password="123")
 

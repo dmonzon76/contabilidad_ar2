@@ -9,9 +9,13 @@ from fiscal.models.thirdparty_tax import ThirdPartyTaxProfile
 def thirdparty_tax_list(request):
     profiles = ThirdPartyTaxProfile.objects.select_related("customer", "company").order_by("customer__name")
 
-    return render(request, "fiscal/thirdparty_tax_list.html", {
-        "profiles": profiles,
-    })
+    return render(
+        request,
+        "fiscal/thirdparty_tax_list.html",
+        {
+            "profiles": profiles,
+        },
+    )
 
 
 @login_required
@@ -26,8 +30,12 @@ def thirdparty_tax_edit(request, pk):
     else:
         form = ThirdPartyTaxProfileForm(instance=profile)
 
-    return render(request, "fiscal/thirdparty_tax_form.html", {
-        "form": form,
-        "profile": profile,
-        "customer": profile.customer,
-    })
+    return render(
+        request,
+        "fiscal/thirdparty_tax_form.html",
+        {
+            "form": form,
+            "profile": profile,
+            "customer": profile.customer,
+        },
+    )
