@@ -26,8 +26,7 @@
                 <td>{{ row.credit }}</td>
                 <td>{{ row.balance }}</td>
                 <td>
-                    <a href="{% url 'accounting:journal_edit' row.entry_id %}"
-                       class="btn btn-sm btn-outline-primary">
+                    <a href="{% url 'accounting:journal_detail' row.entry_id %}" class="btn btn-sm btn-outline-primary">
                         View Entry
                     </a>
                 </td>

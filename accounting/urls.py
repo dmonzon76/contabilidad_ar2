@@ -30,6 +30,8 @@ from accounting.views.fiscal_year_create import fiscal_year_create
 # Journal
 from accounting.views.journal import (
     journal_create,
+    journal_detail,
+    journal_edit,
     journal_list,
 )
 
@@ -58,6 +60,10 @@ urlpatterns = [
     # Journal
     path("journal/", journal_list, name="journal_list"),
     path("journal/new/", journal_create, name="journal_create"),
+    path("journal/<int:entry_id>/edit/",journal_edit, name="journal_edit"),
+    path("journal/<int:entry_id>/",journal_detail, name="journal_detail"),
+
+
     # Periods
     path("periods/", period_list, name="period_list"),
     path("periods/<int:period_id>/open/", period_open, name="period_open"),

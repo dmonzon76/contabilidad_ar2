@@ -228,7 +228,7 @@ class AccountingService:
     def post_purchase(purchase):
         """
         Contabiliza una factura de compra.
-        Debe: Inventario (Neto) + IVA Crédito Fiscal + Percepciones Sufridas (IIBB, IVA, etc.)
+        Debe: Gastos por línea + IVA Crédito Fiscal + Percepciones Sufridas
         Haber: Proveedores (Total a Pagar) + Retenciones Practicadas (si aplican)
         """
         company = purchase.company
@@ -257,22 +257,49 @@ class AccountingService:
 
         entry = JournalEntry.objects.create(**create_kwargs)
 
-        # 1. DEBE: Inventario o Gastos (Neto Gravado)
-        account_inventory = AccountingService.get_account(
-            company, "INVENTORY", "account_inventory", "Inventario / Mercaderías"
-        )
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_inventory,
-            debit=purchase.net_amount,
-            credit=0,
-            description="Neto Gravado Compra",
-        )
+        from collections import defaultdict
 
-        # 2. DEBE: IVA Crédito Fiscal
+        # ==========================
+        # 1. DEBE: Gastos por línea
+        # ==========================
+
+        amounts_by_account = defaultdict(Decimal)
+
+        for line in purchase.lines.all():
+            account = line.expense_account
+
+            if not account:
+                account = AccountingService.get_account(
+                    company,
+                    "EXPENSES",
+                    "account_expenses",
+                    "Gastos",
+                )
+
+            amounts_by_account[account] += line.subtotal
+
+        for account, amount in amounts_by_account.items():
+            if amount <= 0:
+                continue
+
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account,
+                debit=amount,
+                credit=0,
+                description=f"Compra - {account.name}",
+            )
+
+        # ==========================
+        # 2. DEBE: IVA discriminado
+        # ==========================
+
         if purchase.tax_amount > 0:
             account_iva_credit = AccountingService.get_account(
-                company, "IVA_CREDIT", "account_iva_credit", "IVA Crédito Fiscal"
+                company,
+                "IVA_CREDIT",
+                "account_iva_credit",
+                "IVA Crédito Fiscal",
             )
             JournalEntryLine.objects.create(
                 entry=entry,
@@ -282,24 +309,42 @@ class AccountingService:
                 description="IVA Crédito Fiscal",
             )
 
-        # 3. DEBE: Percepciones Sufridas (IIBB por Jurisdicción, IVA, etc.)
-        if purchase.perception_amount > 0:
-            account_perception = AccountingService.get_account(
-                company, "IIBB_PERCEPTION_ASSET", None, "Percepción IIBB / Impuestos Sufridos"
-            )
+        # ==========================
+        # 3. DEBE: Percepciones
+        # ==========================
+
+        for perception in purchase.perceptions.all():
+            if perception.amount <= 0:
+                continue
+
+            account = perception.account
+
+            if not account:
+                account = AccountingService.get_account(
+                    company,
+                    "IIBB_PERCEPTION_ASSET",
+                    None,
+                    "Percepciones Sufridas",
+                )
+
             JournalEntryLine.objects.create(
                 entry=entry,
-                account=account_perception,
-                debit=purchase.perception_amount,
+                account=account,
+                debit=perception.amount,
                 credit=0,
-                description="Percepciones sufridas en compra",
+                description=str(perception),
             )
 
-        # 4. HABER: Proveedores (Total a Pagar)
-        account_prov = AccountingService.get_account(company, "SUPPLIERS", "account_suppliers", "Proveedores")
+        # 4. HABER: Proveedores
+        account_suppliers = AccountingService.get_account(
+            company,
+            "SUPPLIERS",
+            "account_suppliers",
+            "Proveedores",
+        )
         JournalEntryLine.objects.create(
             entry=entry,
-            account=account_prov,
+            account=account_suppliers,
             debit=0,
             credit=purchase.total_amount,
             description=f"Proveedor {purchase.supplier.name}",
@@ -308,7 +353,10 @@ class AccountingService:
         # 5. HABER: Retenciones Practicadas
         if purchase.retention_amount > 0:
             account_retention = AccountingService.get_account(
-                company, "RETENTIONS_PAYABLE", "account_iibb_retention_payable", "Retenciones a Pagar"
+                company,
+                "RETENTIONS_PAYABLE",
+                "account_iibb_retention_payable",
+                "Retenciones a Pagar",
             )
             JournalEntryLine.objects.create(
                 entry=entry,

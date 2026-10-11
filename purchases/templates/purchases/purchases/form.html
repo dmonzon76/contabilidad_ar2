@@ -198,8 +198,8 @@
             </td>
 
             <td>
-                {{ tf.base_amount }}
-                {% for error in tf.base_amount.errors %}
+                {{ tf.taxable_base }}
+                {% for error in tf.taxable_base.errors %}
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
             </td>
@@ -234,7 +234,7 @@
                 </tr>
             </thead>
 
-            <tbody>
+            <tbody id="perceptions-body">
                 {% for pf in perception_formset %}
                 <tr>
                     {{ pf.id }}
@@ -245,6 +245,21 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="mt-2 mb-3">
+            <button type="button" id="add-perception" class="btn btn-outline-primary btn-sm">
+                + Add Perception
+            </button>
+        </div>
+
+        <template id="empty-perception-form">
+            <tr>
+                {{ perception_formset.empty_form.id }}
+                <td>{{ perception_formset.empty_form.perception_type }}</td>
+                <td>{{ perception_formset.empty_form.amount }}</td>
+                <td>{{ perception_formset.empty_form.DELETE }}</td>
+            </tr>
+        </template>
 
         <hr>
 
@@ -268,7 +283,7 @@
                 </tr>
             </thead>
 
-            <tbody>
+            <tbody id="retentions-body">
                 {% for rf in retention_formset %}
                 <tr>
                     {{ rf.id }}
@@ -279,6 +294,21 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="mt-2 mb-3">
+            <button type="button" id="add-retention" class="btn btn-outline-primary btn-sm">
+                + Add Retention
+            </button>
+        </div>
+
+        <template id="empty-retention-form">
+            <tr>
+                {{ retention_formset.empty_form.id }}
+                <td>{{ retention_formset.empty_form.retention_type }}</td>
+                <td>{{ retention_formset.empty_form.amount }}</td>
+                <td>{{ retention_formset.empty_form.DELETE }}</td>
+            </tr>
+        </template>
 
         <hr>
 
@@ -306,6 +336,12 @@
             const addButton = document.getElementById("add-line");
             const linesBody = document.getElementById("lines-body");
             const lineTemplate = document.getElementById("empty-line-form");
+            const addPerceptionButton = document.getElementById("add-perception");
+            const perceptionsBody = document.getElementById("perceptions-body");
+            const perceptionTemplate = document.getElementById("empty-perception-form");
+            const addRetentionButton = document.getElementById("add-retention");
+            const retentionsBody = document.getElementById("retentions-body");
+            const retentionTemplate = document.getElementById("empty-retention-form");
             const form = document.querySelector("form");
 
             if (addButton && linesBody && lineTemplate) {
@@ -316,6 +352,32 @@
                     const container = document.createElement("tbody");
                     container.innerHTML = rowMarkup;
                     linesBody.appendChild(container.firstElementChild);
+                    totalForms.value = index + 1;
+                    calculatePurchaseTotals();
+                });
+            }
+
+            if (addPerceptionButton && perceptionsBody && perceptionTemplate) {
+                addPerceptionButton.addEventListener("click", function () {
+                    const totalForms = document.getElementById("id_perceptions-TOTAL_FORMS");
+                    const index = Number.parseInt(totalForms.value, 10);
+                    const rowMarkup = perceptionTemplate.innerHTML.replace(/__prefix__/g, index);
+                    const container = document.createElement("tbody");
+                    container.innerHTML = rowMarkup;
+                    perceptionsBody.appendChild(container.firstElementChild);
+                    totalForms.value = index + 1;
+                    calculatePurchaseTotals();
+                });
+            }
+
+            if (addRetentionButton && retentionsBody && retentionTemplate) {
+                addRetentionButton.addEventListener("click", function () {
+                    const totalForms = document.getElementById("id_retentions-TOTAL_FORMS");
+                    const index = Number.parseInt(totalForms.value, 10);
+                    const rowMarkup = retentionTemplate.innerHTML.replace(/__prefix__/g, index);
+                    const container = document.createElement("tbody");
+                    container.innerHTML = rowMarkup;
+                    retentionsBody.appendChild(container.firstElementChild);
                     totalForms.value = index + 1;
                     calculatePurchaseTotals();
                 });
@@ -365,7 +427,7 @@
                         if (row.querySelector('[name$="-DELETE"]')?.checked) return;
                         const tax = row.querySelector('[name$="-tax"]');
                         if (!tax || !tax.value) return;
-                        const baseField = row.querySelector('[name$="-base_amount"]');
+                        const baseField = row.querySelector('[name$="-taxable_base"]');
                         const base = amount(baseField?.value) || net;
                         const taxAmount = base * taxRate(tax) / 100;
                         taxTotal += taxAmount;

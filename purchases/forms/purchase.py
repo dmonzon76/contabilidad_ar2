@@ -176,6 +176,23 @@ class PurchaseRetentionForm(forms.ModelForm):
             ),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["retention_type"].required = False
+        self.fields["amount"].required = False
+        if not self.instance.pk:
+            self.initial["amount"] = None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        retention_type = cleaned_data.get("retention_type")
+        amount = cleaned_data.get("amount")
+        if retention_type and amount is None:
+            self.add_error("amount", "Ingresá el monto de la retención.")
+        elif amount is not None and amount > 0 and not retention_type:
+            self.add_error("retention_type", "Seleccioná el tipo de retención.")
+        return cleaned_data
+
 
 # --- FORMSETS INLINE ---
 
@@ -217,10 +234,18 @@ class PurchaseTaxForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
+        self.fields["tax"].required = False
         self.fields["taxable_base"].required = False
 
     def clean_taxable_base(self):
         return self.cleaned_data.get("taxable_base") or Decimal("0.00")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        taxable_base = cleaned_data.get("taxable_base") or Decimal("0.00")
+        if taxable_base > 0 and not cleaned_data.get("tax"):
+            self.add_error("tax", "Seleccioná un impuesto para la base imponible indicada.")
+        return cleaned_data
 
 
 PurchaseTaxFormSet = inlineformset_factory(
@@ -245,6 +270,6 @@ PurchaseRetentionFormSet = inlineformset_factory(
     Purchase,
     PurchaseRetention,
     form=PurchaseRetentionForm,
-    extra=1,
+    extra=0,
     can_delete=True,
 )
