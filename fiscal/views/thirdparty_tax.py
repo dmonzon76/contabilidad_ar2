@@ -36,6 +36,6 @@ def thirdparty_tax_edit(request, pk):
         {
             "form": form,
             "profile": profile,
-            "customer": profile.customer,
+            "customer": getattr(profile, "customer"),
         },
     )
