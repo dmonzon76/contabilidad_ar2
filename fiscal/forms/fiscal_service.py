@@ -1,4 +1,7 @@
+from typing import cast
+
 from django import forms
+from django.forms import ModelChoiceField
 
 from fiscal.models import FiscalService
 from fiscal.models.tax import Tax
@@ -24,4 +27,4 @@ class FiscalServiceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["tax"].queryset = Tax.objects.filter(enabled=True)
+        cast(ModelChoiceField, self.fields["tax"]).queryset = Tax.objects.filter(enabled=True)

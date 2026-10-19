@@ -51,6 +51,7 @@ class Purchase(models.Model):
             Decimal("0"),
         ).quantize(money)
         tax_lines = list(self.taxes.select_related("tax"))
+
         if any(line.tax is not None for line in lines):
             self.tax_amount = line_tax_amount
         else:
@@ -58,65 +59,46 @@ class Purchase(models.Model):
                 if tax_line.tax is None:
                     tax_line.amount = Decimal("0")
                 else:
-                    if tax_line.base_amount <= 0:
-                        tax_line.base_amount = self.net_amount
-                    tax_line.amount = (tax_line.base_amount * tax_line.tax.rate / Decimal("100")).quantize(money)
-                tax_line.save(update_fields=["base_amount", "amount"])
+                    if tax_line.taxable_base <= 0:
+                        tax_line.taxable_base = self.net_amount
+                    tax_line.amount = (
+                        tax_line.taxable_base
+                        * tax_line.tax.rate
+                        / Decimal("100")
+                    ).quantize(money)
+                tax_line.save(update_fields=["taxable_base", "amount"])
+
             self.tax_amount = sum(
                 (tax_line.amount for tax_line in tax_lines),
                 Decimal("0"),
             ).quantize(money)
 
-        # 3) Percepciones automáticas basadas en perfil fiscal del proveedor
-        profile = getattr(self.supplier, "tax_profile", None)
-
-        if profile:
-            # --- IIBB ---
-            is_iibb_agent = getattr(profile, "is_iibb_perception_agent", False)
-            iibb_rate = Decimal(str(getattr(profile, "iibb_perception_rate", 0) or "0"))
-
-            if (is_iibb_agent or iibb_rate > 0) and not getattr(profile, "is_iibb_exempt", False):
-                self.perceptions.get_or_create(
-                    perception_type="IIBB",
-                    defaults={"amount": Decimal("0")},
-                )
-
-            # --- IVA ---
-            is_iva_agent = getattr(profile, "is_iva_perception_agent", False)
-            iva_rate = Decimal(str(getattr(profile, "iva_perception_rate", 0) or "0"))
-            afip_cat = getattr(profile, "afip_category", "")
-
-            if is_iva_agent or iva_rate > 0:
-                self.perceptions.get_or_create(
-                    perception_type="IVA",
-                    defaults={"amount": Decimal("0")},
-                )
-
-        for p in self.perceptions.all():
-            if not profile:
-                continue
-
-            if p.perception_type == "IIBB":
-                if getattr(profile, "is_iibb_exempt", False):
-                    p.amount = Decimal("0")
-                elif iibb_rate > 0:
-                    p.amount = (self.net_amount * iibb_rate / Decimal("100")).quantize(money)
-            elif p.perception_type == "IVA":
-                if iva_rate > 0:
-                    p.amount = (self.net_amount * iva_rate / Decimal("100")).quantize(money)
-                elif is_iva_agent and afip_cat == "RI":
-                    p.amount = (self.net_amount * Decimal("0.03")).quantize(money)
-            if p.perception_type in {"IIBB", "IVA"}:
-                p.save(update_fields=["amount"])
-
-        self.perception_amount = sum((p.amount for p in self.perceptions.all()), Decimal("0")).quantize(money)
-        self.retention_amount = sum((r.amount for r in self.retentions.all()), Decimal("0")).quantize(money)
-
-        self.total_amount = (
-            self.net_amount + self.tax_amount + self.perception_amount - self.retention_amount
+        self.perception_amount = sum(
+            (perception.amount for perception in self.perceptions.all()),
+            Decimal("0"),
         ).quantize(money)
 
-        self.save()
+        self.retention_amount = sum(
+            (retention.amount for retention in self.retentions.all()),
+            Decimal("0"),
+        ).quantize(money)
+
+        self.total_amount = (
+            self.net_amount
+            + self.tax_amount
+            + self.perception_amount
+            - self.retention_amount
+        ).quantize(money)
+
+        self.save(
+            update_fields=[
+                "net_amount",
+                "tax_amount",
+                "perception_amount",
+                "retention_amount",
+                "total_amount",
+            ]
+        )
 
 
 class PurchaseLine(models.Model):

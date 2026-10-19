@@ -40,10 +40,10 @@ class InvoiceAccountingTests(TestCase):
             },
         )
         for code, name, account_type in (
-            ("CAJA", "Caja", "ASSET"),
-            ("VENTAS", "Ventas", "INCOME"),
-            ("IVA_DEBITO", "IVA Débito Fiscal", "LIABILITY"),
-        ):
+        ("CASH", "Cash", "ASSET"),
+        ("PRODUCT_SALES", "Product Sales", "INCOME"),
+        ("VAT_DEBIT_FISCAL", "VAT Debit Fiscal", "LIABILITY"),
+    ):
             Account.objects.create(
                 company=self.company,
                 code=code,

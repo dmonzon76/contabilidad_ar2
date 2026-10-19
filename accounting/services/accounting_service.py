@@ -17,21 +17,126 @@ class AccountingService:
 
     # Mapeo flexible de códigos para cada función contable
     ACCOUNT_CODE_MAP = {
-        "CUSTOMERS": ["1.1.5", "1.1.02.001", "1.1.02", "CLIENTES"],
-        "SALES_GOODS": ["4.1.1", "4.1.01.001", "4.1.01", "4.1", "VENTAS"],
-        "SALES_SERVICES": ["4.1.2", "4.1.02.001", "4.1.02", "VENTAS_SERVICIOS"],
-        "IVA_DEBIT": ["7.1.1", "2.1.02.001", "2.1.05", "7.1", "IVA_DEBITO"],
-        "IVA_CREDIT": ["7.1.2", "1.1.03.002", "1.1.07", "7.2", "IVA_CREDITO"],
-        "SUPPLIERS": ["2.1.1", "2.1.01.001", "2.1.01", "PROVEEDORES"],
-        "INVENTORY": ["1.1.8", "1.1.04.001", "1.1.04", "1.1.09", "INVENTARIO"],
-        "COGS": ["5.1.1", "5.1.01.001", "5.1.01", "5.1", "CMV"],
-        "EXPENSES": ["6.1.1", "6.1.01", "6.1", "6", "GASTOS"],
-        "CASH": ["1.1.1", "1.1.01.001", "1.1.01", "CAJA"],
-        "IIBB_PERCEPTION_ASSET": ["7.4.1", "1.1.03.004", "1.1.08", "PERCEPCION_IIBB_SUFRIDA"],
-        "IIBB_PERCEPTION_LIABILITY": ["7.4.1", "2.1.02.004", "2.1.06", "PERCEPCION_IIBB_A_DEPOSITAR"],
-        "IVA_PERCEPTION_LIABILITY": ["7.1.5", "2.1.02.002", "PERCEPCION_IVA_A_DEPOSITAR"],
-        "RETENTIONS_PAYABLE": ["7.4.2", "7.1.6", "2.1.02.002", "2.1.08", "RETENCIONES_A_PAGAR"],
-    }
+    # ==========================================
+    # ASSETS
+    # ==========================================
+
+    "CASH": [
+        "1.1.01",
+        "CASH",
+    ],
+
+    "BANKS": [
+        "1.1.02",
+        "BANKS",
+    ],
+
+    "CUSTOMERS": [
+        "1.1.04",
+        "ACCOUNTS_RECEIVABLE",
+    ],
+
+    "OTHER_RECEIVABLES": [
+        "1.1.05",
+        "OTHER_RECEIVABLES",
+    ],
+
+    "SUPPLIER_ADVANCES": [
+        "1.1.06",
+        "ADVANCES_TO_SUPPLIERS",
+    ],
+
+    "IVA_CREDIT": [
+        "1.1.07",
+        "VAT_CREDIT_FISCAL",
+    ],
+
+    "IVA_PERCEPTION_ASSET": [
+        "1.1.08",
+        "VAT_PERCEPTIONS",
+    ],
+
+    "IIBB_PERCEPTION_ASSET": [
+        "1.1.09",
+        "GROSS_INCOME_TAX_PERCEPTIONS",
+    ],
+
+    "INCOME_TAX_RETENTIONS": [
+        "1.1.10",
+        "INCOME_TAX_RETENTIONS",
+    ],
+
+    "INVENTORY": [
+        "1.1.11",
+        "MERCHANDISE_INVENTORY",
+    ],
+
+    # ==========================================
+    # LIABILITIES
+    # ==========================================
+
+    "SUPPLIERS": [
+        "2.1.01",
+        "SUPPLIERS",
+    ],
+
+    "IVA_DEBIT": [
+        "2.1.05",
+        "VAT_DEBIT_FISCAL",
+    ],
+
+    "IVA_PAYABLE": [
+        "2.1.06",
+        "VAT_PAYABLE",
+    ],
+
+    "IVA_PERCEPTION_LIABILITY": [
+        "2.1.07",
+        "VAT_PERCEPTIONS_PAYABLE",
+    ],
+
+    "IIBB_PERCEPTION_LIABILITY": [
+        "2.1.08",
+        "GROSS_INCOME_TAX_PAYABLE",
+    ],
+
+    "RETENTIONS_PAYABLE": [
+        "2.1.09",
+        "TAX_RETENTIONS_PAYABLE",
+    ],
+
+    # ==========================================
+    # REVENUE
+    # ==========================================
+
+    "SALES_GOODS": [
+        "4.1.01",
+        "PRODUCT_SALES",
+    ],
+
+    "SALES_SERVICES": [
+        "4.1.02",
+        "SERVICE_SALES",
+    ],
+
+    # ==========================================
+    # COST OF SALES
+    # ==========================================
+
+    "COGS": [
+        "5.1.01",
+        "COST_OF_GOODS_SOLD",
+    ],
+
+    # ==========================================
+    # EXPENSES
+    # ==========================================
+
+    "EXPENSES": [
+        "6.1.01",
+        "ADMINISTRATIVE_SALARIES",
+    ],
+}
 
     @staticmethod
     def get_account(company, account_key, setting_field=None, custom_name=""):

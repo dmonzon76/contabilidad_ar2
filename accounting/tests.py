@@ -46,15 +46,48 @@ class AccountingServiceTestCase(TestCase):
 
         # 4. Cuentas contables mínimas requeridas
         accounts = {
-            "account_client": ("CLIENTES", "Deudores por Ventas", "ASSET"),
-            "account_sales": ("VENTAS", "Ventas de Mercaderías", "INCOME"),
-            "account_sales_services": ("VENTAS_SERVICIOS", "Ventas de Servicios", "INCOME"),
-            "account_iva_debito": ("IVA_DEBITO", "IVA Débito Fiscal", "LIABILITY"),
-            "account_iibb": ("PERCEPCION_IIBB_A_DEPOSITAR", "Percepción IIBB Practicada", "LIABILITY"),
-            "account_vat_perc": ("PERCEPCION_IVA_A_DEPOSITAR", "Percepción IVA Practicada", "LIABILITY"),
-            "account_cmv": ("CMV", "Costo de Mercaderías Vendidas", "EXPENSE"),
-            "account_inventory": ("INVENTARIO", "Mercaderías de Reventa", "ASSET"),
+        "account_client": (
+            "ACCOUNTS_RECEIVABLE",
+            "Accounts Receivable",
+            "ASSET",
+        ),
+        "account_sales_goods": (
+            "PRODUCT_SALES",
+            "Product Sales",
+            "INCOME",
+        ),
+        "account_sales_services": (
+            "SERVICE_SALES",
+            "Service Sales",
+            "INCOME",
+        ),
+        "account_iva_debito": (
+            "VAT_DEBIT_FISCAL",
+            "VAT Debit Fiscal",
+            "LIABILITY",
+        ),
+        "account_iibb": (
+            "GROSS_INCOME_TAX_PAYABLE",
+            "Gross Income Tax Payable",
+            "LIABILITY",
+        ),
+        "account_vat_perc": (
+            "VAT_PERCEPTIONS_PAYABLE",
+            "VAT Perceptions Payable",
+            "LIABILITY",
+        ),
+        "account_cmv": (
+            "COST_OF_GOODS_SOLD",
+            "Cost Of Goods Sold",
+            "EXPENSE",
+        ),
+        "account_inventory": (
+            "MERCHANDISE_INVENTORY",
+            "Merchandise Inventory",
+            "ASSET",
+        ),
         }
+
 
         for attribute, (code, name, account_type) in accounts.items():
             account, _ = Account.objects.get_or_create(
