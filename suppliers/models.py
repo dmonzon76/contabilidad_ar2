@@ -15,7 +15,7 @@ class Supplier(models.Model):
     company = models.ForeignKey(
     Company,
     on_delete=models.CASCADE,
-    related_name="tax_profiles",
+    related_name="suppliers",
 )
 
     name = models.CharField(

@@ -23,11 +23,11 @@ class ThirdPartyTaxProfile(models.Model):
         ("NON_REGISTERED", "Non Registered"),
     ]
     supplier = models.OneToOneField(
-        "suppliers.Supplier",
-        on_delete=models.CASCADE,
-        related_name="fiscal_profile",
-        null=True,
-        blank=True,
+       "suppliers.Supplier",
+       on_delete=models.CASCADE,
+       related_name="fiscal_profile",
+       null=True,
+       blank=True,
     )
 
     company = models.ForeignKey(
