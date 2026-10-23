@@ -13,10 +13,10 @@ class Supplier(models.Model):
     """
 
     company = models.ForeignKey(
-        Company,
-        on_delete=models.CASCADE,
-        related_name="suppliers",
-    )
+    Company,
+    on_delete=models.CASCADE,
+    related_name="tax_profiles",
+)
 
     name = models.CharField(
         max_length=255,
@@ -37,7 +37,7 @@ class Supplier(models.Model):
         null=True,
         blank=True,
     )
-
+   
     email = models.EmailField(
         blank=True,
         null=True,

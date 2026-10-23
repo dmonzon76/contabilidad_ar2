@@ -1,31 +1,132 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="container py-4">
 
-    <h2 class="mb-4">{{ supplier.name }}</h2>
+    <h2 class="mb-4">
+        {{ supplier.name }}
+    </h2>
 
     <div class="card p-4 shadow-sm">
 
-        <h5 class="mb-3">Basic Information</h5>
-        <p><strong>Email:</strong> {{ supplier.email }}</p>
-        <p><strong>Phone:</strong> {{ supplier.phone }}</p>
-        <p><strong>Address:</strong> {{ supplier.address }}</p>
+        <h5 class="mb-3">
+            Basic Information
+        </h5>
+
+        <p>
+            <strong>Email:</strong>
+            {{ supplier.email|default:"-" }}
+        </p>
+
+        <p>
+            <strong>Phone:</strong>
+            {{ supplier.phone|default:"-" }}
+        </p>
+
+        <p>
+            <strong>Address:</strong>
+            {{ supplier.address|default:"-" }}
+        </p>
 
         <hr class="my-4">
 
-        <h5 class="mb-3">Fiscal Information</h5>
-        <p><strong>CUIT:</strong> {{ supplier.tax_id }}</p>
-        <p><strong>IVA Condition:</strong> {{ supplier.get_iva_condition_display }}</p>
-        <p><strong>IIBB Rate:</strong> {{ supplier.iibb_rate }}%</p>
-        <p><strong>IIBB Exempt:</strong> {{ supplier.is_iibb_exempt|yesno:"Yes,No" }}</p>
-        <p><strong>Ganancias Rate:</strong> {{ supplier.ganancias_rate }}%</p>
-        <p><strong>Ganancias Exempt:</strong> {{ supplier.is_ganancias_exempt|yesno:"Yes,No" }}</p>
+        <h5 class="mb-3">
+            Fiscal Information
+        </h5>
 
-        <a href="{% url 'suppliers:supplier_list' %}" class="btn btn-secondary mt-3">Back</a>
-        <a href="{% url 'suppliers:supplier_edit' supplier.pk %}" class="btn btn-primary mt-3">Edit</a>
-        <a href="{% url 'suppliers:supplier_delete' supplier.pk %}" class="btn btn-outline-danger mt-3">Delete</a>
+        <p>
+            <strong>CUIT:</strong>
+            {{ supplier.tax_id }}
+        </p>
+
+        {% if supplier.tax_profile %}
+
+            <p>
+                <strong>Tax Profile:</strong>
+                {{ supplier.tax_profile.name }}
+            </p>
+
+            <p>
+                <strong>AFIP Category:</strong>
+                {{ supplier.tax_profile.get_afip_category_display }}
+            </p>
+
+            <p>
+                <strong>IIBB Status:</strong>
+                {{ supplier.tax_profile.get_iibb_status_display }}
+            </p>
+
+            <p>
+                <strong>Multilateral Agreement:</strong>
+                {{ supplier.tax_profile.has_multilateral_agreement|yesno:"Yes,No" }}
+            </p>
+
+            {% if supplier.tax_profile.multilateral_number %}
+            <p>
+                <strong>CM Number:</strong>
+                {{ supplier.tax_profile.multilateral_number }}
+            </p>
+            {% endif %}
+
+            <p>
+                <strong>Status:</strong>
+
+                {% if supplier.tax_profile.is_active %}
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        Inactive
+                    </span>
+                {% endif %}
+            </p>
+
+            {% if supplier.tax_profile.notes %}
+            <p>
+                <strong>Notes:</strong><br>
+                {{ supplier.tax_profile.notes }}
+            </p>
+            {% endif %}
+
+        {% else %}
+
+            <div class="alert alert-warning">
+                No tax profile assigned.
+            </div>
+
+        {% endif %}
+
+        <hr class="my-4">
+
+        <div class="d-flex gap-2">
+
+            <a
+                href="{% url 'suppliers:supplier_list' %}"
+                class="btn btn-secondary"
+            >
+                Back
+            </a>
+
+            <a
+                href="{% url 'suppliers:supplier_edit' supplier.pk %}"
+                class="btn btn-primary"
+            >
+                Edit
+            </a>
+
+            <a
+                href="{% url 'suppliers:supplier_delete' supplier.pk %}"
+                class="btn btn-outline-danger"
+            >
+                Delete
+            </a>
+
+        </div>
+
     </div>
 
 </div>
+
 {% endblock %}

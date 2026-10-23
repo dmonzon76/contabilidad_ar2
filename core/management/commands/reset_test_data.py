@@ -6,22 +6,19 @@ from accounting.models import (
     JournalEntryLine,
 )
 from accounting.models.account_movement import AccountMovement
-
+from inventory.models import (
+    InventoryMovement,
+)
 from purchases.models import (
     Purchase,
     PurchaseLine,
-    PurchaseTax,
     PurchasePerception,
     PurchaseRetention,
+    PurchaseTax,
 )
-
 from sales.models import (
     Sale,
     SaleItem,
-)
-
-from inventory.models import (
-    InventoryMovement,
 )
 
 

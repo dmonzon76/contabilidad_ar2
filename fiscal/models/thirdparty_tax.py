@@ -22,6 +22,19 @@ class ThirdPartyTaxProfile(models.Model):
         ("EXEMPT", "Exempt"),
         ("NON_REGISTERED", "Non Registered"),
     ]
+    supplier = models.OneToOneField(
+        "suppliers.Supplier",
+        on_delete=models.CASCADE,
+        related_name="fiscal_profile",
+        null=True,
+        blank=True,
+    )
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="tax_profiles",
+    )
 
     company = models.ForeignKey(
         Company,
@@ -68,3 +81,4 @@ class ThirdPartyTaxProfile(models.Model):
 
     def __str__(self):
         return self.name
+

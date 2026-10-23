@@ -1,15 +1,219 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="erp-title-page">Third Party Tax Profile</h2>
 
-<div class="erp-card p-3">
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+<div class="container-fluid">
 
-        <button class="btn btn-primary">Save</button>
-        <a href="{% url 'thirdparty_tax_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="erp-title-page mb-0">
+            Tax Profile
+        </h2>
+
+        <a
+            href="{% url 'fiscal:thirdparty_tax_list' %}"
+            class="btn btn-secondary"
+        >
+            Back
+        </a>
+
+    </div>
+
+    <div class="row">
+
+        <!-- PROFILE -->
+
+        <div class="col-lg-5">
+
+            <div class="erp-card p-4">
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <h5 class="mb-3">
+                        General Information
+                    </h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Profile Name
+                        </label>
+                        {{ form.name }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            AFIP Category
+                        </label>
+                        {{ form.afip_category }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            IIBB Status
+                        </label>
+                        {{ form.iibb_status }}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.has_multilateral_agreement }}
+                        <label class="form-check-label">
+                            Multilateral Agreement
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            CM Number
+                        </label>
+                        {{ form.multilateral_number }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Notes
+                        </label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="form-check mb-4">
+                        {{ form.is_active }}
+                        <label class="form-check-label">
+                            Active
+                        </label>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Save Profile
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- RULES -->
+
+        <div class="col-lg-7">
+
+            <div class="erp-card p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h5 class="mb-0">
+                        Tax Rules
+                    </h5>
+
+                    <a
+                        href="{% url 'fiscal:thirdparty_tax_rule_create' %}?profile={{ profile.id }}"
+                        class="btn btn-success"
+                    >
+                        Add Rule
+                    </a>
+
+                </div>
+
+                <table class="table table-hover table-sm align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Regime</th>
+                            <th>Jurisdiction</th>
+                            <th>Application</th>
+                            <th>Rate</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for rule in rules %}
+
+                        <tr>
+
+                            <td>
+                                {{ rule.regime.name }}
+                            </td>
+
+                            <td>
+                                {{ rule.regime.jurisdiction|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ rule.regime.get_application_type_display }}
+                            </td>
+
+                            <td>
+                                {{ rule.effective_rate }}%
+                            </td>
+
+                            <td>
+
+                                {% if rule.is_active %}
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        Inactive
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+                            <td class="text-end">
+
+                                <a
+                                    href="{% url 'fiscal:thirdparty_tax_rule_edit' rule.pk %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="{% url 'fiscal:thirdparty_tax_rule_delete' rule.pk %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Delete
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="text-center text-muted"
+                            >
+                                No tax rules configured
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
 {% endblock %}

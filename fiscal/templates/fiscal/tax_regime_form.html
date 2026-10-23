@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">
+
+    {% if regime %}
+        Edit Tax Regime
+    {% else %}
+        New Tax Regime
+    {% endif %}
+
+</h2>
+
+<div class="erp-card p-4">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Save
+        </button>
+
+        <a
+            href="{% url 'fiscal:tax_regime_list' %}"
+            class="btn btn-secondary"
+        >
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

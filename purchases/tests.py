@@ -10,7 +10,7 @@ from accounting.models.account import Account
 from accounting.models.period import FiscalYear, Period
 from accounting.services import AccountingService
 from company.models import Company
-from fiscal.models import Tax, ThirdPartyTaxProfile
+from fiscal.models import Tax
 from purchases.models import Purchase, PurchaseLine, PurchasePerception, PurchaseRetention
 from suppliers.models import Supplier
 

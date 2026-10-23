@@ -34,9 +34,24 @@ from fiscal.views.fiscal_service import (
     fiscal_service_edit,
     fiscal_service_list,
 )
+from fiscal.views.tax_regime import (
+    tax_regime_create,
+    tax_regime_delete,
+    tax_regime_edit,
+    tax_regime_list,
+)
 from fiscal.views.thirdparty_tax import (
+    thirdparty_tax_create,
+    thirdparty_tax_delete,
+    thirdparty_tax_detail,
     thirdparty_tax_edit,
     thirdparty_tax_list,
+)
+from fiscal.views.thirdparty_tax_rule import (
+    thirdparty_tax_rule_create,
+    thirdparty_tax_rule_delete,
+    thirdparty_tax_rule_edit,
+    thirdparty_tax_rule_list,
 )
 
 app_name = "fiscal"
@@ -48,15 +63,90 @@ urlpatterns = [
     path("afip/", afip_activity_list, name="afip_activity_list"),
     path("afip/new/", afip_activity_create, name="afip_activity_create"),
     path("afip/<int:pk>/edit/", afip_activity_edit, name="afip_activity_edit"),
+    path("regimes/", tax_regime_list, name="tax_regime_list"),
+    path("regimes/new/", tax_regime_create, name="tax_regime_create"),
+    path("regimes/<int:pk>/edit/", tax_regime_edit, name="tax_regime_edit"),
+    path("regimes/<int:pk>/delete/", tax_regime_delete, name="tax_regime_delete"),
     # -------------------------
     # COMPANY TAX PROFILE
     # -------------------------
     path("company/", company_tax_profile, name="company_tax_profile"),
     # -------------------------
+    # TAX REGIMES
+    # -------------------------
+    path(
+        "regimes/",
+        tax_regime_list,
+        name="tax_regime_list",
+    ),
+    path(
+        "regimes/new/",
+        tax_regime_create,
+        name="tax_regime_create",
+    ),
+    path(
+        "regimes/<int:pk>/edit/",
+        tax_regime_edit,
+        name="tax_regime_edit",
+    ),
+    path(
+        "regimes/<int:pk>/delete/",
+        tax_regime_delete,
+        name="tax_regime_delete",
+    ),
+    # -------------------------
     # THIRD PARTY TAX PROFILES
     # -------------------------
     path("thirdparty/", thirdparty_tax_list, name="thirdparty_tax_list"),
     path("thirdparty/<int:pk>/edit/", thirdparty_tax_edit, name="thirdparty_tax_edit"),
+    path(
+        "thirdparty/new/",
+        thirdparty_tax_create,
+        name="thirdparty_tax_create",
+    ),
+    path(
+        "thirdparty/<int:pk>/",
+        thirdparty_tax_detail,
+        name="thirdparty_tax_detail",
+    ),
+    path(
+        "thirdparty/<int:pk>/delete/",
+        thirdparty_tax_delete,
+        name="thirdparty_tax_delete",
+    ),
+# -------------------------
+# THIRD PARTY TAX RULES
+# -------------------------
+
+path(
+    "tax-rules/",
+    thirdparty_tax_rule_list,
+    name="thirdparty_tax_rule_list",
+),
+
+path(
+    "tax-rules/new/",
+    thirdparty_tax_rule_create,
+    name="thirdparty_tax_rule_create",
+),
+
+path(
+    "tax-rules/<int:pk>/edit/",
+    thirdparty_tax_rule_edit,
+    name="thirdparty_tax_rule_edit",
+),
+
+path(
+    "tax-rules/<int:pk>/delete/",
+    thirdparty_tax_rule_delete,
+    name="thirdparty_tax_rule_delete",
+),
+
+
+
+
+
+
     # -------------------------
     # ELECTRONIC VOUCHER BOOKS
     # -------------------------

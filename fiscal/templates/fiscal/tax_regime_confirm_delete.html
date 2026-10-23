@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="erp-card p-4">
+
+    <h3>
+        Delete Tax Regime
+    </h3>
+
+    <p>
+
+        Are you sure you want to delete:
+
+        <strong>
+            {{ regime.name }}
+        </strong>
+
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >
+            Delete
+        </button>
+
+        <a
+            href="{% url 'fiscal:tax_regime_list' %}"
+            class="btn btn-secondary"
+        >
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

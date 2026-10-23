@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="erp-title-page">
+    Tax Regimes
+</h2>
+
+<div class="erp-card p-3">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <h5 class="mb-0">
+            Regimes
+        </h5>
+
+        <a
+            href="{% url 'fiscal:tax_regime_create' %}"
+            class="btn btn-primary"
+        >
+            New Regime
+        </a>
+
+    </div>
+
+    <table class="table table-hover table-sm">
+
+        <thead>
+
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Tax Type</th>
+            <th>Application</th>
+            <th>Jurisdiction</th>
+            <th>Rate</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for r in regimes %}
+
+        <tr>
+
+            <td>{{ r.code }}</td>
+
+            <td>{{ r.name }}</td>
+
+            <td>{{ r.get_tax_type_display }}</td>
+
+            <td>{{ r.get_application_type_display }}</td>
+
+            <td>{{ r.jurisdiction|default:"-" }}</td>
+
+            <td>{{ r.rate }}%</td>
+
+            <td>
+
+                {% if r.is_active %}
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        Inactive
+                    </span>
+                {% endif %}
+
+            </td>
+
+            <td>
+
+                <a
+                    href="{% url 'fiscal:tax_regime_edit' r.pk %}"
+                    class="btn btn-sm btn-outline-primary"
+                >
+                    Edit
+                </a>
+
+                <a
+                    href="{% url 'fiscal:tax_regime_delete' r.pk %}"
+                    class="btn btn-sm btn-outline-danger"
+                >
+                    Delete
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="8" class="text-center text-muted">
+                No tax regimes found.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
