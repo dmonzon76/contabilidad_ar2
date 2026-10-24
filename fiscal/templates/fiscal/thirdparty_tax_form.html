@@ -10,6 +10,10 @@
             Tax Profile
         </h2>
 
+        <span class="text-muted">
+    Create rules from a Fiscal Profile.
+</span>
+
         <a
             href="{% url 'fiscal:thirdparty_tax_list' %}"
             class="btn btn-secondary"
@@ -110,7 +114,7 @@
                     </h5>
 
                     <a
-                        href="{% url 'fiscal:thirdparty_tax_rule_create' %}?profile={{ profile.id }}"
+                       href="{% url 'fiscal:thirdparty_tax_rule_create' profile.id %}"
                         class="btn btn-success"
                     >
                         Add Rule

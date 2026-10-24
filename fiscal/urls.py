@@ -125,7 +125,7 @@ path(
 ),
 
 path(
-    "tax-rules/new/",
+    "profiles/<int:profile_id>/rules/add/",
     thirdparty_tax_rule_create,
     name="thirdparty_tax_rule_create",
 ),

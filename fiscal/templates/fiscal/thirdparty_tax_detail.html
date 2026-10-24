@@ -125,7 +125,7 @@
             </h4>
 
             <a
-                href="{% url 'fiscal:thirdparty_tax_rule_create' %}?profile={{ profile.id }}"
+                href="{% url 'fiscal:thirdparty_tax_rule_create' profile.id %}"
                 class="btn btn-success"
             >
                 Add Rule

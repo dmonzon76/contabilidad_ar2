@@ -42,10 +42,23 @@
 
         {% if supplier.tax_profile %}
 
-            <p>
-                <strong>Tax Profile:</strong>
-                {{ supplier.tax_profile.name }}
-            </p>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div>
+
+        <strong>Tax Profile:</strong>
+        {{ supplier.tax_profile.name }}
+
+    </div>
+
+    <a
+        href="{% url 'fiscal:thirdparty_tax_edit' supplier.tax_profile.id %}"
+        class="btn btn-sm btn-primary"
+    >
+        Edit Fiscal Profile
+    </a>
+
+    </div>
 
             <p>
                 <strong>AFIP Category:</strong>

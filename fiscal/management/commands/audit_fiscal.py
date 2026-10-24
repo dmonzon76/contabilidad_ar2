@@ -1,9 +1,12 @@
+from typing import Self
+
 from django.apps import apps
 from django.core.management.base import BaseCommand
 
 from fiscal.models import (
     JurisdictionCoefficient,
     TaxRegime,
+    TaxRegistryImport,
     ThirdPartyTaxProfile,
     ThirdPartyTaxRule,
 )
@@ -28,6 +31,9 @@ class Command(BaseCommand):
         self.audit_unused_jurisdictions()
 
         self.audit_coefficients()
+
+        self.audit_registries()
+
 
     def print_header(self):
 
@@ -251,3 +257,48 @@ class Command(BaseCommand):
                         f"{count} coefficients loaded."
                     )
                 )
+
+    def audit_registries(self):
+
+        self.stdout.write("")
+        self.stdout.write(
+            "TAX REGISTRIES"
+        )
+        self.stdout.write(
+            "-" * 60
+        )
+
+        imports = (
+            TaxRegistryImport.objects
+            .order_by(
+                "-period"
+            )
+        )
+
+        if not imports.exists():
+
+            self.stdout.write(
+                self.style.WARNING(
+                    "No registries imported."
+                )
+            )
+
+            return
+
+        for registry in imports:
+
+            self.stdout.write(
+                f"{registry.registry_type}"
+            )
+
+            self.stdout.write(
+                f"  Period: "
+                f"{registry.period}"
+            )
+
+            self.stdout.write(
+                f"  Records: "
+                f"{registry.records_count}"
+            )
+
+            self.stdout.write("")

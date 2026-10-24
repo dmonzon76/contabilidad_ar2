@@ -25,6 +25,20 @@ class ThirdPartyTaxRule(models.Model):
         blank=True,
     )
 
+    CALCULATION_METHODS = [
+
+    ("FIXED", "Fixed Rate"),
+
+    ("REGISTRY", "Monthly Registry"),
+
+    ("CERTIFICATE", "Certificate"),
+
+]
+    calculation_method = models.CharField(
+    max_length=20,
+    choices=CALCULATION_METHODS,
+    default="FIXED",
+)
     is_active = models.BooleanField(
         default=True,
     )

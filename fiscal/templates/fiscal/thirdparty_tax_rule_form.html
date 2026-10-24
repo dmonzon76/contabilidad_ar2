@@ -2,105 +2,57 @@
 
 {% block content %}
 
-<h2 class="erp-title-page">
-    Third Party Tax Rules
-</h2>
+<div class="container py-4">
 
-<div class="erp-card p-3">
+    <h2 class="mb-4">
+        New Tax Rule
+    </h2>
 
-    <div class="d-flex justify-content-between mb-3">
+    <div class="card p-4">
 
-        <h5 class="mb-0">
-            Rules
-        </h5>
+        <form method="post">
 
-        <a
-            href="{% url 'fiscal:thirdparty_tax_rule_create' %}"
-            class="btn btn-primary"
-        >
-            New Rule
-        </a>
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% for err in field.errors %}
+                        <div class="text-danger">
+                            {{ err }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Save Rule
+            </button>
+
+            <a
+                href="{% url 'fiscal:thirdparty_tax_edit' profile.id %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+        </form>
 
     </div>
-
-    <table class="table table-hover table-sm">
-
-        <thead>
-        <tr>
-            <th>Profile</th>
-            <th>Regime</th>
-            <th>Jurisdiction</th>
-            <th>Rate</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-        </thead>
-
-        <tbody>
-
-        {% for rule in rules %}
-
-        <tr>
-
-            <td>{{ rule.tax_profile }}</td>
-
-            <td>{{ rule.regime.name }}</td>
-
-            <td>
-                {{ rule.regime.jurisdiction|default:"-" }}
-            </td>
-
-            <td>
-                {{ rule.effective_rate }}%
-            </td>
-
-            <td>
-
-                {% if rule.is_active %}
-                    <span class="badge bg-success">
-                        Active
-                    </span>
-                {% else %}
-                    <span class="badge bg-secondary">
-                        Inactive
-                    </span>
-                {% endif %}
-
-            </td>
-
-            <td>
-
-                <a
-                    href="{% url 'fiscal:thirdparty_tax_rule_edit' rule.pk %}"
-                    class="btn btn-sm btn-outline-primary"
-                >
-                    Edit
-                </a>
-
-                <a
-                    href="{% url 'fiscal:thirdparty_tax_rule_delete' rule.pk %}"
-                    class="btn btn-sm btn-outline-danger"
-                >
-                    Delete
-                </a>
-
-            </td>
-
-        </tr>
-
-        {% empty %}
-
-        <tr>
-            <td colspan="6" class="text-center text-muted">
-                No rules defined.
-            </td>
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-    </table>
 
 </div>
 

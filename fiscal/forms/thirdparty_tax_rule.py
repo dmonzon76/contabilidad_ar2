@@ -6,32 +6,44 @@ from fiscal.models import ThirdPartyTaxRule
 class ThirdPartyTaxRuleForm(forms.ModelForm):
 
     class Meta:
+
         model = ThirdPartyTaxRule
 
         fields = [
-            "tax_profile",
             "regime",
+            "calculation_method",
             "custom_rate",
             "is_active",
             "notes",
-        ]
+    ]
+
 
         widgets = {
-            "tax_profile": forms.Select(
-                attrs={"class": "form-select"}
-            ),
+
             "regime": forms.Select(
-                attrs={"class": "form-select"}
+                attrs={
+                    "class": "form-select",
+                }
             ),
+            "calculation_method": forms.Select(
+                attrs={
+            "class": "form-select",
+            }
+            ),
+
             "custom_rate": forms.NumberInput(
                 attrs={
                     "class": "form-control",
                     "step": "0.0001",
                 }
             ),
+
             "is_active": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
+                attrs={
+                    "class": "form-check-input",
+                }
             ),
+
             "notes": forms.Textarea(
                 attrs={
                     "class": "form-control",

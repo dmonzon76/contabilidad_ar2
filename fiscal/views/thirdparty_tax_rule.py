@@ -5,11 +5,14 @@ from django.shortcuts import (
     render,
 )
 
+import fiscal.models
 from fiscal.forms.thirdparty_tax_rule import (
     ThirdPartyTaxRuleForm,
 )
-
-from fiscal.models import ThirdPartyTaxRule
+from fiscal.models import (
+    ThirdPartyTaxProfile,
+    ThirdPartyTaxRule,
+)
 
 
 @login_required
@@ -38,7 +41,15 @@ def thirdparty_tax_rule_list(request):
 
 
 @login_required
-def thirdparty_tax_rule_create(request):
+def thirdparty_tax_rule_create(
+    request,
+    profile_id,
+):
+
+    profile = get_object_or_404(
+        ThirdPartyTaxProfile,
+        pk=profile_id,
+    )
 
     if request.method == "POST":
 
@@ -48,10 +59,17 @@ def thirdparty_tax_rule_create(request):
 
         if form.is_valid():
 
-            form.save()
+            rule = form.save(
+                commit=False
+            )
+
+            rule.tax_profile = profile
+
+            rule.save()
 
             return redirect(
-                "fiscal:thirdparty_tax_rule_list"
+                "fiscal:thirdparty_tax_edit",
+                pk=profile.pk,
             )
 
     else:
@@ -63,10 +81,9 @@ def thirdparty_tax_rule_create(request):
         "fiscal/thirdparty_tax_rule_form.html",
         {
             "form": form,
-            "rule": None,
+            "profile": profile,
         },
     )
-
 
 @login_required
 def thirdparty_tax_rule_edit(request, pk):
