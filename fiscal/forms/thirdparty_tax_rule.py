@@ -15,8 +15,7 @@ class ThirdPartyTaxRuleForm(forms.ModelForm):
             "custom_rate",
             "is_active",
             "notes",
-    ]
-
+        ]
 
         widgets = {
 
@@ -25,10 +24,11 @@ class ThirdPartyTaxRuleForm(forms.ModelForm):
                     "class": "form-select",
                 }
             ),
+
             "calculation_method": forms.Select(
                 attrs={
-            "class": "form-select",
-            }
+                    "class": "form-select",
+                }
             ),
 
             "custom_rate": forms.NumberInput(
@@ -51,3 +51,26 @@ class ThirdPartyTaxRuleForm(forms.ModelForm):
                 }
             ),
         }
+
+        def clean(self):
+
+            cleaned = super().clean()
+
+            method = cleaned.get(
+                "calculation_method"
+            )
+
+            rate = cleaned.get(
+                "custom_rate"
+            )
+
+            if (
+                method == "FIXED"
+                and rate is None
+            ):
+                self.add_error(
+                    "custom_rate",
+                    "Fixed method requires a rate."
+                )
+
+            return cleaned

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "customers.apps.CustomersConfig",
     "suppliers.apps.SuppliersConfig",
     "products.apps.ProductsConfig",
+    "payroll.apps.PayrollConfig",
 ]
 
 # =============================================================================
