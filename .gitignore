@@ -53,3 +53,4 @@ General/.dbeaver/
 # **/migrations/
 # Pero normalmente conviene versionarlas.
 # ============================================
+*.xlsx

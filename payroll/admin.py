@@ -1,17 +1,15 @@
 from django.contrib import admin
 
 from payroll.models import (
+    AttendanceRecord,
     Employee,
+    EmployeePosition,
     JobCategory,
     LaborAgreement,
     PayrollPeriod,
     PayrollReceipt,
     PayrollReceiptLine,
     SalaryConcept,
-)
-
-from payroll.models import (
-    EmployeePosition,
 )
 
 # Register your models here.
@@ -189,4 +187,26 @@ class EmployeePositionAdmin(admin.ModelAdmin):
         "agreement",
         "category",
         "is_active",
+    )
+@admin.register(AttendanceRecord)
+class AttendanceRecordAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "employee",
+        "payroll_period",
+        "normal_hours",
+        "overtime_50_hours",
+        "overtime_100_hours",
+        "absence_days",
+        "is_approved",
+    )
+
+    search_fields = (
+        "employee__last_name",
+        "employee__first_name",
+    )
+
+    list_filter = (
+        "payroll_period",
+        "is_approved",
     )
