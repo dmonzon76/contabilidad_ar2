@@ -1,5 +1,3 @@
-# payroll/services/payroll_calculator.py
-
 from decimal import Decimal
 
 from django.db import transaction
@@ -11,6 +9,7 @@ from payroll.models import (
     PayrollReceipt,
     PayrollReceiptLine,
     SalaryConcept,
+    SalaryScaleLine,
 )
 
 
@@ -66,7 +65,30 @@ class PayrollCalculator:
             .first()
         )
 
-        gross_salary = position.basic_salary
+        scale_line = cls._get_salary_scale_line(
+            position,
+        )
+
+        if not scale_line:
+
+            raise ValueError(
+                (
+                    f"No salary scale found for "
+                    f"category '{position.category}'."
+                )
+            )
+
+        basic_salary = (
+            scale_line.basic_salary
+        )
+
+        fixed_amount = (
+            scale_line.fixed_amount
+        )
+
+        extraordinary_amount = (
+            scale_line.extraordinary_amount
+        )
 
         #
         # HABERES
@@ -74,14 +96,24 @@ class PayrollCalculator:
 
         cls._create_basic_salary_line(
             receipt,
-            gross_salary,
+            basic_salary,
+        )
+
+        cls._create_fixed_amount_line(
+            receipt,
+            fixed_amount,
+        )
+
+        cls._create_extraordinary_amount_line(
+            receipt,
+            extraordinary_amount,
         )
 
         cls._create_seniority_line(
             receipt,
             employee,
             period,
-            gross_salary,
+            basic_salary,
         )
 
         if attendance:
@@ -89,27 +121,37 @@ class PayrollCalculator:
             cls._create_attendance_bonus_line(
                 receipt,
                 attendance,
-                gross_salary,
+                basic_salary,
             )
 
             cls._create_overtime_50_line(
                 receipt,
                 attendance,
-                gross_salary,
+                basic_salary,
             )
 
             cls._create_overtime_100_line(
                 receipt,
                 attendance,
-                gross_salary,
+                basic_salary,
             )
+
+        #
+        # Totales parciales
+        #
 
         cls._calculate_totals(
             receipt,
         )
 
+        #
+        # Base imponible sólo remunerativa
+        #
+
         remunerative_total = (
-            receipt.total_earnings
+            cls._get_remunerative_total(
+                receipt,
+            )
         )
 
         #
@@ -131,6 +173,10 @@ class PayrollCalculator:
             remunerative_total,
         )
 
+        #
+        # Recalcular incluyendo descuentos
+        #
+
         cls._calculate_totals(
             receipt,
         )
@@ -140,6 +186,24 @@ class PayrollCalculator:
         receipt.save()
 
         return receipt
+
+    @classmethod
+    def _get_salary_scale_line(
+        cls,
+        position,
+    ):
+
+        return (
+            SalaryScaleLine.objects
+            .filter(
+                category=position.category,
+            )
+            .select_related(
+                "category",
+                "scale",
+            )
+            .first()
+        )
 
     @staticmethod
     def _get_concept(
@@ -185,13 +249,45 @@ class PayrollCalculator:
     def _create_basic_salary_line(
         cls,
         receipt,
-        gross_salary,
+        basic_salary,
     ):
 
         cls._create_line(
             receipt,
             "001",
-            gross_salary,
+            basic_salary,
+        )
+
+    @classmethod
+    def _create_fixed_amount_line(
+        cls,
+        receipt,
+        amount,
+    ):
+
+        if amount <= 0:
+            return
+
+        cls._create_line(
+            receipt,
+            "050",
+            amount,
+        )
+
+    @classmethod
+    def _create_extraordinary_amount_line(
+        cls,
+        receipt,
+        amount,
+    ):
+
+        if amount <= 0:
+            return
+
+        cls._create_line(
+            receipt,
+            "060",
+            amount,
         )
 
     @classmethod
@@ -200,7 +296,7 @@ class PayrollCalculator:
         receipt,
         employee,
         period,
-        gross_salary,
+        basic_salary,
     ):
 
         years = max(
@@ -212,7 +308,7 @@ class PayrollCalculator:
             return
 
         amount = (
-            gross_salary
+            basic_salary
             * cls.SENIORITY_RATE_PER_YEAR
             * Decimal(str(years))
         )
@@ -228,14 +324,14 @@ class PayrollCalculator:
         cls,
         receipt,
         attendance,
-        gross_salary,
+        basic_salary,
     ):
 
         if attendance.absence_days > 0:
             return
 
         amount = (
-            gross_salary
+            basic_salary
             * cls.ATTENDANCE_BONUS_RATE
         )
 
@@ -250,14 +346,14 @@ class PayrollCalculator:
         cls,
         receipt,
         attendance,
-        gross_salary,
+        basic_salary,
     ):
 
         if attendance.overtime_50_hours <= 0:
             return
 
         hour_value = (
-            gross_salary
+            basic_salary
             / cls.MONTHLY_HOURS
         )
 
@@ -278,14 +374,14 @@ class PayrollCalculator:
         cls,
         receipt,
         attendance,
-        gross_salary,
+        basic_salary,
     ):
 
         if attendance.overtime_100_hours <= 0:
             return
 
         hour_value = (
-            gross_salary
+            basic_salary
             / cls.MONTHLY_HOURS
         )
 
@@ -359,6 +455,34 @@ class PayrollCalculator:
             amount,
         )
 
+    @staticmethod
+    def _get_remunerative_total(
+        receipt,
+    ):
+
+        remunerative_codes = {
+            "001",
+            "002",
+            "003",
+            "010",
+            "011",
+        }
+
+        total = Decimal("0.00")
+
+        for line in receipt.lines.select_related(
+            "concept"
+        ):
+
+            if (
+                line.concept.code
+                in remunerative_codes
+            ):
+
+                total += line.amount
+
+        return total
+
     #
     # TOTALES
     #
@@ -391,9 +515,7 @@ class PayrollCalculator:
                 deductions += line.amount
 
         receipt.total_earnings = earnings
-
         receipt.total_deductions = deductions
-
         receipt.net_amount = (
             earnings - deductions
         )
