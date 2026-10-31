@@ -41,7 +41,9 @@ class PayrollCalculator:
             },
         )
 
-        receipt.lines.all().delete()
+        PayrollReceiptLine.objects.filter(
+            receipt=receipt,
+        ).delete()
 
         position = (
             employee.positions
@@ -470,9 +472,9 @@ class PayrollCalculator:
 
         total = Decimal("0.00")
 
-        for line in receipt.lines.select_related(
-            "concept"
-        ):
+        for line in PayrollReceiptLine.objects.filter(
+            receipt=receipt,
+        ).select_related("concept"):
 
             if (
                 line.concept.code
@@ -492,32 +494,67 @@ class PayrollCalculator:
         receipt,
     ):
 
-        earnings = Decimal("0.00")
+        remunerative = Decimal("0.00")
+        non_remunerative = Decimal("0.00")
         deductions = Decimal("0.00")
 
-        for line in receipt.lines.select_related(
-            "concept"
-        ):
+        remunerative_codes = {
+            "001",
+            "002",
+            "003",
+            "010",
+            "011",
+        }
 
-            concept_type = (
-                line.concept.concept_type
-            )
+        non_remunerative_codes = {
+            "050",
+            "060",
+        }
 
-            if concept_type == "EARNING":
+        for line in PayrollReceiptLine.objects.filter(
+            receipt=receipt,
+        ).select_related("concept"):
 
-                earnings += line.amount
+            code = line.concept.code
 
-            elif concept_type in (
+            if code in remunerative_codes:
+
+                remunerative += line.amount
+
+            elif code in non_remunerative_codes:
+
+                non_remunerative += line.amount
+
+            elif line.concept.concept_type in (
                 "DEDUCTION",
                 "EMPLOYEE_CONTRIBUTION",
             ):
 
                 deductions += line.amount
 
-        receipt.total_earnings = earnings
+        receipt.total_remunerative = (
+            remunerative
+        )
+
+        receipt.total_non_remunerative = (
+            non_remunerative
+        )
+
+        #
+        # Compatibilidad temporal
+        #
+
+        receipt.total_earnings = (
+            remunerative
+            + non_remunerative
+        )
+
         receipt.total_deductions = deductions
+
         receipt.net_amount = (
-            earnings - deductions
+            remunerative
+            + non_remunerative
+            - deductions
         )
 
         receipt.save()

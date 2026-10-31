@@ -37,7 +37,13 @@ class PayrollReceipt(models.Model):
 
     liquidation_date = models.DateField()
 
-    total_earnings = models.DecimalField(
+    total_remunerative = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=0,
+)
+
+    total_non_remunerative = models.DecimalField(
         max_digits=14,
         decimal_places=2,
         default=0,
@@ -53,7 +59,8 @@ class PayrollReceipt(models.Model):
         max_digits=14,
         decimal_places=2,
         default=0,
-    )
+
+)
 
     status = models.CharField(
         max_length=20,
@@ -61,15 +68,11 @@ class PayrollReceipt(models.Model):
         default="DRAFT",
     )
 
-    notes = models.TextField(
-        blank=True,
-        null=True,
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
-
+    total_earnings = models.DecimalField(
+         max_digits=14,
+         decimal_places=2,
+         default=0,
+)
     class Meta:
 
         ordering = [

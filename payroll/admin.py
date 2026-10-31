@@ -163,6 +163,7 @@ class PayrollReceiptLineAdmin(admin.ModelAdmin):
 
     list_filter = (
         "concept",
+        
     )
 
 @admin.register(EmployeePosition)

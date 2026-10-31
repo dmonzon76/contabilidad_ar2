@@ -45,6 +45,32 @@ class PayrollReceiptLine(models.Model):
             "concept__code",
         ]
 
+    @property
+    def is_remunerative(self):
+
+        return self.concept.code in {
+            "001",
+            "002",
+            "003",
+            "010",
+            "011",
+        }
+
+    @property
+    def is_non_remunerative(self):
+
+        return self.concept.code in {
+            "050",
+            "060",
+        }
+
+    @property
+    def is_deduction(self):
+
+        return self.concept.code.startswith(
+            "1"
+        )
+
     def clean(self):
 
         super().clean()
