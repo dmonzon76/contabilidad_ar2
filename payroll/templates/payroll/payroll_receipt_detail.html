@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'payroll/css/payroll_receipt.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-3 receipt-container">
+
+    <!-- HEADER -->
+
+    <div class="card mb-3">
+
+        <div class="card-body py-3">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+
+                    <h2 class="mb-3">
+                        Payroll Receipt
+                    </h2>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <strong>Employee:</strong>
+                            {{ receipt.employee }}
+                        </div>
+
+                        <div class="col-md-3">
+                            <strong>Period:</strong>
+                            {{ receipt.period }}
+                        </div>
+
+                        <div class="col-md-3">
+                            <strong>Status:</strong>
+                            {{ receipt.status }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 text-end">
+
+                    <div class="text-muted">
+                        Net Amount
+                    </div>
+
+                    <h1 class="text-primary fw-bold mb-0">
+                        $ {{ receipt.net_amount }}
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN GRID -->
+
+    <div class="row">
+
+        <!-- EARNINGS -->
+
+        <div class="col-lg-7">
+
+            <div class="card">
+
+                <div class="card-header bg-success text-white">
+                    Earnings
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table table-sm table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th width="80">Code</th>
+                                <th>Concept</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for line in remunerative_lines %}
+                            <tr>
+                                <td>{{ line.concept.code }}</td>
+                                <td>{{ line.concept.name }}</td>
+                                <td class="text-end">
+                                    {{ line.amount }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            {% for line in non_remunerative_lines %}
+                            <tr class="table-info">
+                                <td>{{ line.concept.code }}</td>
+                                <td>{{ line.concept.name }}</td>
+                                <td class="text-end">
+                                    {{ line.amount }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                        <tfoot>
+
+                            <tr class="table-light">
+
+                                <th colspan="2">
+                                    Total Earnings
+                                </th>
+
+                                <th class="text-end">
+
+                                    {{ receipt.total_remunerative|add:receipt.total_non_remunerative }}
+
+                                </th>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DEDUCTIONS -->
+
+        <div class="col-lg-5">
+
+            <div class="card">
+
+                <div class="card-header bg-danger text-white">
+                    Deductions
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table table-sm table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th width="80">Code</th>
+                                <th>Concept</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for line in deduction_lines %}
+                            <tr>
+                                <td>{{ line.concept.code }}</td>
+                                <td>{{ line.concept.name }}</td>
+                                <td class="text-end">
+                                    {{ line.amount }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+
+                        <tfoot>
+
+                            <tr class="table-light">
+
+                                <th colspan="2">
+                                    Total Deductions
+                                </th>
+
+                                <th class="text-end">
+                                    {{ receipt.total_deductions }}
+                                </th>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

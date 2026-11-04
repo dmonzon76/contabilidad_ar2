@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-3">
+
+    <div class="card border-warning">
+
+        <div class="card-header">
+
+            Deactivate Employee
+
+        </div>
+
+        <div class="card-body">
+
+            <p>
+
+                The employee will be marked
+                as inactive.
+
+            </p>
+
+            <p>
+
+                Existing payroll receipts,
+                attendance records and history
+                will be preserved.
+
+            </p>
+
+            <hr>
+
+            <h5>
+
+                {{ employee }}
+
+            </h5>
+
+            <form
+                method="post"
+                action="{% url 'payroll:employee_deactivate_confirm' employee.pk %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    class="btn btn-warning"
+                    type="submit"
+                >
+
+                    Deactivate
+
+                </button>
+
+                <a
+                    href="{% url 'payroll:employee_list' %}"
+                    class="btn btn-secondary"
+                >
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

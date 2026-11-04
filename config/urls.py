@@ -13,6 +13,10 @@ urlpatterns = [
     path("company/", include(("company.urls", "company"), namespace="company")),
     # Core business apps
     path("accounting/", include(("accounting.urls", "accounting"), namespace="accounting")),
+    path(
+    "payroll/",
+    include(("payroll.urls", "payroll"), namespace="payroll"),
+),
     path("api/", include(("fiscal.urls", "fiscal"), namespace="fiscal")),
     path("sales/", include(("sales.urls", "sales"), namespace="sales")),
     path("purchases/", include(("purchases.urls", "purchases"), namespace="purchases")),

@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+    <div
+        class="
+            d-flex
+            justify-content-between
+            align-items-center
+            mb-3
+        "
+    >
+
+        <div>
+
+            <h2 class="mb-0">
+
+                {{ employee }}
+
+            </h2>
+
+            <small class="text-muted">
+
+                Employee Detail
+
+            </small>
+
+        </div>
+
+        <div>
+
+            <a
+                href="{% url 'payroll:employee_update' employee.pk %}"
+                class="btn btn-warning"
+            >
+                Edit
+            </a>
+
+            <a
+                href="{% url 'payroll:employee_list' %}"
+                class="btn btn-secondary"
+            >
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <!-- Employee Information -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+                    Employee Information
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>First Name</th>
+                            <td>{{ employee.first_name }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Last Name</th>
+                            <td>{{ employee.last_name }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>CUIL</th>
+                            <td>{{ employee.cuil }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Employee Number</th>
+                            <td>{{ employee.employee_number }}</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Employment Information -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+                    Employment Information
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Hire Date</th>
+                            <td>{{ employee.hire_date }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Status</th>
+
+                            <td>
+
+                                {% if employee.is_active %}
+
+                                <span
+                                    class="
+                                        badge
+                                        bg-success
+                                    "
+                                >
+                                    Active
+                                </span>
+
+                                {% else %}
+
+                                <span
+                                    class="
+                                        badge
+                                        bg-danger
+                                    "
+                                >
+                                    Inactive
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Current Position -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+                    Current Position
+                </div>
+
+                <div class="card-body">
+
+                    {% if current_position %}
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Category</th>
+                            <td>
+                                {{ current_position.category }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Start Date</th>
+                            <td>
+                                {{ current_position.start_date }}
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    {% else %}
+
+                    <span class="text-muted">
+                        No active position.
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Payroll Information -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+                    Latest Payroll Receipt
+                </div>
+
+                <div class="card-body">
+
+                    {% if last_receipt %}
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Period</th>
+                            <td>
+                                {{ last_receipt.period }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Net Amount</th>
+                            <td>
+                                $ {{ last_receipt.net_amount }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                {{ last_receipt.status }}
+                            </td>
+                        </tr>
+
+                    </table>
+
+                    <a
+                        href="{% url 'payroll:payroll_receipt_detail' last_receipt.pk %}"
+                        class="
+                            btn
+                            btn-outline-primary
+                            btn-sm
+                        "
+                    >
+                        View Receipt
+                    </a>
+
+                    {% else %}
+
+                    <span class="text-muted">
+
+                        No payroll receipts found.
+
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

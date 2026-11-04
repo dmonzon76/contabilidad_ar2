@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+    <div class="card border-danger">
+
+        <div class="card-header bg-danger text-white">
+
+            Delete Employee
+
+        </div>
+
+        <div class="card-body">
+
+            <h5>
+
+                Are you sure you want to delete
+                this employee?
+
+            </h5>
+
+            <hr>
+
+            <p>
+
+                <strong>
+
+                    {{ employee.last_name }},
+                    {{ employee.first_name }}
+
+                </strong>
+
+            </p>
+
+            <p>
+
+                CUIL:
+                {{ employee.cuil }}
+
+            </p>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-danger"
+                >
+
+                    Delete
+
+                </button>
+
+                <a
+                    href="{% url 'payroll:employee_list' %}"
+                    class="btn btn-secondary"
+                >
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
