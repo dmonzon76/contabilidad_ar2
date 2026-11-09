@@ -1,13 +1,31 @@
 from django.urls import path
 
 from payroll.views.employee_create import EmployeeCreateView
+from payroll.views.employee_deactivate import EmployeeDeactivateView
+from payroll.views.employee_deactivate_confirm import EmployeeDeactivateConfirmView
+from payroll.views.employee_delete import EmployeeDeleteView
 from payroll.views.employee_detail import EmployeeDetailView
 from payroll.views.employee_list import EmployeeListView
 from payroll.views.employee_update import EmployeeUpdateView
+from payroll.views.family_member_create import (
+    FamilyMemberCreateView,
+)
+from payroll.views.family_member_update import (
+    FamilyMemberUpdateView,
+)
+
 from payroll.views.payroll_receipt_detail import PayrollReceiptDetailView
-from payroll.views.employee_delete import EmployeeDeleteView
-from payroll.views.employee_deactivate import EmployeeDeactivateView
-from payroll.views.employee_deactivate_confirm import EmployeeDeactivateConfirmView
+
+from payroll.views.dashboard import (
+    PayrollDashboardView,
+)
+
+
+    
+
+
+
+
 
 
 urlpatterns = [
@@ -57,4 +75,20 @@ path(
     EmployeeDeactivateView.as_view(),
     name="employee_deactivate_confirm",
 ),
+path(
+    "employees/<int:employee_id>/family/new/",
+    FamilyMemberCreateView.as_view(),
+    name="family_member_create",
+),
+path(
+    "family/<int:pk>/edit/",
+    FamilyMemberUpdateView.as_view(),
+    name="family_member_update",
+),
+path(
+        "dashboard/",
+        PayrollDashboardView.as_view(),
+        name="dashboard",
+    ),
+
 ]

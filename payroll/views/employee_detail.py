@@ -1,8 +1,10 @@
+from django.template import context
 from django.views.generic import DetailView
 
 from payroll.models import (
     Employee,
     EmployeePosition,
+    FamilyMember,
     PayrollReceipt,
 )
 
@@ -51,6 +53,15 @@ class EmployeeDetailView(DetailView):
             )
             .first()
         )
+        family_members = (
+    FamilyMember.objects
+    .filter(
+        employee=employee,
+    )
+)
+
+        context["family_members"
+        ] = family_members
 
         context[
             "current_position"

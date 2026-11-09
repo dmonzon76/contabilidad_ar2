@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                {% if object %}
+                    Edit Family Member
+                {% else %}
+                    Add Family Member
+                {% endif %}
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="alert alert-light border mb-4">
+                <strong>Employee:</strong>
+                {% if object %}
+                    {{ object.employee }}
+                {% else %}
+                    {{ employee }}
+                {% endif %}
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.dni.id_for_label }}">{{ form.dni.label }}</label>
+                        {{ form.dni }}
+                        {% if form.dni.errors %}
+                            <div class="text-danger small mt-1">{{ form.dni.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.birth_date.id_for_label }}">{{ form.birth_date.label }}</label>
+                        {{ form.birth_date }}
+                        {% if form.birth_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.birth_date.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.relationship.id_for_label }}">{{ form.relationship.label }}</label>
+                        {{ form.relationship }}
+                        {% if form.relationship.errors %}
+                            <div class="text-danger small mt-1">{{ form.relationship.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="{{ form.family_allowance_until.id_for_label }}">{{ form.family_allowance_until.label }}</label>
+                        {{ form.family_allowance_until }}
+                        <small class="text-muted d-block mt-1">Leave empty if benefit does not expire.</small>
+                        {% if form.family_allowance_until.errors %}
+                            <div class="text-danger small mt-1">{{ form.family_allowance_until.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mt-4">
+                            {{ form.dependent }}
+                            <label class="form-check-label" for="{{ form.dependent.id_for_label }}">
+                                Economically Dependent
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mt-4">
+                            {{ form.disabled }}
+                            <label class="form-check-label" for="{{ form.disabled.id_for_label }}">
+                                Disabled
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label" for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="javascript:history.back();" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        Save Family Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

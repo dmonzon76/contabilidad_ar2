@@ -4,14 +4,7 @@
 
 <div class="container-fluid mt-3">
 
-    <div
-        class="
-            d-flex
-            justify-content-between
-            align-items-center
-            mb-3
-        "
-    >
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
         <div>
 
@@ -23,7 +16,7 @@
 
             <small class="text-muted">
 
-                Employee Detail
+                Employee File
 
             </small>
 
@@ -51,14 +44,16 @@
 
     <div class="row">
 
-        <!-- Employee Information -->
+        <!-- Personal Information -->
 
         <div class="col-lg-6 mb-3">
 
             <div class="card h-100">
 
                 <div class="card-header">
-                    Employee Information
+
+                    Personal Information
+
                 </div>
 
                 <div class="card-body">
@@ -66,13 +61,13 @@
                     <table class="table table-sm">
 
                         <tr>
-                            <th>First Name</th>
-                            <td>{{ employee.first_name }}</td>
+                            <th>Employee Number</th>
+                            <td>{{ employee.employee_number }}</td>
                         </tr>
 
                         <tr>
-                            <th>Last Name</th>
-                            <td>{{ employee.last_name }}</td>
+                            <th>DNI</th>
+                            <td>{{ employee.dni }}</td>
                         </tr>
 
                         <tr>
@@ -81,8 +76,23 @@
                         </tr>
 
                         <tr>
-                            <th>Employee Number</th>
-                            <td>{{ employee.employee_number }}</td>
+                            <th>Birth Date</th>
+                            <td>{{ employee.birth_date }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Nationality</th>
+                            <td>{{ employee.nationality }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Gender</th>
+                            <td>{{ employee.get_gender_display }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Marital Status</th>
+                            <td>{{ employee.get_marital_status_display }}</td>
                         </tr>
 
                     </table>
@@ -93,14 +103,143 @@
 
         </div>
 
-        <!-- Employment Information -->
+        <!-- Address -->
 
         <div class="col-lg-6 mb-3">
 
             <div class="card h-100">
 
                 <div class="card-header">
+
+                    Address Information
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Street</th>
+                            <td>{{ employee.street }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Number</th>
+                            <td>{{ employee.street_number }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>City</th>
+                            <td>{{ employee.city }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Province</th>
+                            <td>{{ employee.province }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Postal Code</th>
+                            <td>{{ employee.postal_code }}</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Contact -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    Contact Information
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ employee.email }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Mobile</th>
+                            <td>{{ employee.mobile_phone }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Emergency Contact</th>
+                            <td>{{ employee.emergency_contact_name }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Emergency Phone</th>
+                            <td>{{ employee.emergency_contact_phone }}</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Bank -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    Bank Information
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <tr>
+                            <th>Bank</th>
+                            <td>{{ employee.bank_name }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>CBU</th>
+                            <td>{{ employee.cbu }}</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Employment -->
+
+        <div class="col-lg-6 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
                     Employment Information
+
                 </div>
 
                 <div class="card-body">
@@ -114,35 +253,23 @@
 
                         <tr>
                             <th>Status</th>
-
                             <td>
 
                                 {% if employee.is_active %}
 
-                                <span
-                                    class="
-                                        badge
-                                        bg-success
-                                    "
-                                >
-                                    Active
-                                </span>
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
 
                                 {% else %}
 
-                                <span
-                                    class="
-                                        badge
-                                        bg-danger
-                                    "
-                                >
-                                    Inactive
-                                </span>
+                                    <span class="badge bg-danger">
+                                        Inactive
+                                    </span>
 
                                 {% endif %}
 
                             </td>
-
                         </tr>
 
                     </table>
@@ -153,60 +280,16 @@
 
         </div>
 
-        <!-- Current Position -->
+        <!-- Payroll -->
 
         <div class="col-lg-6 mb-3">
 
             <div class="card h-100">
 
                 <div class="card-header">
-                    Current Position
-                </div>
 
-                <div class="card-body">
-
-                    {% if current_position %}
-
-                    <table class="table table-sm">
-
-                        <tr>
-                            <th>Category</th>
-                            <td>
-                                {{ current_position.category }}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Start Date</th>
-                            <td>
-                                {{ current_position.start_date }}
-                            </td>
-                        </tr>
-
-                    </table>
-
-                    {% else %}
-
-                    <span class="text-muted">
-                        No active position.
-                    </span>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Payroll Information -->
-
-        <div class="col-lg-6 mb-3">
-
-            <div class="card h-100">
-
-                <div class="card-header">
                     Latest Payroll Receipt
+
                 </div>
 
                 <div class="card-body">
@@ -217,45 +300,27 @@
 
                         <tr>
                             <th>Period</th>
-                            <td>
-                                {{ last_receipt.period }}
-                            </td>
+                            <td>{{ last_receipt.period }}</td>
                         </tr>
 
                         <tr>
                             <th>Net Amount</th>
-                            <td>
-                                $ {{ last_receipt.net_amount }}
-                            </td>
+                            <td>${{ last_receipt.net_amount }}</td>
                         </tr>
 
                         <tr>
                             <th>Status</th>
-                            <td>
-                                {{ last_receipt.status }}
-                            </td>
+                            <td>{{ last_receipt.status }}</td>
                         </tr>
 
                     </table>
 
                     <a
                         href="{% url 'payroll:payroll_receipt_detail' last_receipt.pk %}"
-                        class="
-                            btn
-                            btn-outline-primary
-                            btn-sm
-                        "
+                        class="btn btn-outline-primary btn-sm"
                     >
                         View Receipt
                     </a>
-
-                    {% else %}
-
-                    <span class="text-muted">
-
-                        No payroll receipts found.
-
-                    </span>
 
                     {% endif %}
 
@@ -265,7 +330,155 @@
 
         </div>
 
-    </div>
+        <!-- Family Group -->
+
+        <div class="col-12 mb-3">
+
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <span>
+                        Family Group
+                    </span>
+
+                    <a
+                        href="{% url 'payroll:family_member_create' employee.pk %}"
+                        class="btn btn-success btn-sm"
+                    >
+                        + Add Family Member
+                    </a>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table table-sm table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Relationship</th>
+
+                                <th>Last Name</th>
+
+                                <th>First Name</th>
+
+                                <th>DNI</th>
+
+                                <th>Birth Date</th>
+
+                                <th>Dependent</th>
+
+                                <th>Disabled</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for member in family_members %}
+
+                            <tr>
+
+                                <td>
+                                    {{ member.get_relationship_display }}
+                                </td>
+
+                                <td>
+                                    {{ member.last_name }}
+                                </td>
+
+                                <td>
+                                    {{ member.first_name }}
+                                </td>
+
+                                <td>
+                                    {{ member.dni }}
+                                </td>
+
+                                <td>
+                                    {{ member.birth_date }}
+                                </td>
+                                <th>Allowance Until</th>
+                                <td>
+                                    {% if member.family_allowance_until %}
+                                        {{ member.family_allowance_until }}
+                                    {% else %}
+                                        <span class="text-muted">
+                                            N/A
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <th>Eligible</th>
+                                <td>
+
+                                    {% if member.receives_family_allowance %}
+
+                                        <span class="badge bg-success">
+                                            Yes
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-secondary">
+                                            No
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if member.disabled %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            Yes
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-secondary">
+                                            No
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="text-center text-muted"
+                                >
+
+                                    No family members registered.
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
 
 </div>
 

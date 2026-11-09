@@ -13,13 +13,51 @@ class EmployeeCreateView(CreateView):
     )
 
     fields = [
-        "first_name",
-        "last_name",
-        "employee_number",
-        "cuil",
-        "hire_date",
-        "is_active",
-    ]
+
+    # Identificación
+
+    "employee_number",
+    "first_name",
+    "last_name",
+
+    "dni",
+    "cuil",
+
+    # Personales
+
+    "birth_date",
+    "nationality",
+    "gender",
+    "marital_status",
+
+    # Domicilio
+
+    "street",
+    "street_number",
+    "city",
+    "province",
+    "postal_code",
+
+    # Contacto
+
+    "email",
+    "mobile_phone",
+
+    # Emergencias
+
+    "emergency_contact_name",
+    "emergency_contact_phone",
+
+    # Bancarios
+
+    "bank_name",
+    "cbu",
+
+    # Laboral
+
+    "hire_date",
+    "is_active",
+]
 
     success_url = reverse_lazy(
         "payroll:employee_list"

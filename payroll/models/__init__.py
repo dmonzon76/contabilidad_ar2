@@ -1,3 +1,5 @@
+from payroll.models.family_member import FamilyMember
+
 from .agreement import LaborAgreement
 from .attendance_record import AttendanceRecord
 from .category import JobCategory
@@ -10,4 +12,4 @@ from .salary_concept import SalaryConcept
 from .salary_scale import SalaryScale
 from .salary_scale_line import SalaryScaleLine
 
-__all__ = ["LaborAgreement", "JobCategory", "Employee", "SalaryConcept", "PayrollPeriod", "PayrollReceipt", "PayrollReceiptLine", "EmployeePosition", "AttendanceRecord", "SalaryScale", "SalaryScaleLine" ]
+__all__ = ["FamilyMember", "LaborAgreement", "JobCategory", "Employee", "SalaryConcept", "PayrollPeriod", "PayrollReceipt", "PayrollReceiptLine", "EmployeePosition", "AttendanceRecord", "SalaryScale", "SalaryScaleLine" ]

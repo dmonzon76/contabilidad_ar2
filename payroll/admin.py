@@ -4,6 +4,7 @@ from payroll.models import (
     AttendanceRecord,
     Employee,
     EmployeePosition,
+    FamilyMember,
     JobCategory,
     LaborAgreement,
     PayrollPeriod,
@@ -210,4 +211,27 @@ class AttendanceRecordAdmin(admin.ModelAdmin):
     list_filter = (
         "payroll_period",
         "is_approved",
+    )
+@admin.register(FamilyMember)
+class FamilyMemberAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "employee",
+        "relationship",
+        "last_name",
+        "first_name",
+        "dependent",
+        "disabled",
+    )
+
+    list_filter = (
+        "relationship",
+        "dependent",
+        "disabled",
+    )
+
+    search_fields = (
+        "last_name",
+        "first_name",
+        "dni",
     )
