@@ -30,6 +30,12 @@ from payroll.views.dashboard import (
 
 urlpatterns = [
     path(
+        "dashboard/",
+        PayrollDashboardView.as_view(),
+        name="dashboard",
+),
+
+    path(
         "receipts/<int:pk>/",
         PayrollReceiptDetailView.as_view(),
         name="payroll_receipt_detail",

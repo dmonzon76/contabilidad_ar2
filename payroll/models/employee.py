@@ -4,7 +4,6 @@ from company.models import Company
 
 
 class Employee(models.Model):
-
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
@@ -13,7 +12,6 @@ class Employee(models.Model):
 
     employee_number = models.CharField(
         max_length=20,
-        unique=True,
     )
 
     first_name = models.CharField(
@@ -26,13 +24,11 @@ class Employee(models.Model):
 
     cuil = models.CharField(
         max_length=11,
-        unique=True,
     )
     dni = models.CharField(
         max_length=20,
         blank=True,
         null=True,
-        unique=True,
     )
 
     birth_date = models.DateField(
@@ -152,15 +148,20 @@ class Employee(models.Model):
     )
 
     class Meta:
-
         ordering = [
             "last_name",
             "first_name",
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "company",
+                    "employee_number",
+                ],
+                name="uniq_employee_number_by_company",
+            ),
+        ]
 
     def __str__(self):
 
-        return (
-            f"{self.last_name}, "
-            f"{self.first_name}"
-        )
+        return f"{self.last_name}, {self.first_name}"

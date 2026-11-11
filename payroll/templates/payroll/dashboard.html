@@ -4,19 +4,92 @@
 
 <div class="container-fluid mt-3">
 
-    <div class="mb-4">
+    <!-- HEADER -->
 
-        <h1 class="mb-1">
-            Payroll Dashboard
-        </h1>
+    <div class="row mb-4">
 
-        <p class="text-muted">
-            Human Resources and Payroll Overview
-        </p>
+        <div class="col-md-8">
+
+            <h1 class="mb-1">
+                Payroll Dashboard
+            </h1>
+
+            <p class="text-muted mb-0">
+                Human Resources and Payroll Management Center
+            </p>
+
+        </div>
+
+        <div class="col-md-4 text-end">
+
+            <span class="badge bg-primary">
+                Current Period
+            </span>
+
+            <span class="badge bg-secondary">
+                2026-10
+            </span>
+
+        </div>
 
     </div>
 
-    <!-- KPI -->
+    <!-- QUICK ACTIONS -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            Quick Actions
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <a
+                    href="{% url 'payroll:employee_list' %}"
+                    class="btn btn-primary"
+                >
+                    Employees
+                </a>
+
+                <a
+                    href="#"
+                    class="btn btn-outline-primary"
+                >
+                    Family Group
+                </a>
+
+                <a
+                    href="#"
+                    class="btn btn-outline-primary"
+                >
+                    Payroll Receipts
+                </a>
+
+                <a
+                    href="#"
+                    class="btn btn-outline-primary"
+                >
+                    Salary Scales
+                </a>
+
+                <a
+                    href="#"
+                    class="btn btn-outline-primary"
+                >
+                    Payroll Periods
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- KPI ROW -->
 
     <div class="row mb-4">
 
@@ -26,8 +99,8 @@
 
                 <div class="card-body">
 
-                    <small>
-                        Employees
+                    <small class="text-muted">
+                        Active Employees
                     </small>
 
                     <h2>
@@ -46,7 +119,7 @@
 
                 <div class="card-body">
 
-                    <small>
+                    <small class="text-muted">
                         Family Members
                     </small>
 
@@ -66,7 +139,7 @@
 
                 <div class="card-body">
 
-                    <small>
+                    <small class="text-muted">
                         Payroll Receipts
                     </small>
 
@@ -86,7 +159,7 @@
 
                 <div class="card-body">
 
-                    <small>
+                    <small class="text-muted">
                         Payroll Cost
                     </small>
 
@@ -102,7 +175,7 @@
 
     </div>
 
-    <!-- Payroll Summary -->
+    <!-- PAYROLL SUMMARY -->
 
     <div class="card mb-4">
 
@@ -116,39 +189,51 @@
 
             <div class="row text-center">
 
-                <div class="col-md-4">
+                <div class="col-md-3">
 
-                    <h5>
+                    <h6>
                         Remunerative
-                    </h5>
+                    </h6>
 
-                    <h3>
+                    <h4>
                         $ {{ total_remunerative }}
-                    </h3>
+                    </h4>
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
 
-                    <h5>
+                    <h6>
                         Non Remunerative
-                    </h5>
+                    </h6>
 
-                    <h3>
+                    <h4>
                         $ {{ total_non_remunerative }}
-                    </h3>
+                    </h4>
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
 
-                    <h5>
+                    <h6>
                         Deductions
-                    </h5>
+                    </h6>
 
-                    <h3>
+                    <h4>
                         $ {{ total_deductions }}
-                    </h3>
+                    </h4>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <h6>
+                        Net Payroll
+                    </h6>
+
+                    <h4>
+                        $ {{ payroll_cost }}
+                    </h4>
 
                 </div>
 
@@ -158,61 +243,120 @@
 
     </div>
 
-    <!-- Category Distribution -->
+    <!-- WORKFORCE -->
 
-    <div class="card mb-4">
+    <div class="row mb-4">
 
-        <div class="card-header">
+        <div class="col-lg-6">
 
-            Employees By Category
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    Employees By Category
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-sm">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Category</th>
+
+                                <th>Employees</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for item in category_stats %}
+
+                            <tr>
+
+                                <td>
+                                    {{ item.category__name }}
+                                </td>
+
+                                <td>
+                                    {{ item.total }}
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td colspan="2">
+
+                                    No data available
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
 
         </div>
 
-        <div class="card-body">
+        <div class="col-lg-6">
 
-            <table class="table table-sm">
+            <div class="card h-100">
 
-                <thead>
+                <div class="card-header">
 
-                    <tr>
+                    Family Group Summary
 
-                        <th>Category</th>
+                </div>
 
-                        <th>Employees</th>
+                <div class="card-body">
 
-                    </tr>
+                    <p>
+                        Total Family Members:
+                        <strong>
+                            {{ family_members }}
+                        </strong>
+                    </p>
 
-                </thead>
+                    <p>
+                        Dependents:
+                        <strong>
+                            {{ dependents }}
+                        </strong>
+                    </p>
 
-                <tbody>
+                    <p>
+                        Disabled Dependents:
+                        <strong>
+                            {{ disabled_dependents }}
+                        </strong>
+                    </p>
 
-                    {% for item in category_stats %}
+                </div>
 
-                    <tr>
-
-                        <td>
-                            {{ item.category__name }}
-                        </td>
-
-                        <td>
-                            {{ item.total }}
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
+            </div>
 
         </div>
 
     </div>
 
-    <!-- Latest Receipts -->
+    <!-- LATEST RECEIPTS -->
 
-    <div class="card mb-4">
+    <div class="card">
 
         <div class="card-header">
 
@@ -260,6 +404,18 @@
 
                         <td>
                             {{ receipt.status }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="4">
+
+                            No payroll receipts found.
+
                         </td>
 
                     </tr>
