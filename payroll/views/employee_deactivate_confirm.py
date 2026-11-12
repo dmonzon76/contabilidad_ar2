@@ -14,3 +14,8 @@ class EmployeeDeactivateConfirmView(
     )
 
     context_object_name = "employee"
+
+    def get_queryset(self):
+        return Employee.objects.filter(
+            company=self.request.active_company,
+        )

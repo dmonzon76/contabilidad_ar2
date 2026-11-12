@@ -16,6 +16,7 @@ class EmployeeDeactivateView(View):
         employee = get_object_or_404(
             Employee,
             pk=pk,
+            company=request.active_company,
         )
 
         employee.is_active = False

@@ -78,10 +78,16 @@ def main_dashboard(request):
         },
     }
 
-    active_employees = Employee.objects.filter(is_active=True).count()
-    family_members = FamilyMember.objects.count()
-    payroll_receipts = PayrollReceipt.objects.count()
-    payroll_cost = PayrollReceipt.objects.aggregate(total=Sum("net_amount"))["total"] or 0
+    active_employees = (
+        Employee.objects.filter(company_id=company_id, is_active=True).count()
+    )
+    family_members = FamilyMember.objects.filter(employee__company_id=company_id).count()
+    payroll_receipts = PayrollReceipt.objects.filter(employee__company_id=company_id).count()
+    payroll_cost = (
+        PayrollReceipt.objects.filter(employee__company_id=company_id)
+        .aggregate(total=Sum("net_amount"))["total"]
+        or 0
+    )
 
     context = {
         "active_company": company,
@@ -93,14 +99,12 @@ def main_dashboard(request):
             "cash_flow_month": float(cash_flow_month),
             "inventory_value": float(inventory_value),
         },
+        "dashboard_data": dashboard_data,
+        "dashboard_data_json": json.dumps(dashboard_data),
         "active_employees": active_employees,
         "family_members": family_members,
         "payroll_receipts": payroll_receipts,
         "payroll_cost": float(payroll_cost),
-        "top_products": [],
-        "top_customers": [],
-        "alerts": [],
-        "dashboard_data_json": json.dumps(dashboard_data),
     }
 
     return render(request, "dashboard/main_dashboard.html", context)

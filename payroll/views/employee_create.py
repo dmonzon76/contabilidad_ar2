@@ -62,3 +62,7 @@ class EmployeeCreateView(CreateView):
     success_url = reverse_lazy(
         "payroll:employee_list"
     )
+
+    def form_valid(self, form):
+        form.instance.company = self.request.active_company
+        return super().form_valid(form)

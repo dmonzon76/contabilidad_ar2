@@ -13,7 +13,7 @@ class LaborAgreement(models.Model):
 
     code = models.CharField(
         max_length=20,
-        unique=True,
+        
     )
 
     name = models.CharField(
@@ -42,8 +42,20 @@ class LaborAgreement(models.Model):
     class Meta:
 
         ordering = [
-            "name",
-        ]
+        "name",
+    ]
+
+    constraints = [
+
+        models.UniqueConstraint(
+            fields=[
+                "company",
+                "code",
+            ],
+            name="uniq_agreement_code_by_company",
+        ),
+
+    ]
 
     def __str__(self):
 

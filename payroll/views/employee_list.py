@@ -11,16 +11,16 @@ class EmployeeListView(ListView):
         "payroll/employees/employee_list.html"
     )
 
-    context_object_name = "employees"
+    context_object_name = (
+        "employees"
+    )
 
     paginate_by = 25
 
     def get_queryset(self):
-
-        return (
-            Employee.objects
-            .order_by(
-                "last_name",
-                "first_name",
-            )
+        return Employee.objects.filter(
+            company=self.request.active_company,
+        ).order_by(
+            "last_name",
+            "first_name",
         )

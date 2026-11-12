@@ -62,3 +62,8 @@ class EmployeeUpdateView(UpdateView):
     success_url = reverse_lazy(
         "payroll:employee_list"
     )
+
+    def get_queryset(self):
+        return Employee.objects.filter(
+            company=self.request.active_company,
+        )
