@@ -64,6 +64,15 @@ class EmployeeUpdateView(UpdateView):
     )
 
     def get_queryset(self):
-        return Employee.objects.filter(
-            company=self.request.active_company,
+
+        company_id = (
+        self.request.session.get(
+            "active_company_id"
         )
+    )
+
+        return (
+        Employee.objects.filter(
+            company_id=company_id,
+        )
+    )

@@ -1,5 +1,4 @@
 from django.urls import reverse
-
 from django.views.generic import UpdateView
 
 from payroll.models import FamilyMember
@@ -41,3 +40,10 @@ class FamilyMemberUpdateView(
                 "pk": self.object.employee.pk,
             },
         )
+        def get_queryset(self):
+
+            return (
+                FamilyMember.objects.filter(
+                    employee__company=self.request.active_company
+                )
+            )

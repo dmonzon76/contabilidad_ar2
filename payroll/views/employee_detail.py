@@ -20,9 +20,18 @@ class EmployeeDetailView(DetailView):
     context_object_name = "employee"
 
     def get_queryset(self):
-        return Employee.objects.filter(
-            company=self.request.active_company,
+
+            company_id = (
+            self.request.session.get(
+            "active_company_id"
         )
+    )
+
+            return (
+        Employee.objects.filter(
+            company_id=company_id,
+        )
+    )
 
     def get_context_data(
         self,
