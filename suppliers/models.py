@@ -23,12 +23,11 @@ class Supplier(models.Model):
     )
 
     tax_id = models.CharField(
-        max_length=20,
-        unique=True,
-        blank=False,
-        null=False,
-        verbose_name="CUIT",
-    )
+    max_length=20,
+    blank=False,
+    null=False,
+    verbose_name="CUIT",
+)
 
     tax_profile = models.ForeignKey(
         ThirdPartyTaxProfile,
@@ -66,6 +65,14 @@ class Supplier(models.Model):
     class Meta:
         ordering = ["name"]
         unique_together = ("company", "name")
+
+    models.UniqueConstraint(
+    fields=[
+        "company",
+        "tax_id",
+    ],
+    name="uniq_supplier_taxid_company",
+)    
 
     def __str__(self):
         return f"{self.name}"

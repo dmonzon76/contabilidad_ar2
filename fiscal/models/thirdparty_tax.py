@@ -44,7 +44,7 @@ class ThirdPartyTaxProfile(models.Model):
 
     name = models.CharField(
         max_length=150,
-        unique=True,
+        unique=False,
     )
 
     afip_category = models.CharField(
