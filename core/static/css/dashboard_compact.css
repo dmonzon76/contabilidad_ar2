@@ -1,0 +1,445 @@
+/*
+==================================================
+DASHBOARD COMPACT
+ERP Compact Mode
+contabilidad_ar2
+==================================================
+*/
+
+/* ==================================================
+   VARIABLES
+   ================================================== */
+
+.erp-compact {
+
+    --dashboard-radius: 10px;
+
+    --dashboard-padding: 0.85rem;
+
+    --dashboard-gap: 0.75rem;
+
+    --dashboard-chart-height: 220px;
+
+    --kpi-value-size: 1.35rem;
+
+    --kpi-label-size: 0.75rem;
+
+    --kpi-footer-size: 0.70rem;
+
+    --card-header-size: 0.85rem;
+
+    --table-size: 0.85rem;
+
+    --badge-size: 0.72rem;
+
+    --button-size: 0.80rem;
+
+    --transition-speed: .20s;
+
+}
+
+/* ==================================================
+   DASHBOARD TITLES
+   ================================================== */
+
+.erp-compact .app-title {
+
+    font-size: 1.40rem;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    margin-bottom: .35rem;
+
+}
+
+.erp-compact .app-subtitle {
+
+    font-size: .85rem;
+
+    opacity: .85;
+
+    margin-bottom: 0;
+
+}
+
+.erp-compact .table-title {
+
+    font-size: 1.10rem;
+
+    margin-bottom: 0;
+
+}
+
+/* ==================================================
+   KPI CARDS
+   ================================================== */
+
+.erp-compact .kpi-card {
+
+    p*dding: var(--dashboard-padding);
+
+*   border-radius: var(--dashboard-*adius);
+
+    min-height: 95px;
+
+  * transition: all var(--transition-*peed);
+
+}
+
+.erp-compact .kpi-card:*over {
+
+    transform: translateY(*2px);
+
+}
+
+.erp-compact .kpi-icon {*
+    width: 38px;
+
+    height: 38p*;
+
+}
+
+.erp-compact .kpi-svg {
+
+   *width: 18px;
+
+    height: 18px;
+
+}*
+.erp-compact .kpi-label {
+
+    font-size: var(--kpi-label-size);
+
+    margin-bottom: .20rem;
+
+}
+
+.erp-compact .kpi-value {
+
+    font-size: var(--kpi-value-size);
+
+    font-weight: 700;
+
+    line-height: 1.1;
+
+}
+
+.erp-compact .kpi-footer {
+
+    font-size: var(--kpi-footer-size);
+
+}
+
+/* ==================================================
+   BOOTSTRAP CARDS
+   ================================================== */
+
+.erp-compact .card {
+
+    borde*-radius: var(--dashboard-radius);
+
+}
+
+.erp-compact .card-header {
+
+    padding: .65rem .85rem;
+
+    font-size: var(--card-header-size);
+
+    font-weight: 600;
+
+}
+
+.erp-compact .card-body {
+
+    padding: .85rem;
+
+}
+
+/* ==================================================
+   MINI STAT CARDS
+   ================================================== */
+
+.erp-compact .mini-stat-card {
+
+    padding: .75rem;
+
+    min-height: 70px;
+
+    border-radius: 8px;
+
+}
+
+.erp-compact .mini-stat-label {
+
+    font-size: .75rem;
+
+}
+
+.erp-compact .mini-stat-value {
+
+    font-size: 1.15rem;
+
+    font-weight: 700;
+
+}
+
+/* ==================================================
+   PANELS
+   ================================================== */
+
+.erp-compact .dashboard-panel,
+
+.erp-compact .payroll-panel {
+
+    padding: .90rem;
+
+    border-radius: var(--dashboard-radius);
+
+}
+
+.erp-compact .payroll-panel-header {
+
+    margin-bottom: .75rem;
+
+}
+
+.erp-compact .dashboard-grid,
+
+.erp-compact .payroll-grid {
+
+    gap: .65rem;
+
+}
+
+/* ==================================================
+   TABLES
+   ================================================== */
+
+.erp-compact .table {
+
+    font-size: var(--table-size);
+
+    margin-bottom: 0;
+
+}
+
+.erp-compact .table th {
+
+    font-size: .78rem;
+
+    font-weight: 600;
+
+    padding: .55rem;
+
+}
+
+.erp-compact .table td {
+
+    padding: .50rem;
+
+    vertical-align: middle;
+
+}
+
+.erp-compact .table-sm th,
+
+.erp-compact .table-sm td {
+
+    padding: .40rem;
+
+}
+
+/* ==================================================
+   BUTTONS
+   ================================================== */
+
+.erp-compact .btn {
+
+    font-size: var(--button-size);
+
+}
+
+.erp-compact .btn-sm {
+
+    padding: .30rem .65rem;
+
+    font-size: .75rem;
+
+}
+
+/* ==================================================
+   BADGES
+   ================================================== */
+
+.erp-compact .badge {
+
+    font-size: var(--badge-size);
+
+}
+
+/* ==================================================
+   FORMS
+   ================================================== */
+
+.erp-compact .form-label {
+
+    font-size: .82rem;
+
+    margin-bottom: .20rem;
+
+}
+
+.erp-compact .form-control,
+
+.erp-compact .form-select {
+
+    min-height: 34px;
+
+    font-size: .85rem;
+
+}
+
+.erp-compact textarea.form-control {
+
+    min-height: 90px;
+
+}
+
+/* ==================================================
+   CHARTS
+   ================================================== */
+
+.erp-compact .chart-container {
+
+    height: var(--dashboard-chart-height);
+
+}
+
+.erp-compact canvas {
+
+    max-height: var(--dashboard-chart-height);
+
+}
+
+/* ==================================================
+   ALERTS
+   ================================================== */
+
+.erp-compact .alert {
+
+    padding: .65rem .85rem;
+
+    font-size: .85rem;
+
+}
+
+.erp-compact .alert-pill {
+
+    padding: .45rem .75rem;
+
+    font-size: .75rem;
+
+}
+
+/* ==================================================
+   QUICK ACTIONS
+   ================================================== */
+
+.erp-compact .quick-actions .btn {
+
+    padding: .45rem .85rem;
+
+}
+
+/* ==================================================
+   LIST GROUPS
+   ================================================== */
+
+.erp-compact .list-group-item {
+
+    padding: .55rem .85rem;
+
+    font-size: .85rem;
+
+}
+
+/* ==================================================
+   ROW SPACING
+   ================================================== */
+
+.erp-compact .row {
+
+    --bs-gutter-y: .75rem;
+
+}
+
+/* ==================================================
+   HEADINGS
+   ================================================== */
+
+.erp-compact h1 {
+
+    font-size: 1.40rem;
+
+}
+
+.erp-compact h2 {
+
+    font-size: 1.20rem;
+
+}
+
+.erp-compact h3 {
+
+    font-size: 1.05rem;
+
+}
+
+.erp-compact h4 {
+
+    font-size: .95rem;
+
+}
+
+.erp-compact h5 {
+
+    font-size: .90rem;
+
+}
+
+.erp-compact h6 {
+
+    font-size: .82rem;
+
+}
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+
+@media (max-width: 768px) {
+
+    .erp-compact .kpi-card {
+
+        min-height: 80px;
+
+        padding: .70rem;
+
+    }
+
+    .erp-compact .kpi-value {
+
+        font-size: 1.10rem;
+
+    }
+
+    .erp-compact .chart-container {
+
+        height: 180px;
+
+    }
+
+}
