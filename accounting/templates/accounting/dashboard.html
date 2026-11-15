@@ -1,4 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'css/accounting.css' %}"
+>
+
+{% endblock %}
+
 
 {% block title %}Accounting Center{% endblock %}
 

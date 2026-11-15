@@ -137,95 +137,62 @@
         </article>
     </div>
 
-   <div class="payroll-panel-header">
-
-    <div>
-
-        <p class="text-uppercase text-muted small fw-semibold mb-1">
-            Human Resources
-        </p>
-
-        <h2 class="table-title mb-0">
-            Payroll Overview
-        </h2>
-
-    </div>
-
-    <div class="d-flex align-items-center gap-2">
-
-        <span class="badge text-bg-success">
-            {{ active_employees }} active
-        </span>
-
-        <a
-            href="{% url 'payroll:dashboard' %}"
-            class="btn btn-primary btn-sm"
-        >
-            Open Payroll
-        </a>
-
-    </div>
-
-</div>
-
-    <div class="d-flex align-items-center gap-2">
-
-        <span class="badge text-bg-success">
-            {{ active_employees }} active
-        </span>
-
-        <a
-            href="{% url 'payroll:dashboard' %}"
-            class="btn btn-primary btn-sm"
-        >
-            Open Payroll
-        </a>
-
-    </div>
-
-</div>
-
-        <div class="payroll-grid">
-            <div class="mini-stat-card">
-                <span class="mini-stat-label">Active employees</span>
-                <strong class="mini-stat-value">{{ active_employees|default:0 }}</strong>
+    <section class="payroll-panel" aria-labelledby="payroll-overview-title">
+        <div class="payroll-panel-header">
+            <div>
+                <p class="text-uppercase text-muted small fw-semibold mb-1">
+                    Human Resources
+                </p>
+                <h2 id="payroll-overview-title" class="table-title mb-0">
+                    Payroll Overview
+                </h2>
             </div>
-            <div class="mini-stat-card">
-                <span class="mini-stat-label">Family members</span>
-                <strong class="mini-stat-value">{{ family_members|default:0 }}</strong>
-            </div>
-            <div class="mini-stat-card">
-                <span class="mini-stat-label">Payroll receipts</span>
-                <strong class="mini-stat-value">{{ payroll_receipts|default:0 }}</strong>
-            </div>
-            <div class="mini-stat-card accent">
-                <span class="mini-stat-label">Total payroll</span>
-                <strong class="mini-stat-value">{{ payroll_cost|default:0 }}</strong>
+
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge text-bg-success">
+                    {{ active_employees }} active
+                </span>
+                <a
+                    href="{% url 'payroll:dashboard' %}"
+                    class="btn btn-primary btn-sm"
+                >
+                    Open Payroll
+                </a>
             </div>
         </div>
 
-        <div class="payroll-alerts">
-            {% if active_employees > 0 %}
-                <div class="alert-pill success">
-                    Staffing stable: {{ active_employees }} employees currently active.
-                </div>
-            {% else %}
-                <div class="alert-pill warning">
-                    No active employees in the selected company.
-                </div>
-            {% endif %}
+        <div class="payroll-summary-bar">
 
-            {% if payroll_cost > 0 %}
-                <div class="alert-pill info">
-                    Payroll cost is currently {{ payroll_cost|floatformat:0 }} ARS for the period.
-                </div>
-            {% else %}
-                <div class="alert-pill neutral">
-                    No payroll cost recorded yet.
-                </div>
-            {% endif %}
-        </div>
-    </div>
+    <span>
+        EMP
+        <strong>{{ active_employees }}</strong>
+    </span>
+
+    <span>
+        FAM
+        <strong>{{ family_members }}</strong>
+    </span>
+
+    <span>
+        REC
+        <strong>{{ payroll_receipts }}</strong>
+    </span>
+
+    <span>
+        PAY
+        <strong>{{ payroll_cost|floatformat:0 }}</strong>
+    </span>
+
+    <a
+        href="{% url 'payroll:dashboard' %}"
+        class="btn btn-sm btn-primary"
+    >
+        Open Payroll
+    </a>
+
+</div>
+
+    </section>
 
     <div class="charts-row">
         <article class="chart-card">
@@ -362,3 +329,4 @@
 </script>
 <script src="{% static 'js/dashboard_main.js' %}"></script>
 {% endblock %}
+
