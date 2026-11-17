@@ -1,4 +1,5 @@
 import decimal
+
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
@@ -7,6 +8,7 @@ from fiscal.models.tax import Tax
 from products.models import Product
 from purchases.models.purchase import Purchase
 from sales.models.sale import Sale
+
 
 class Location(models.Model):
     """

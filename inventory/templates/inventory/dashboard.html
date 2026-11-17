@@ -2,6 +2,46 @@
 
 {% block content %}
 <h2>Inventory Dashboard</h2>
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+
+    <a href="{% url 'products:product_list' %}"
+       class="btn btn-outline-primary">
+        Products
+    </a>
+
+    <a href="{% url 'products:product_add' %}"
+       class="btn btn-primary">
+        Add Product / Service
+    </a>
+
+    <a href="{% url 'inventory:inventory_list' %}"
+       class="btn btn-outline-secondary">
+        Inventory Items
+    </a>
+
+    <a href="{% url 'inventory:inventory_add' %}"
+       class="btn btn-secondary">
+        Add Inventory Item
+    </a>
+
+    <a href="{% url 'inventory:location_list' %}"
+       class="btn btn-outline-info">
+        Locations
+    </a>
+
+    <a href="{% url 'inventory:location_add' %}"
+       class="btn btn-info text-white">
+        Add Location
+    </a>
+
+    <a href="{% url 'inventory:movement_list' %}"
+       class="btn btn-outline-success">
+        Movements
+    </a>
+
+</div>
+
 {% include "core/components/third_party_dashboard_nav.html" %}
 
 <div class="row mb-4">
