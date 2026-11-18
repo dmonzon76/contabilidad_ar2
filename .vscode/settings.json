@@ -1,0 +1,129 @@
+{
+    // ============================================================
+    // PYTHON GLOBAL SETTINGS
+    // ============================================================
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    // ============================================================
+    // INTEGRATED TERMINAL
+    // ============================================================
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.automationProfile.windows": {
+        "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "terminal.integrated.defaultLocation": "panel",
+    "terminal.integrated.hideOnStartup": "never",
+    "terminal.integrated.enablePersistentSessions": true,
+    "terminal.integrated.persistentSessionReviveProcess": true,
+    "terminal.integrated.scrollback": 10000,
+    "terminal.integrated.env.windows": {
+        "VIRTUAL_ENV": "${workspaceFolder}\\venv",
+        "PATH": "${workspaceFolder}\\venv\\Scripts;${env:PATH}"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.formatOnPaste": true,
+        "editor.autoIndent": "full",
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.detectIndentation": false
+    },
+    // ============================================================
+    // GLOBAL FORMAT SETTINGS
+    // ============================================================
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll.ruff": "explicit"
+    },
+    // ============================================================
+    // RUFF (GLOBAL LINT)
+    // ============================================================
+    "ruff.enable": true,
+    "ruff.lint.enable": true,
+    // ============================================================
+    // UI GLOBAL (ERP STYLE — TODO BLANCO FIJO)
+    // ============================================================
+    "workbench.colorCustomizations": {
+        // ----- Title Bar -----
+        "titleBar.activeBackground": "#1E1E1E",
+        "titleBar.inactiveBackground": "#1E1E1E",
+        "titleBar.activeForeground": "#FFFFFF",
+        "titleBar.inactiveForeground": "#FFFFFF",
+        // ----- Activity Bar -----
+        "activityBar.background": "#1E1E1E",
+        "activityBar.foreground": "#FFFFFF",
+        "activityBar.inactiveForeground": "#FFFFFF",
+        "activityBar.activeBorder": "#FFFFFF",
+        // ----- Side Bar -----
+        "sideBar.background": "#252526",
+        "sideBar.foreground": "#FFFFFF",
+        "sideBar.border": "#FFFFFF",
+        "sideBarSectionHeader.foreground": "#FFFFFF",
+        "sideBarSectionHeader.background": "#252526",
+        // ----- Panels -----
+        "panel.background": "#1E1E1E",
+        "panel.foreground": "#FFFFFF",
+        "panel.border": "#FFFFFF",
+        "panelTitle.activeForeground": "#FFFFFF",
+        "panelTitle.inactiveForeground": "#FFFFFF",
+        // ----- Editor Groups -----
+        "editorGroup.border": "#FFFFFF",
+        "editorGroupHeader.tabsBorder": "#FFFFFF",
+        // ----- Status Bar -----
+        "statusBar.background": "#1E1E1E",
+        "statusBar.foreground": "#FFFFFF",
+        "statusBar.border": "#FFFFFF",
+        // ----- Sash -----
+        "sash.hoverBorder": "#FFFFFF",
+        // ----- General Borders -----
+        "contrastBorder": "#FFFFFF",
+        "activeContrastBorder": "#FFFFFF",
+        // ============================================================
+        // TERMINAL (BLANCA + TEXTO NEGRO) — SOLUCIÓN AL PROBLEMA
+        // ============================================================
+        "terminal.background": "#1E1E1E",
+        "terminal.foreground": "#FFFFFF",
+        "terminalCursor.background": "#FFFFFF",
+        "terminalCursor.foreground": "#FFFFFF",
+        "terminal.ansiBlack": "#000000",
+        "terminal.ansiRed": "#CC0000",
+        "terminal.ansiGreen": "#009900",
+        "terminal.ansiYellow": "#CC9900",
+        "terminal.ansiBlue": "#0033CC",
+        "terminal.ansiMagenta": "#CC00CC",
+        "terminal.ansiCyan": "#0099CC",
+        "terminal.ansiWhite": "#FFFFFF",
+        "terminal.ansiBrightBlack": "#666666",
+        "terminal.ansiBrightRed": "#FF0000",
+        "terminal.ansiBrightGreen": "#00CC00",
+        "terminal.ansiBrightYellow": "#FFCC00",
+        "terminal.ansiBrightBlue": "#0066FF",
+        "terminal.ansiBrightMagenta": "#FF00FF",
+        "terminal.ansiBrightCyan": "#00CCFF",
+        "terminal.ansiBrightWhite": "#FFFFFF"
+    },
+    "workbench.sash.size": 20,
+    "workbench.sash.hoverDelay": 0,
+    // ============================================================
+    // PROJECT CLEANUP (GLOBAL)
+    // ============================================================
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.venv": true
+    },
+    "search.exclude": {
+        "**/__pycache__": true,
+        "**/.venv": true
+    },
+    // ============================================================
+    // AUTO SAVE
+    // ============================================================
+    "files.autoSave": "afterDelay"
+}

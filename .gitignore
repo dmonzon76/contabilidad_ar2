@@ -25,7 +25,8 @@ local_settings.py
 # ============================================
 # IDE / EDITOR
 # ============================================
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 .metadata/
 
