@@ -80,6 +80,25 @@ class Sale(models.Model):
     def __str__(self):
         return f"Sale {self.number} - {self.customer.name}"
 
+    @property
+    def is_service(self):
+        """
+        La venta se considera de servicios
+        solamente cuando todos los ítems
+        son servicios.
+        """
+
+        items = self.items.all()
+
+        if not items.exists():
+            return False
+
+        return all(
+            item.product
+            and item.product.is_service
+            for item in items
+        )
+
     def recalc_totals(self):
 
         net = Decimal("0.00")
