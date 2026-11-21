@@ -4,6 +4,14 @@ from .models import Product
 
 
 class ProductForm(forms.ModelForm):
+    type = forms.ChoiceField(
+        choices=[
+            ("PRODUCT", "Stock Product"),
+            ("SERVICE", "Service"),
+        ],
+        widget=forms.RadioSelect,
+    )
+
     class Meta:
         model = Product
         fields = [
@@ -27,12 +35,14 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["type"].required = True
-        self.fields["type"].empty_label = None
 
         self.fields["type"].help_text = (
             "PRODUCT: Physical product with stock and inventory movements. SERVICE: Service without stock or inventory."
         )
-
+        self.fields["type"].choices = [
+            ("PRODUCT", "Stock Product"),
+            ("SERVICE", "Service"),
+        ]
         self.fields["name"].widget.attrs.update({"placeholder": "Product or Service Name"})
 
         self.fields["sku"].widget.attrs.update({"placeholder": "Unique Code"})

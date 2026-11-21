@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounting.models import Account, JournalEntry, JournalEntryLine, Period
+from company.forms import company
 
 
 class AccountingService:
@@ -17,126 +18,102 @@ class AccountingService:
 
     # Mapeo flexible de códigos para cada función contable
     ACCOUNT_CODE_MAP = {
-    # ==========================================
-    # ASSETS
-    # ==========================================
-
-    "CASH": [
-        "1.1.01",
-        "CASH",
-    ],
-
-    "BANKS": [
-        "1.1.02",
-        "BANKS",
-    ],
-
-    "CUSTOMERS": [
-        "1.1.04",
-        "ACCOUNTS_RECEIVABLE",
-    ],
-
-    "OTHER_RECEIVABLES": [
-        "1.1.05",
-        "OTHER_RECEIVABLES",
-    ],
-
-    "SUPPLIER_ADVANCES": [
-        "1.1.06",
-        "ADVANCES_TO_SUPPLIERS",
-    ],
-
-    "IVA_CREDIT": [
-        "1.1.07",
-        "VAT_CREDIT_FISCAL",
-    ],
-
-    "IVA_PERCEPTION_ASSET": [
-        "1.1.08",
-        "VAT_PERCEPTIONS",
-    ],
-
-    "IIBB_PERCEPTION_ASSET": [
-        "1.1.09",
-        "GROSS_INCOME_TAX_PERCEPTIONS",
-    ],
-
-    "INCOME_TAX_RETENTIONS": [
-        "1.1.10",
-        "INCOME_TAX_RETENTIONS",
-    ],
-
-    "INVENTORY": [
-        "1.1.11",
-        "MERCHANDISE_INVENTORY",
-    ],
-
-    # ==========================================
-    # LIABILITIES
-    # ==========================================
-
-    "SUPPLIERS": [
-        "2.1.01",
-        "SUPPLIERS",
-    ],
-
-    "IVA_DEBIT": [
-        "2.1.05",
-        "VAT_DEBIT_FISCAL",
-    ],
-
-    "IVA_PAYABLE": [
-        "2.1.06",
-        "VAT_PAYABLE",
-    ],
-
-    "IVA_PERCEPTION_LIABILITY": [
-        "2.1.07",
-        "VAT_PERCEPTIONS_PAYABLE",
-    ],
-
-    "IIBB_PERCEPTION_LIABILITY": [
-        "2.1.08",
-        "GROSS_INCOME_TAX_PAYABLE",
-    ],
-
-    "RETENTIONS_PAYABLE": [
-        "2.1.09",
-        "TAX_RETENTIONS_PAYABLE",
-    ],
-
-    # ==========================================
-    # REVENUE
-    # ==========================================
-
-    "SALES_GOODS": [
-        "4.1.01",
-        "PRODUCT_SALES",
-    ],
-
-    "SALES_SERVICES": [
-        "4.1.02",
-        "SERVICE_SALES",
-    ],
-
-    # ==========================================
-    # COST OF SALES
-    # ==========================================
-
-    "COGS": [
-        "5.1.01",
-        "COST_OF_GOODS_SOLD",
-    ],
-
-    # ==========================================
-    # EXPENSES
-    # ==========================================
-
-    "EXPENSES": [
-        "6.1.01",
-        "ADMINISTRATIVE_SALARIES",
-    ],
-}
+        # ==========================================
+        # ASSETS
+        # ==========================================
+        "CASH": [
+            "1.1.01",
+            "CASH",
+        ],
+        "BANKS": [
+            "1.1.02",
+            "BANKS",
+        ],
+        "CUSTOMERS": [
+            "1.1.04",
+            "ACCOUNTS_RECEIVABLE",
+        ],
+        "OTHER_RECEIVABLES": [
+            "1.1.05",
+            "OTHER_RECEIVABLES",
+        ],
+        "SUPPLIER_ADVANCES": [
+            "1.1.06",
+            "ADVANCES_TO_SUPPLIERS",
+        ],
+        "IVA_CREDIT": [
+            "1.1.07",
+            "VAT_CREDIT_FISCAL",
+        ],
+        "IVA_PERCEPTION_ASSET": [
+            "1.1.08",
+            "VAT_PERCEPTIONS",
+        ],
+        "IIBB_PERCEPTION_ASSET": [
+            "1.1.09",
+            "GROSS_INCOME_TAX_PERCEPTIONS",
+        ],
+        "INCOME_TAX_RETENTIONS": [
+            "1.1.10",
+            "INCOME_TAX_RETENTIONS",
+        ],
+        "INVENTORY": [
+            "1.1.11",
+            "MERCHANDISE_INVENTORY",
+        ],
+        # ==========================================
+        # LIABILITIES
+        # ==========================================
+        "SUPPLIERS": [
+            "2.1.01",
+            "SUPPLIERS",
+        ],
+        "IVA_DEBIT": [
+            "2.1.05",
+            "VAT_DEBIT_FISCAL",
+        ],
+        "IVA_PAYABLE": [
+            "2.1.06",
+            "VAT_PAYABLE",
+        ],
+        "IVA_PERCEPTION_LIABILITY": [
+            "2.1.07",
+            "VAT_PERCEPTIONS_PAYABLE",
+        ],
+        "IIBB_PERCEPTION_LIABILITY": [
+            "2.1.08",
+            "GROSS_INCOME_TAX_PAYABLE",
+        ],
+        "RETENTIONS_PAYABLE": [
+            "2.1.09",
+            "TAX_RETENTIONS_PAYABLE",
+        ],
+        # ==========================================
+        # REVENUE
+        # ==========================================
+        "SALES_GOODS": [
+            "4.1.01",
+            "PRODUCT_SALES",
+        ],
+        "SALES_SERVICES": [
+            "4.1.02",
+            "SERVICE_SALES",
+        ],
+        # ==========================================
+        # COST OF SALES
+        # ==========================================
+        "COGS": [
+            "5.1.01",
+            "COST_OF_GOODS_SOLD",
+        ],
+        # ==========================================
+        # EXPENSES
+        # ==========================================
+        "EXPENSES": [
+            "6.1.01",
+            "ADMINISTRATIVE_SALARIES",
+        ],
+    }
 
     @staticmethod
     def get_account(company, account_key, setting_field=None, custom_name=""):
@@ -248,24 +225,55 @@ class AccountingService:
             description=f"Cliente {sale.customer.name}",
         )
 
-        # 2. HABER: Ventas (Neto Gravado)
-        sales_key = "SALES_SERVICES" if is_service else "SALES_GOODS"
-        sales_setting = "account_sales_services" if is_service else "account_sales_goods"
-        sales_label = "Ventas de Servicios" if is_service else "Ventas de Mercaderías"
+        # 2. HABER: Ventas por tipo de artículo
+        product_total = Decimal("0.00")
+        service_total = Decimal("0.00")
 
-        account_sales = AccountingService.get_account(company, sales_key, sales_setting, sales_label)
-        JournalEntryLine.objects.create(
-            entry=entry,
-            account=account_sales,
-            debit=0,
-            credit=sale.net_amount,
-            description=sales_label,
-        )
+        for item in sale.items.all():
+            if item.product and item.product.is_service:
+                service_total += item.subtotal
+            else:
+                product_total += item.subtotal
+
+        if product_total > 0:
+            account_product_sales = AccountingService.get_account(
+                company,
+                "SALES_GOODS",
+                "account_sales_goods",
+                "Ventas de Mercaderías",
+            )
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_product_sales,
+                debit=0,
+                credit=product_total,
+                description="Ventas de Mercaderías",
+            )
+
+        if service_total > 0:
+            account_service_sales = AccountingService.get_account(
+                company,
+                "SALES_SERVICES",
+                "account_sales_services",
+                "Ventas de Servicios",
+            )
+            JournalEntryLine.objects.create(
+                entry=entry,
+                account=account_service_sales,
+                debit=0,
+                credit=service_total,
+                description="Ventas de Servicios",
+            )
 
         # 3. HABER: IVA Débito Fiscal
         iva_amount = getattr(sale, "iva_amount", Decimal("0.00")) or getattr(sale, "vat_amount", Decimal("0.00"))
         if iva_amount > 0:
-            account_iva = AccountingService.get_account(company, "IVA_DEBIT", "account_iva_debit", "IVA Débito Fiscal")
+            account_iva = AccountingService.get_account(
+                company,
+                "IVA_DEBIT",
+                "account_iva_debit",
+                "IVA Débito Fiscal",
+            )
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=account_iva,
@@ -278,7 +286,10 @@ class AccountingService:
         iibb_amount = getattr(sale, "iibb_perception_amount", Decimal("0.00"))
         if iibb_amount > 0:
             account_iibb = AccountingService.get_account(
-                company, "IIBB_PERCEPTION_LIABILITY", "account_iibb_perception_payable", "Percepción IIBB a Depositar"
+                company,
+                "IIBB_PERCEPTION_LIABILITY",
+                "account_iibb_perception_payable",
+                "Percepción IIBB a Depositar",
             )
             JournalEntryLine.objects.create(
                 entry=entry,
@@ -292,7 +303,10 @@ class AccountingService:
         vat_perc_amount = getattr(sale, "vat_perception_amount", Decimal("0.00"))
         if vat_perc_amount > 0:
             account_vat_perc = AccountingService.get_account(
-                company, "IVA_PERCEPTION_LIABILITY", "account_iva_perception_payable", "Percepción IVA a Depositar"
+                company,
+                "IVA_PERCEPTION_LIABILITY",
+                "account_iva_perception_payable",
+                "Percepción IVA a Depositar",
             )
             JournalEntryLine.objects.create(
                 entry=entry,
@@ -305,9 +319,17 @@ class AccountingService:
         # 6. DEBE / HABER: Costo de Mercadería Vendida e Inventario
         total_cost = getattr(sale, "total_cost", Decimal("0.00"))
         if not is_service and total_cost > 0:
-            account_cmv = AccountingService.get_account(company, "COGS", "account_cmv", "Costo de Mercaderías Vendidas")
+            account_cmv = AccountingService.get_account(
+                company,
+                "COGS",
+                "account_cmv",
+                "Costo de Mercaderías Vendidas",
+            )
             account_inventory = AccountingService.get_account(
-                company, "INVENTORY", "account_inventory", "Inventario / Mercaderías"
+                company,
+                "INVENTORY",
+                "account_inventory",
+                "Inventario / Mercaderías",
             )
 
             JournalEntryLine.objects.create(
@@ -317,7 +339,6 @@ class AccountingService:
                 credit=0,
                 description="Costo de mercadería vendida",
             )
-
             JournalEntryLine.objects.create(
                 entry=entry,
                 account=account_inventory,
@@ -561,11 +582,10 @@ class AccountingService:
 
         return reverse
 
-
-@staticmethod
-def ensure_required_accounts(company):
-    """
-    Método de compatibilidad para signals y flujos legacy.
-    Evita fallos en la creación automática de empresas.
-    """
-    return []
+    @staticmethod
+    def ensure_required_accounts(company):
+        """
+        Método de compatibilidad para signals y flujos legacy.
+        Evita fallos en la creación automática de empresas.
+        """
+        return []

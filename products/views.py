@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from urllib3 import request
 
+from company.forms import company
 from core.middleware.active_company import get_active_company_from_request
 from products.forms import ProductForm
 from products.models import Product
@@ -15,7 +17,18 @@ def product_add(request):
     company = get_active_company_from_request(request)
 
     if request.method == "POST":
+        print("\n====================")
+        print("POST DATA")
+        print("====================")
+        print(request.POST)
+
         form = ProductForm(request.POST)
+
+        print("\n====================")
+        print("FORM ERRORS")
+        print("====================")
+        print(form.errors)
+
         if form.is_valid():
             p = form.save(commit=False)
             p.company = company

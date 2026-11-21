@@ -41,12 +41,11 @@
                         <div class="border rounded p-3 bg-light">
 
                             <div class="form-check mb-3">
-
-                                {{ form.type.0.tag }}
+                                {{ form.type.1.tag }}
 
                                 <label
                                     class="form-check-label"
-                                    for="{{ form.type.0.id_for_label }}"
+                                    for="{{ form.type.1.id_for_label }}"
                                 >
                                     <strong>📦 Product</strong>
                                     <br>
@@ -56,16 +55,14 @@
                                         cost tracking and stock movements.
                                     </small>
                                 </label>
-
                             </div>
 
                             <div class="form-check">
-
-                                {{ form.type.1.tag }}
+                                {{ form.type.2.tag }}
 
                                 <label
                                     class="form-check-label"
-                                    for="{{ form.type.1.id_for_label }}"
+                                    for="{{ form.type.2.id_for_label }}"
                                 >
                                     <strong>🛠 Service</strong>
                                     <br>
@@ -76,7 +73,6 @@
                                         no stock movements.
                                     </small>
                                 </label>
-
                             </div>
 
                         </div>
@@ -86,7 +82,6 @@
                                 {{ form.type.errors }}
                             </div>
                         {% endif %}
-
                     </div>
 
                     <div class="col-md-6">

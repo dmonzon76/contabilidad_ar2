@@ -81,7 +81,7 @@ class Product(models.Model):
     price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        default=0,
+        default=Decimal("0.00"),
     )
 
     class Meta:
