@@ -91,7 +91,78 @@
             </tbody>
 
         </table>
+{% if sale.status == "DRAFT" %}
 
+<div class="card mt-4">
+
+    <div class="card-header">
+        <h5 class="mb-0">
+            Add Item
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <form
+            method="post"
+            action="{% url 'sales:sale_item_add' sale.pk %}"
+        >
+
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">
+                        Product
+                    </label>
+                    {{ item_form.product }}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">
+                        Quantity
+                    </label>
+                    {{ item_form.quantity }}
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">
+                        Unit Price
+                    </label>
+                    {{ item_form.unit_price }}
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">
+                        Tax
+                    </label>
+                    {{ item_form.tax }}
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Description
+                </label>
+                {{ item_form.description }}
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Add Line
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endif %}
     {% else %}
 
         <div class="alert alert-info">

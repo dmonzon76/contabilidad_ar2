@@ -15,6 +15,7 @@ from inventory.integration import update_inventory_from_sale
 from sales.forms.sale import SaleForm
 from sales.forms.sale_item import SaleItemForm
 from sales.models.sale import Sale
+from sales.models.sale_item import SaleItem
 
 # ============================================================
 # LISTA DE VENTAS
@@ -55,13 +56,13 @@ class SaleCreateView(CreateView):
         self.object = sale
 
         return redirect(
-            "sales:sale_detail",
+            "sales:sale_workspace",
             pk=sale.pk,
         )
 
     def get_success_url(self):
         return reverse_lazy(
-            "sales:sale_detail",
+            "sales:sale_workspace",
             kwargs={"pk": self.object.pk},
         )
 
@@ -70,14 +71,40 @@ class SaleCreateView(CreateView):
 # DETALLE DE VENTA
 # ============================================================
 
-
 class SaleDetailView(DetailView):
     model = Sale
     template_name = "sales/sale_detail.html"
     context_object_name = "sale"
 
     def get_queryset(self):
-        return Sale.objects.filter(company_id=self.request.session.get("active_company_id"))
+        return Sale.objects.filter(
+            company_id=self.request.session.get("active_company_id")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["item_form"] = SaleItemForm(company=self.object.company)
+
+        return context
+
+
+class SaleWorkspaceView(DetailView):
+    model = Sale
+    template_name = "sales/sale_workspace.html"
+    context_object_name = "sale"
+
+    def get_queryset(self):
+        return Sale.objects.filter(
+            company_id=self.request.session.get("active_company_id")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["item_form"] = SaleItemForm(company=self.object.company)
+
+        return context
 
 
 # ============================================================
@@ -86,7 +113,6 @@ class SaleDetailView(DetailView):
 
 
 def sale_item_add(request, sale_id):
-
     sale = get_object_or_404(
         Sale,
         id=sale_id,
@@ -127,7 +153,7 @@ def sale_item_add(request, sale_id):
             sale.recalc_totals()
 
             return redirect(
-                "sales:sale_detail",
+                "sales:sale_workspace",
                 pk=sale.id,
             )
 
@@ -148,6 +174,37 @@ def sale_item_add(request, sale_id):
     )
 
 
+@login_required
+@require_POST
+def sale_item_delete(request, pk):
+    item = get_object_or_404(
+        SaleItem,
+        pk=pk,
+        sale__company_id=request.session.get("active_company_id"),
+    )
+
+    sale = item.sale
+
+    if sale.status != "DRAFT":
+        messages.error(request, "Issued sales cannot be modified.")
+
+        return redirect(
+            "sales:sale_workspace",
+            pk=sale.pk,
+        )
+
+    item.delete()
+
+    sale.recalc_totals()
+
+    messages.success(request, "Item deleted successfully.")
+
+    return redirect(
+        "sales:sale_workspace",
+        pk=sale.pk,
+    )
+
+
 # ... (vistas anteriores) ...
 
 
@@ -162,11 +219,11 @@ def issue_sale(request, pk):
 
     if sale.status != "DRAFT":
         messages.warning(request, "La venta ya fue emitida anteriormente.")
-        return redirect("sales:sale_detail", pk=sale.pk)
+        return redirect("sales:sale_workspace", pk=sale.pk)
 
     if not sale.items.exists():
         messages.error(request, "No se puede emitir una venta sin ítems cargados.")
-        return redirect("sales:sale_detail", pk=sale.pk)
+        return redirect("sales:sale_workspace", pk=sale.pk)
 
     try:
         with transaction.atomic():
@@ -181,12 +238,15 @@ def issue_sale(request, pk):
             sale.status = "ISSUED"
             sale.save(update_fields=["status"])
 
-        messages.success(request, f"Venta N° {sale.number} emitida y contabilizada correctamente.")
+        messages.success(
+            request,
+            f"Venta N° {sale.number} emitida y contabilizada correctamente.",
+        )
 
     except Exception as e:
         messages.error(request, f"Error al emitir la venta: {str(e)}")
 
-    return redirect("sales:sale_detail", pk=sale.pk)
+    return redirect("sales:sale_workspace", pk=sale.pk)
 
 
 # ============================================================
@@ -211,7 +271,7 @@ def sale_delete(request, pk):
         )
         return render(
             request,
-            "sales/sale_detail.html",
+            "sales/sale_workspace.html",
             {"sale": sale, "error": str(e)},
         )
 
@@ -227,7 +287,60 @@ def get_voucher_type_for_customer(customer):
 
     if category == "RI":
         return "FA"
-    elif category == "CF":
+    if category == "CF":
         return "FB"
+    return "FC"
+
+
+@login_required
+def sale_item_edit(request, pk):
+    item = get_object_or_404(
+        SaleItem,
+        pk=pk,
+        sale__company_id=request.session.get("active_company_id"),
+    )
+
+    sale = item.sale
+
+    if sale.status != "DRAFT":
+        messages.error(request, "Issued sales cannot be modified.")
+
+        return redirect(
+            "sales:sale_workspace",
+            pk=sale.pk,
+        )
+
+    if request.method == "POST":
+        form = SaleItemForm(
+            request.POST,
+            instance=item,
+            company=sale.company,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            sale.recalc_totals()
+
+            messages.success(request, "Item updated successfully.")
+
+            return redirect(
+                "sales:sale_workspace",
+                pk=sale.pk,
+            )
+
     else:
-        return "FC"
+        form = SaleItemForm(
+            instance=item,
+            company=sale.company,
+        )
+
+    return render(
+        request,
+        "sales/edit_sale_item.html",
+        {
+            "form": form,
+            "item": item,
+            "sale": sale,
+        },
+    )

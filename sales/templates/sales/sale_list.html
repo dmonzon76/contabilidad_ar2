@@ -24,7 +24,7 @@
                 <td>{{ sale.customer.name }}</td>
                 <td>${{ sale.total_amount }}</td>
                 <td>
-                    <a href="{% url 'sales:sale_detail' sale.id %}" class="btn btn-sm btn-secondary">
+                    <a href="{% url 'sales:sale_workspace' sale.id %}" class="btn btn-sm btn-secondary">
                         View
                     </a>
                 </td>
