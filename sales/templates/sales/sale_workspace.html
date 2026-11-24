@@ -390,13 +390,14 @@
 
                             <h6>Journal Entry</h6>
 
-                            <button
-                                class="btn btn-sm btn-outline-primary"
-                                disabled
-                            >
-                                Coming Soon
-                            </button>
-
+                            {% if journal_entry %}
+                                <span class="badge bg-success">Available</span>
+                                <div class="small mt-2">
+                                    Entry #{{ journal_entry.id }}
+                                </div>
+                            {% else %}
+                                <span class="badge bg-secondary">Not Generated</span>
+                            {% endif %}
                         </div>
 
                     </div>
@@ -411,12 +412,14 @@
 
                             <h6>Inventory Movements</h6>
 
-                            <button
-                                class="btn btn-sm btn-outline-success"
-                                disabled
-                            >
-                                Coming Soon
-                            </button>
+                                <span class="badge bg-success">
+                                    {{ inventory_movements_count }}
+                                </span>
+
+                                <div class="small mt-2">
+                                    movement(s)
+                                </div>
+
 
                         </div>
 

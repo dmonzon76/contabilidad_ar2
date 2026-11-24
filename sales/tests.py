@@ -49,6 +49,12 @@ class SalesCompanyIsolationTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_sales_list_route_uses_sales_list_template(self):
+        response = self.client.get(reverse("sales:sale_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "sales/sale_list.html")
+
     def test_sales_dashboard_only_counts_active_company_data(self):
         response = self.client.get(reverse("sales:dashboard"))
 
