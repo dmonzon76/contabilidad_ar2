@@ -1,7 +1,6 @@
-from inventory.models import InventoryItem, InventoryMovement, Location
 from django.core.exceptions import ValidationError
 
-from inventory.models import InventoryItem, Location
+from inventory.models import InventoryItem, InventoryMovement, Location
 
 
 def get_default_location(company):
@@ -50,7 +49,6 @@ def validate_inventory_before_issue(sale):
                 f"Available: {inventory_item.quantity}. "
                 f"Required: {sale_item.quantity}."
             )
-
 # ============================================================
 # ENTRADAS DE STOCK (COMPRAS)
 # ============================================================
@@ -87,6 +85,53 @@ def update_inventory_from_purchase(purchase):
         item.quantity += line.quantity
         item.save()
 
+def validate_inventory_before_issue(sale):
+    """
+    Valida inventario antes de emitir una venta.
+    """
+
+    company = sale.company
+
+    stock_items = [
+        item
+        for item in sale.items.all()
+        if not item.product.is_service
+    ]
+
+    # Venta únicamente de servicios
+    if not stock_items:
+        return
+
+    location = get_default_location(company)
+
+    if not location:
+        raise ValidationError(
+            "Cannot issue document. No inventory location configured for this company."
+        )
+
+    for sale_item in stock_items:
+
+        try:
+            inventory_item = InventoryItem.objects.get(
+                company=company,
+                product=sale_item.product,
+                location=location,
+            )
+
+        except InventoryItem.DoesNotExist:
+
+            raise ValidationError(
+                f'Cannot issue document. Product "{sale_item.product.name}" is not registered in inventory.'
+            )
+
+        if inventory_item.quantity < sale_item.quantity:
+
+            raise ValidationError(
+                f'Cannot issue document. '
+                f'Insufficient stock for product "{sale_item.product.name}". '
+                f'Available: {inventory_item.quantity}. '
+                f'Required: {sale_item.quantity}.'
+            )
 
 # ============================================================
 # SALIDAS DE STOCK (VENTAS)

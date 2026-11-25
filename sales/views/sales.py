@@ -238,25 +238,21 @@ def issue_sale(request, pk):
         return redirect("sales:sale_workspace", pk=sale.pk)
 
     try:
-        with transaction.atomic():
-            # 1. Recalcular subtotales
-           sale.recalc_totals()
+       with transaction.atomic():
 
-            # Validación previa de inventario
-           validate_inventory_before_issue(sale)
+        # 1. Recalcular subtotales
+        sale.recalc_totals()
 
-            # Descontar stock y contabilizar
-           update_inventory_from_sale(sale)
-           AccountingService.post_sale(sale)
+        # 2. Validación previa de inventario
+        validate_inventory_before_issue(sale)
 
+        # 3. Descontar stock y contabilizar
+        update_inventory_from_sale(sale)
+        AccountingService.post_sale(sale)
 
-            # 2. Descontar stock de inventario y generar el asiento contable
-           update_inventory_from_sale(sale)
-           AccountingService.post_sale(sale)
-
-            # 3. Cambiar estado a emitida
-           sale.status = "ISSUED"
-           sale.save(update_fields=["status"])
+        # 4. Cambiar estado a emitida
+        sale.status = "ISSUED"
+        sale.save(update_fields=["status"])
 
         messages.success(
             request,

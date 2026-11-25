@@ -59,12 +59,26 @@
 
         {% include "core/components/sidebar.html" %}
 
-        <main class="flex-grow-1 p-4">
+       <main class="flex-grow-1 p-4">
 
-            {% block content %}
-            {% endblock %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
 
-        </main>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
 
     </div>
 

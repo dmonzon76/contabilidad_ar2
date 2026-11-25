@@ -4,8 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from accounting.models import Account, JournalEntry, JournalEntryLine, Period
-from company.forms import company
+from accounting.models import Account, AccountMovement, JournalEntry, JournalEntryLine, Period
 
 
 class AccountingService:
@@ -346,6 +345,16 @@ class AccountingService:
                 credit=total_cost,
                 description="Salida de inventario",
             )
+        AccountMovement.objects.get_or_create(
+            company=company,
+            customer=sale.customer,
+            sale=sale,
+            defaults={
+                "movement_type": "DEBIT",
+                "amount": sale.total_amount,
+                "description": f"Sale {sale.number}",
+            },
+        )
 
         return entry
 
